@@ -16,15 +16,43 @@ type TransactionHistoryRow = {
   id: number
   no: string
   transactionHash: string
+  transactionType: string
+  status: 'Success' | 'Pending' | 'Failed'
   fromCompany: string
   fromWallet: string
+  fromAddress: string
   toCompany: string
   toWallet: string
+  toAddress: string
   date: string
+  confirmedAt: string
+  asset: string
+  network: string
   amount: string
+  fee: string
+  netAmount: string
+  fiatValue: string
+  blockNumber: string
+  confirmations: string
+  referenceNumber: string
 }
 
-const rows: TransactionHistoryRow[] = [
+type BaseTransactionRow = Pick<
+  TransactionHistoryRow,
+  | 'id'
+  | 'no'
+  | 'transactionHash'
+  | 'fromCompany'
+  | 'fromWallet'
+  | 'toCompany'
+  | 'toWallet'
+  | 'date'
+  | 'amount'
+>
+
+type CustodyTransactionMetadata = Omit<TransactionHistoryRow, keyof BaseTransactionRow>
+
+const baseRows: BaseTransactionRow[] = [
   {
     id: 1,
     no: '1',
@@ -192,6 +220,241 @@ const rows: TransactionHistoryRow[] = [
   },
 ]
 
+const custodyMetadata: CustodyTransactionMetadata[] = [
+  {
+    transactionType: 'Transfer',
+    status: 'Success',
+    fromAddress: 'bb1qpx8n9du2s7v6m4wxahk9pr80qx2k4c2n6tyg5l',
+    toAddress: 'bb1qmx4d9lv2p8r7yq0cnt6gwh3e2uf5s9adk1zpa',
+    confirmedAt: '01 Mar 2022, 10:24 WIB',
+    asset: 'PAXG',
+    network: 'Bullion Private Ledger',
+    fee: '0.01 KG',
+    netAmount: '11.99 KG',
+    fiatValue: 'Rp 13.188.000',
+    blockNumber: 'BBP-2022-0301-000184',
+    confirmations: '12/12',
+    referenceNumber: 'BB-CUST-2022-000421',
+  },
+  {
+    transactionType: 'QR Receive',
+    status: 'Success',
+    fromAddress: 'bb1q8xlt6v2d94ka3sjp0hmwfq5gny7cerz1b2vdx',
+    toAddress: 'bb1qpx8n9du2s7v6m4wxahk9pr80qx2k4c2n6tyg5l',
+    confirmedAt: '01 Mar 2022, 11:08 WIB',
+    asset: 'PAXG',
+    network: 'Bullion Private Ledger',
+    fee: '0.00 KG',
+    netAmount: '1 KG',
+    fiatValue: 'Rp 1.100.000',
+    blockNumber: 'BBP-2022-0301-000193',
+    confirmations: '12/12',
+    referenceNumber: 'BB-CUST-2022-000422',
+  },
+  {
+    transactionType: 'Deposit',
+    status: 'Success',
+    fromAddress: 'bb1q3m7sjx5enr88q0zp6twyk9d4ufxlt92avh6sn',
+    toAddress: 'bb1q8xlt6v2d94ka3sjp0hmwfq5gny7cerz1b2vdx',
+    confirmedAt: '01 Mar 2022, 13:45 WIB',
+    asset: 'PAXG',
+    network: 'Bullion Private Ledger',
+    fee: '0.03 KG',
+    netAmount: '121.97 KG',
+    fiatValue: 'Rp 134.200.000',
+    blockNumber: 'BBP-2022-0301-000205',
+    confirmations: '12/12',
+    referenceNumber: 'BB-CUST-2022-000423',
+  },
+  {
+    transactionType: 'Transfer',
+    status: 'Pending',
+    fromAddress: 'bb1qmx4d9lv2p8r7yq0cnt6gwh3e2uf5s9adk1zpa',
+    toAddress: 'bb1qpx8n9du2s7v6m4wxahk9pr80qx2k4c2n6tyg5l',
+    confirmedAt: '01 Mar 2022, 15:17 WIB',
+    asset: 'PAXG',
+    network: 'Bullion Private Ledger',
+    fee: '0.01 KG',
+    netAmount: '2.99 KG',
+    fiatValue: 'Rp 3.300.000',
+    blockNumber: 'BBP-2022-0301-000218',
+    confirmations: '4/12',
+    referenceNumber: 'BB-CUST-2022-000424',
+  },
+  {
+    transactionType: 'Swap',
+    status: 'Success',
+    fromAddress: 'bb1q25e2tc79ru0nlp5a8kgx3cq0shmr49vq2dj73',
+    toAddress: 'bb1q7nwjp9u2vl6k5mk8hctra0s2x3dg4feq96zpn',
+    confirmedAt: '02 Mar 2022, 09:16 WIB',
+    asset: 'PGT',
+    network: 'Bullion Private Ledger',
+    fee: '0.02 KG',
+    netAmount: '23.98 KG',
+    fiatValue: 'Rp 26.400.000',
+    blockNumber: 'BBP-2022-0302-000244',
+    confirmations: '12/12',
+    referenceNumber: 'BB-CUST-2022-000425',
+  },
+  {
+    transactionType: 'Redemption',
+    status: 'Success',
+    fromAddress: 'bb1qfyw9scl4ne82mt4g6hzxpa7k0q5c3dj1r8qvl',
+    toAddress: 'bb1q8xlt6v2d94ka3sjp0hmwfq5gny7cerz1b2vdx',
+    confirmedAt: '03 Mar 2022, 12:22 WIB',
+    asset: 'PAXG',
+    network: 'Bullion Private Ledger',
+    fee: '0.01 KG',
+    netAmount: '7.99 KG',
+    fiatValue: 'Rp 8.800.000',
+    blockNumber: 'BBP-2022-0303-000267',
+    confirmations: '12/12',
+    referenceNumber: 'BB-CUST-2022-000426',
+  },
+  {
+    transactionType: 'QR Receive',
+    status: 'Success',
+    fromAddress: 'bb1q7nwjp9u2vl6k5mk8hctra0s2x3dg4feq96zpn',
+    toAddress: 'bb1q25e2tc79ru0nlp5a8kgx3cq0shmr49vq2dj73',
+    confirmedAt: '03 Mar 2022, 14:39 WIB',
+    asset: 'PGT',
+    network: 'Bullion Private Ledger',
+    fee: '0.00 KG',
+    netAmount: '15 KG',
+    fiatValue: 'Rp 16.500.000',
+    blockNumber: 'BBP-2022-0303-000273',
+    confirmations: '12/12',
+    referenceNumber: 'BB-CUST-2022-000427',
+  },
+  {
+    transactionType: 'Transfer',
+    status: 'Failed',
+    fromAddress: 'bb1qpx8n9du2s7v6m4wxahk9pr80qx2k4c2n6tyg5l',
+    toAddress: 'bb1qfyw9scl4ne82mt4g6hzxpa7k0q5c3dj1r8qvl',
+    confirmedAt: '04 Mar 2022, 09:03 WIB',
+    asset: 'PAXG',
+    network: 'Bullion Private Ledger',
+    fee: '0.00 KG',
+    netAmount: '0 KG',
+    fiatValue: 'Rp 9.900.000',
+    blockNumber: 'BBP-2022-0304-000301',
+    confirmations: '0/12',
+    referenceNumber: 'BB-CUST-2022-000428',
+  },
+  {
+    transactionType: 'Transfer',
+    status: 'Success',
+    fromAddress: 'bb1qmx4d9lv2p8r7yq0cnt6gwh3e2uf5s9adk1zpa',
+    toAddress: 'bb1q3m7sjx5enr88q0zp6twyk9d4ufxlt92avh6sn',
+    confirmedAt: '05 Mar 2022, 10:47 WIB',
+    asset: 'PAXG',
+    network: 'Bullion Private Ledger',
+    fee: '0.02 KG',
+    netAmount: '31.98 KG',
+    fiatValue: 'Rp 35.200.000',
+    blockNumber: 'BBP-2022-0305-000329',
+    confirmations: '12/12',
+    referenceNumber: 'BB-CUST-2022-000429',
+  },
+  {
+    transactionType: 'Transfer',
+    status: 'Pending',
+    fromAddress: 'bb1q8xlt6v2d94ka3sjp0hmwfq5gny7cerz1b2vdx',
+    toAddress: 'bb1q7nwjp9u2vl6k5mk8hctra0s2x3dg4feq96zpn',
+    confirmedAt: '05 Mar 2022, 16:05 WIB',
+    asset: 'PAXG',
+    network: 'Bullion Private Ledger',
+    fee: '0.01 KG',
+    netAmount: '4.99 KG',
+    fiatValue: 'Rp 5.500.000',
+    blockNumber: 'BBP-2022-0305-000341',
+    confirmations: '7/12',
+    referenceNumber: 'BB-CUST-2022-000430',
+  },
+  {
+    transactionType: 'Withdrawal',
+    status: 'Success',
+    fromAddress: 'bb1q25e2tc79ru0nlp5a8kgx3cq0shmr49vq2dj73',
+    toAddress: 'bb1qpx8n9du2s7v6m4wxahk9pr80qx2k4c2n6tyg5l',
+    confirmedAt: '06 Mar 2022, 08:51 WIB',
+    asset: 'PAXG',
+    network: 'Bullion Private Ledger',
+    fee: '0.01 KG',
+    netAmount: '17.99 KG',
+    fiatValue: 'Rp 19.800.000',
+    blockNumber: 'BBP-2022-0306-000356',
+    confirmations: '12/12',
+    referenceNumber: 'BB-CUST-2022-000431',
+  },
+  {
+    transactionType: 'Deposit',
+    status: 'Success',
+    fromAddress: 'bb1qfyw9scl4ne82mt4g6hzxpa7k0q5c3dj1r8qvl',
+    toAddress: 'bb1qmx4d9lv2p8r7yq0cnt6gwh3e2uf5s9adk1zpa',
+    confirmedAt: '07 Mar 2022, 10:12 WIB',
+    asset: 'PAXG',
+    network: 'Bullion Private Ledger',
+    fee: '0.03 KG',
+    netAmount: '40.97 KG',
+    fiatValue: 'Rp 45.100.000',
+    blockNumber: 'BBP-2022-0307-000381',
+    confirmations: '12/12',
+    referenceNumber: 'BB-CUST-2022-000432',
+  },
+  {
+    transactionType: 'Swap',
+    status: 'Success',
+    fromAddress: 'bb1q3m7sjx5enr88q0zp6twyk9d4ufxlt92avh6sn',
+    toAddress: 'bb1q25e2tc79ru0nlp5a8kgx3cq0shmr49vq2dj73',
+    confirmedAt: '07 Mar 2022, 13:31 WIB',
+    asset: 'PGT',
+    network: 'Bullion Private Ledger',
+    fee: '0.02 KG',
+    netAmount: '26.98 KG',
+    fiatValue: 'Rp 29.700.000',
+    blockNumber: 'BBP-2022-0307-000396',
+    confirmations: '12/12',
+    referenceNumber: 'BB-CUST-2022-000433',
+  },
+  {
+    transactionType: 'Transfer',
+    status: 'Success',
+    fromAddress: 'bb1qpx8n9du2s7v6m4wxahk9pr80qx2k4c2n6tyg5l',
+    toAddress: 'bb1q8xlt6v2d94ka3sjp0hmwfq5gny7cerz1b2vdx',
+    confirmedAt: '08 Mar 2022, 09:57 WIB',
+    asset: 'PAXG',
+    network: 'Bullion Private Ledger',
+    fee: '0.01 KG',
+    netAmount: '10.99 KG',
+    fiatValue: 'Rp 12.100.000',
+    blockNumber: 'BBP-2022-0308-000417',
+    confirmations: '12/12',
+    referenceNumber: 'BB-CUST-2022-000434',
+  },
+  {
+    transactionType: 'Deposit',
+    status: 'Success',
+    fromAddress: 'bb1q7nwjp9u2vl6k5mk8hctra0s2x3dg4feq96zpn',
+    toAddress: 'bb1qfyw9scl4ne82mt4g6hzxpa7k0q5c3dj1r8qvl',
+    confirmedAt: '09 Mar 2022, 11:26 WIB',
+    asset: 'PAXG',
+    network: 'Bullion Private Ledger',
+    fee: '0.04 KG',
+    netAmount: '63.96 KG',
+    fiatValue: 'Rp 70.400.000',
+    blockNumber: 'BBP-2022-0309-000452',
+    confirmations: '12/12',
+    referenceNumber: 'BB-CUST-2022-000435',
+  },
+]
+
+const rows: TransactionHistoryRow[] = baseRows.map(
+  (row, index): TransactionHistoryRow => ({
+    ...row,
+    ...custodyMetadata[index]!,
+  }),
+)
+
 const hasTableControls = computed(() => rows.length > 10)
 const perPage = computed(() => Number(rowLimit.value))
 
@@ -204,12 +467,25 @@ const filteredRows = computed(() => {
     [
       row.no,
       row.transactionHash,
+      row.transactionType,
+      row.status,
       row.fromCompany,
       row.fromWallet,
+      row.fromAddress,
       row.toCompany,
       row.toWallet,
+      row.toAddress,
       row.date,
+      row.confirmedAt,
+      row.asset,
+      row.network,
       row.amount,
+      row.fee,
+      row.netAmount,
+      row.fiatValue,
+      row.blockNumber,
+      row.confirmations,
+      row.referenceNumber,
     ]
       .join(' ')
       .toLowerCase()
@@ -244,11 +520,17 @@ watch([rowLimit, searchQuery], () => {
 const exportTransactions = async () => {
   try {
     await generatePdfEStatement({
-      title: 'Transaction History E-Statement',
-      companyName: 'Bullion Bank',
-      companyId: 'PT Bullion Bank Indonesia',
+      title: 'Custody Transaction Report',
+      companyName: 'PT Bullion Bank Indonesia',
+      companyId: '001PXTID',
+      custodyAccountId: 'CUST-BBP-2026-001',
+      walletId: 'BBP-WAL-2026-001245',
       reportPeriod: '1 Mar 2022 - 9 Mar 2022',
-      lastUpdated,
+      openingBalance: '245 KG',
+      totalDebit: '145 KG',
+      totalCredit: '213 KG',
+      closingBalance: '313 KG',
+      lastUpdated: lastUpdated.value,
       transactions: rows,
     })
     showAlert({
@@ -342,9 +624,11 @@ const closeTransactionDetail = () => {
           <tr>
             <th class="col-no">No</th>
             <th class="col-hash">Transaction Hash</th>
+            <th class="col-type">Type</th>
             <th class="col-party">From</th>
             <th class="col-party">To</th>
             <th class="col-date">Date</th>
+            <th class="col-asset">Asset</th>
             <th class="col-amount">Amount</th>
             <th class="col-action">Action</th>
           </tr>
@@ -353,6 +637,12 @@ const closeTransactionDetail = () => {
           <tr v-for="row in paginatedRows" :key="row.id">
             <td class="col-no">{{ row.no }}</td>
             <td class="col-hash">{{ row.transactionHash }}</td>
+            <td class="type-cell">
+              <span>{{ row.transactionType }}</span>
+              <strong :class="['status-badge', `status-badge--${row.status.toLowerCase()}`]">
+                {{ row.status }}
+              </strong>
+            </td>
             <td class="party-cell">
               <div class="party-cell-content">
                 <strong>{{ row.fromCompany }}</strong>
@@ -366,6 +656,10 @@ const closeTransactionDetail = () => {
               </div>
             </td>
             <td class="col-date">{{ row.date }}</td>
+            <td class="asset-cell">
+              <strong>{{ row.asset }}</strong>
+              <span>{{ row.network }}</span>
+            </td>
             <td class="col-amount">{{ row.amount }}</td>
             <td class="col-action">
               <button class="detail-button" type="button" @click="previewTransaction(row)">
@@ -374,7 +668,7 @@ const closeTransactionDetail = () => {
             </td>
           </tr>
           <tr v-if="paginatedRows.length === 0">
-            <td class="empty-cell" colspan="7">Tidak ada data yang ditampilkan</td>
+            <td class="empty-cell" colspan="9">Tidak ada data yang ditampilkan</td>
           </tr>
         </tbody>
       </table>
@@ -387,12 +681,28 @@ const closeTransactionDetail = () => {
             <span>Transaction Hash</span>
             <strong>{{ row.transactionHash }}</strong>
           </div>
-          <p>{{ row.amount }}</p>
+          <div class="mobile-card-meta">
+            <strong :class="['status-badge', `status-badge--${row.status.toLowerCase()}`]">
+              {{ row.status }}
+            </strong>
+            <p>{{ row.amount }}</p>
+          </div>
         </header>
 
         <div class="mobile-card-divider" aria-hidden="true" />
 
         <dl class="mobile-card-details">
+          <div>
+            <dt>Type</dt>
+            <dd>{{ row.transactionType }}</dd>
+          </div>
+          <div>
+            <dt>Asset</dt>
+            <dd>
+              <strong>{{ row.asset }}</strong>
+              <span>{{ row.network }}</span>
+            </dd>
+          </div>
           <div>
             <dt>Date</dt>
             <dd>{{ row.date }}</dd>
@@ -486,12 +796,65 @@ const closeTransactionDetail = () => {
               <dd>{{ selectedTransaction.transactionHash }}</dd>
             </div>
             <div class="detail-item">
+              <dt>Reference Number</dt>
+              <dd>{{ selectedTransaction.referenceNumber }}</dd>
+            </div>
+            <div class="detail-item">
+              <dt>Transaction Type</dt>
+              <dd>{{ selectedTransaction.transactionType }}</dd>
+            </div>
+            <div class="detail-item">
+              <dt>Status</dt>
+              <dd>
+                <span
+                  :class="[
+                    'status-badge',
+                    `status-badge--${selectedTransaction.status.toLowerCase()}`,
+                  ]"
+                >
+                  {{ selectedTransaction.status }}
+                </span>
+              </dd>
+            </div>
+            <div class="detail-item">
               <dt>Date</dt>
               <dd>{{ selectedTransaction.date }}</dd>
             </div>
             <div class="detail-item">
+              <dt>Confirmed At</dt>
+              <dd>{{ selectedTransaction.confirmedAt }}</dd>
+            </div>
+            <div class="detail-item">
+              <dt>Asset</dt>
+              <dd>{{ selectedTransaction.asset }}</dd>
+            </div>
+            <div class="detail-item">
+              <dt>Network</dt>
+              <dd>{{ selectedTransaction.network }}</dd>
+            </div>
+            <div class="detail-item">
               <dt>Amount</dt>
               <dd>{{ selectedTransaction.amount }}</dd>
+            </div>
+            <div class="detail-item">
+              <dt>Fee</dt>
+              <dd>{{ selectedTransaction.fee }}</dd>
+            </div>
+            <div class="detail-item">
+              <dt>Net Amount</dt>
+              <dd>{{ selectedTransaction.netAmount }}</dd>
+            </div>
+            <div class="detail-item">
+              <dt>Fiat Value</dt>
+              <dd>{{ selectedTransaction.fiatValue }}</dd>
+            </div>
+            <div class="detail-item">
+              <dt>Block Number</dt>
+              <dd>{{ selectedTransaction.blockNumber }}</dd>
+            </div>
+            <div class="detail-item">
+              <dt>Confirmations</dt>
+              <dd>{{ selectedTransaction.confirmations }}</dd>
             </div>
           </dl>
 
@@ -500,11 +863,13 @@ const closeTransactionDetail = () => {
               <span>From</span>
               <strong>{{ selectedTransaction.fromCompany }}</strong>
               <p>{{ selectedTransaction.fromWallet }}</p>
+              <p>{{ selectedTransaction.fromAddress }}</p>
             </article>
             <article class="detail-party-card">
               <span>To</span>
               <strong>{{ selectedTransaction.toCompany }}</strong>
               <p>{{ selectedTransaction.toWallet }}</p>
+              <p>{{ selectedTransaction.toAddress }}</p>
             </article>
           </div>
         </section>
@@ -689,7 +1054,7 @@ h1 {
 }
 
 .history-table {
-  width: 1457px;
+  width: 1720px;
   margin: 0;
   border: 1px solid var(--g-kit-black-20);
   border-radius: 6px;
@@ -797,8 +1162,16 @@ h1 {
   width: 280px;
 }
 
+.col-type {
+  width: 160px;
+}
+
 .col-date {
   width: 160px;
+}
+
+.col-asset {
+  width: 170px;
 }
 
 .col-amount,
@@ -815,6 +1188,70 @@ h1 {
   display: flex;
   flex-direction: column;
   gap: 4px;
+}
+
+.type-cell,
+.asset-cell {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.type-cell > span,
+.asset-cell > span {
+  color: var(--g-kit-black-60);
+  font-size: var(--g-kit-font-size-sigma);
+  font-weight: var(--g-kit-font-weight-normal);
+  line-height: var(--g-kit-line-height-sigma);
+}
+
+.asset-cell > strong {
+  color: var(--g-kit-black-80);
+  font-size: var(--g-kit-font-size-omicron);
+  font-weight: var(--g-kit-font-weight-bold);
+  line-height: var(--g-kit-line-height-omicron);
+}
+
+.status-badge {
+  width: fit-content;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: var(--g-kit-font-size-omega);
+  font-weight: var(--g-kit-font-weight-bold);
+  line-height: var(--g-kit-line-height-omega);
+}
+
+.status-badge--success {
+  background: var(--g-kit-lime-10);
+  color: var(--g-kit-lime-50);
+}
+
+.status-badge--pending {
+  background: #fff4e5;
+  color: #b65f00;
+}
+
+.status-badge--failed {
+  background: #fdecec;
+  color: #ae1e22;
+}
+
+.mobile-card-header .status-badge--success,
+.detail-item dd .status-badge--success {
+  color: var(--g-kit-lime-50);
+}
+
+.mobile-card-header .status-badge--pending,
+.detail-item dd .status-badge--pending {
+  color: #b65f00;
+}
+
+.mobile-card-header .status-badge--failed,
+.detail-item dd .status-badge--failed {
+  color: #ae1e22;
 }
 
 .party-cell-content strong,
@@ -924,6 +1361,14 @@ h1 {
   font-weight: var(--g-kit-font-weight-bold);
   line-height: var(--g-kit-line-height-sigma);
   white-space: nowrap;
+}
+
+.mobile-card-meta {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: flex-end;
+  flex-direction: column;
+  gap: 6px;
 }
 
 .mobile-card-divider {
@@ -1085,6 +1530,10 @@ h1 {
   font-weight: var(--g-kit-font-weight-bold);
   line-height: var(--g-kit-line-height-sigma);
   word-break: break-word;
+}
+
+.detail-item dd .status-badge {
+  vertical-align: top;
 }
 
 .detail-party-grid {

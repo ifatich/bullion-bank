@@ -53,8 +53,9 @@ const refreshData = () => {
     </header>
 
     <div class="redemption-fields">
-      <GInputText v-model="amount" label="Amount" placeholder="Masukkan amount" />
+      <GInputText class="mb-0" v-model="amount" label="Amount" placeholder="Masukkan amount" />
       <GDatePicker
+        class="mb-0"
         v-model="redemptionDate"
         title="Redemption Date"
         placeholder="Pilih redemption date"
@@ -64,8 +65,8 @@ const refreshData = () => {
       <div class="section-divider" aria-hidden="true" />
 
       <div class="summary-grid">
-        <GInputText v-model="transactionFee" label="Transaction Fee" disabled placeholder="---" />
-        <GInputText v-model="grandTotal" label="Grand Total" disabled placeholder="---" />
+        <GInputText class="mb-0" v-model="transactionFee" label="Transaction Fee" disabled placeholder="---" />
+        <GInputText class="mb-0" v-model="grandTotal" label="Grand Total" disabled placeholder="---" />
       </div>
     </div>
   </section>
