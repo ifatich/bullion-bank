@@ -1,44 +1,90 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 
-import { GTable } from '@/components'
 import { useAppAlert } from '@/hooks/useAppAlert'
 
 const rowLimit = ref('10')
 const lastUpdated = ref('08/07/2024, 09.00 AM')
 const { showAlert } = useAppAlert()
 
-const columns = [
-  { key: 'no', label: 'No' },
-  { key: 'transactionName', label: 'Transaction Name' },
-  { key: 'action', label: 'Action' },
-]
-
 type TransactionHistoryRow = {
   id: number
   no: string
-  transactionName: string
-  action: string
+  transactionHash: string
+  fromCompany: string
+  fromWallet: string
+  toCompany: string
+  toWallet: string
+  date: string
+  amount: string
 }
 
 const rows: TransactionHistoryRow[] = [
   {
     id: 1,
     no: '1',
-    transactionName: 'Token Swap',
-    action: 'Swap Token',
+    transactionHash: 'CMP-BBP-2026-000421',
+    fromCompany: 'PT Indonesia Blockchain Persada',
+    fromWallet: 'BBP-WAL-2026-001245',
+    toCompany: 'PT MY Blockchain Corp',
+    toWallet: 'BBP-WAL-2026-234354',
+    date: '01 Mar 2022',
+    amount: '12 PGT',
   },
   {
     id: 2,
     no: '2',
-    transactionName: 'Token Redemption',
-    action: 'Request Redemption',
+    transactionHash: 'CMP-BBP-2026-000422',
+    fromCompany: 'PT Indonesia Maju',
+    fromWallet: 'BBP-WAL-2026-008210',
+    toCompany: 'PT Indonesia Blockchain Persada',
+    toWallet: 'BBP-WAL-2026-001245',
+    date: '01 Mar 2022',
+    amount: '1 PGT',
   },
   {
     id: 3,
     no: '3',
-    transactionName: 'Profile Update',
-    action: 'Update Profile',
+    transactionHash: 'CMP-BBP-2026-000423',
+    fromCompany: 'PT Blockchain Persada',
+    fromWallet: 'BBP-WAL-2026-001246',
+    toCompany: 'PT Indonesia Maju',
+    toWallet: 'BBP-WAL-2026-008210',
+    date: '01 Mar 2022',
+    amount: '122 PGT',
+  },
+  {
+    id: 4,
+    no: '4',
+    transactionHash: 'CMP-BBP-2026-000424',
+    fromCompany: 'PT MY Blockchain Corp',
+    fromWallet: 'BBP-WAL-2026-234354',
+    toCompany: 'PT Indonesia Blockchain Persada',
+    toWallet: 'BBP-WAL-2026-001245',
+    date: '01 Mar 2022',
+    amount: '3 PGT',
+  },
+  {
+    id: 5,
+    no: '5',
+    transactionHash: 'CMP-BBP-2026-000425',
+    fromCompany: 'PT Pegadaian Digital Aset',
+    fromWallet: 'BBP-WAL-2026-002819',
+    toCompany: 'PT Nusantara Token Emas',
+    toWallet: 'BBP-WAL-2026-009127',
+    date: '02 Mar 2022',
+    amount: '24 PGT',
+  },
+  {
+    id: 6,
+    no: '6',
+    transactionHash: 'CMP-BBP-2026-000426',
+    fromCompany: 'PT Sentra Bullion Indonesia',
+    fromWallet: 'BBP-WAL-2026-110043',
+    toCompany: 'PT Indonesia Maju',
+    toWallet: 'BBP-WAL-2026-008210',
+    date: '03 Mar 2022',
+    amount: '8 PGT',
   },
 ]
 
@@ -55,6 +101,13 @@ const refreshData = () => {
   }).format(new Date())
   showAlert({
     label: 'Transaction history berhasil diperbarui.',
+    variant: 'info',
+  })
+}
+
+const editTransaction = (row: TransactionHistoryRow) => {
+  showAlert({
+    label: `Transaksi ${row.transactionHash} dipilih.`,
     variant: 'info',
   })
 }
@@ -101,12 +154,38 @@ const refreshData = () => {
     </div>
 
     <div class="history-table-wrap">
-      <GTable
-        class="history-table"
-        :columns="columns"
-        :data="rows"
-        nodata-message="Belum ada data yang ditampilkan."
-      />
+      <table class="history-table">
+        <thead>
+          <tr>
+            <th class="col-no">No</th>
+            <th class="col-hash">Transaction Hash</th>
+            <th class="col-party">From</th>
+            <th class="col-party">To</th>
+            <th class="col-date">Date</th>
+            <th class="col-amount">Amount</th>
+            <th class="col-action">Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr v-for="row in rows" :key="row.id">
+            <td class="col-no">{{ row.no }}</td>
+            <td class="col-hash">{{ row.transactionHash }}</td>
+            <td class="party-cell">
+              <strong>{{ row.fromCompany }}</strong>
+              <span>{{ row.fromWallet }}</span>
+            </td>
+            <td class="party-cell">
+              <strong>{{ row.toCompany }}</strong>
+              <span>{{ row.toWallet }}</span>
+            </td>
+            <td class="col-date">{{ row.date }}</td>
+            <td class="col-amount">{{ row.amount }}</td>
+            <td class="col-action">
+              <button class="edit-button" type="button" @click="editTransaction(row)">Edit</button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
     </div>
 
     <footer class="history-table-footer">{{ paginationSummary }}</footer>
@@ -217,48 +296,143 @@ h1 {
   overflow-x: auto;
 }
 
-.history-table-wrap :deep(.history-table) {
-  width: 100%;
+.history-table {
+  width: 1457px;
   margin: 0;
   overflow: hidden;
   border: 1px solid var(--g-kit-black-20);
-  border-radius: 8px;
+  border-radius: 6px;
   border-spacing: 0;
+  border-collapse: separate;
+  table-layout: fixed;
 }
 
-.history-table-wrap :deep(.history-table th) {
-  height: 48px;
-  padding: 12px 16px;
+.history-table th {
+  height: 56px;
+  padding: 18px 16px;
   border: 0;
+  border-right: 1px solid var(--g-kit-black-20);
   background: var(--g-kit-lime-50);
   color: var(--g-kit-white);
   font-size: var(--g-kit-font-size-omicron);
-  font-weight: var(--g-kit-font-weight-bold);
+  font-weight: var(--g-kit-font-weight-extrabold, 800);
   line-height: var(--g-kit-line-height-omicron);
   text-align: left;
+  white-space: nowrap;
 }
 
-.history-table-wrap :deep(.history-table th:first-child) {
-  width: 96px;
+.history-table th:first-child {
+  border-top-left-radius: 6px;
 }
 
-.history-table-wrap :deep(.history-table th:last-child) {
-  width: 180px;
+.history-table th:last-child {
+  border-top-right-radius: 6px;
 }
 
-.history-table-wrap :deep(.history-table td) {
+.history-table td {
   padding: 16px;
-  border-top: 1px solid var(--g-kit-black-20);
+  border-top: 1px solid transparent;
+  border-right: 1px solid var(--g-kit-black-20);
   color: var(--g-kit-black-60);
   font-size: var(--g-kit-font-size-omicron);
-  font-weight: var(--g-kit-font-weight-normal);
+  font-weight: var(--g-kit-font-weight-semibold, 600);
+  line-height: var(--g-kit-line-height-omicron);
+  vertical-align: top;
+  word-break: break-word;
+}
+
+.history-table th:last-child,
+.history-table td:last-child {
+  border-right: 0;
+}
+
+.history-table tbody tr {
+  background: var(--g-kit-white);
+}
+
+.history-table tbody tr:nth-child(even) {
+  background: var(--g-kit-black-10);
+}
+
+.history-table tbody tr + tr td {
+  border-top-color: var(--g-kit-black-20);
+}
+
+.col-no {
+  width: 67px;
+  text-align: center;
+}
+
+.col-hash {
+  width: 220px;
+}
+
+.col-party {
+  width: 280px;
+}
+
+.col-date {
+  width: 160px;
+}
+
+.col-amount,
+.col-action {
+  width: 150px;
+}
+
+.col-amount {
+  font-weight: var(--g-kit-font-weight-extrabold, 800);
+  white-space: nowrap;
+}
+
+.party-cell {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.party-cell strong,
+.party-cell span {
+  min-width: 0;
+  color: var(--g-kit-black-60);
+}
+
+.party-cell strong {
+  overflow: hidden;
+  font-size: var(--g-kit-font-size-kappa);
+  font-weight: var(--g-kit-font-weight-extrabold, 800);
+  line-height: var(--g-kit-line-height-kappa);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.party-cell span {
+  font-size: var(--g-kit-font-size-omicron);
+  font-weight: var(--g-kit-font-weight-semibold, 600);
   line-height: var(--g-kit-line-height-omicron);
 }
 
-.history-table-wrap :deep(.history-table tbody td[colspan]) {
-  color: var(--g-kit-black-50);
-  text-align: center;
-  vertical-align: middle;
+.edit-button {
+  width: 100%;
+  min-height: 26px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 3px 10px;
+  border: 1px solid var(--g-kit-lime-50);
+  border-radius: 4px;
+  background: var(--g-kit-white);
+  color: var(--g-kit-lime-50);
+  font-size: var(--g-kit-font-size-sigma);
+  font-weight: var(--g-kit-font-weight-extrabold, 800);
+  line-height: var(--g-kit-line-height-sigma);
+  cursor: pointer;
+}
+
+.edit-button:hover,
+.edit-button:focus-visible {
+  background: var(--g-kit-lime-10);
+  outline: 0;
 }
 
 .history-table-footer {
@@ -275,6 +449,10 @@ h1 {
 
   .history-card-header p {
     align-items: flex-start;
+  }
+
+  .history-table {
+    width: 1220px;
   }
 }
 </style>
