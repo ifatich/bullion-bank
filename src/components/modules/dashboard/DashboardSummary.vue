@@ -42,7 +42,7 @@ const copyToClipboard = async (value: string) => {
           <h2>Total Balance</h2>
           <span class="info-icon">i</span>
         </div>
-        <strong class="balance-value">100 PXT</strong>
+        <strong class="balance-value">100 KG</strong>
         <div class="meta-block">
           <span>Wallet ID</span>
           <p>

@@ -12,7 +12,7 @@ const lastUpdated = ref('08/07/2024, 09.00 AM')
 const { showAlert } = useAppAlert()
 
 const tokenOptions = [
-  { label: 'PXT', value: 'pxt' },
+  { label: 'KG', value: 'kg' },
   { label: 'IDR', value: 'idr' },
   { label: 'Gold Token', value: 'gold-token' },
 ]
