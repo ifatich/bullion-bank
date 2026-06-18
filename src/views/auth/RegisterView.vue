@@ -1,16 +1,16 @@
 <script setup lang="ts">
 import LoginHero from '@/components/modules/auth/login/LoginHero.vue'
-import LoginForm from '@/components/modules/auth/login/LoginForm.vue'
+import RegisterForm from '@/components/modules/auth/register/RegisterForm.vue'
 </script>
 
 <template>
-  <div class="login-page">
+  <div class="register-page">
     <section class="left-side">
       <LoginHero />
     </section>
 
     <section class="right-side">
-      <LoginForm />
+      <RegisterForm />
     </section>
 
     <footer>Copyright © 2026 PT Pegadaian. All Rights Reserved</footer>
@@ -18,7 +18,7 @@ import LoginForm from '@/components/modules/auth/login/LoginForm.vue'
 </template>
 
 <style scoped>
-.login-page {
+.register-page {
   width: 100%;
   min-height: 100svh;
   display: grid;
@@ -29,7 +29,7 @@ import LoginForm from '@/components/modules/auth/login/LoginForm.vue'
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
-  padding: 46px 50px 24px 80px;
+  padding: 50px 50px 24px 80px;
   position: relative;
   overflow: hidden;
 }
@@ -41,7 +41,7 @@ import LoginForm from '@/components/modules/auth/login/LoginForm.vue'
 
 .right-side {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: flex-end;
   min-width: 0;
 }
@@ -57,7 +57,7 @@ footer {
 }
 
 @media (max-width: 1200px) {
-  .login-page {
+  .register-page {
     grid-template-columns: 1fr;
     padding: 32px 24px 56px;
     overflow: auto;
@@ -82,7 +82,7 @@ footer {
 }
 
 @media (max-width: 768px) {
-  .login-page {
+  .register-page {
     display: flex;
     flex-direction: column;
     padding: 20px 16px;

@@ -1,11 +1,32 @@
 <script setup lang="ts">
+import { ref } from 'vue'
+
 import DashboardSummary from '@/components/modules/dashboard/DashboardSummary.vue'
 import DashboardTopbar from '@/components/modules/dashboard/DashboardTopbar.vue'
 import MenuSection from '@/components/modules/dashboard/MenuSection.vue'
+import QRGenerateModal from '@/components/modules/dashboard/QRGenerateModal.vue'
 import TaskCard from '@/components/modules/dashboard/TaskCard.vue'
+import { useAppAlert } from '@/hooks/useAppAlert'
 
-const tokenMenus = [{ label: 'Swap', to: '/token/swap' }, { label: 'Redemption' }, { label: 'Transfer' }]
+const tokenMenus = [
+  { label: 'Swap', to: '/token/swap' },
+  { label: 'Redemption', to: '/token/redemption' },
+  { label: 'Transfer', to: '/token/transfer' },
+]
 const qrMenus = [{ label: 'Add QR' }]
+const isQRModalOpen = ref(false)
+const { showAlert } = useAppAlert()
+
+const handleTokenMenuSelect = () => {
+  showAlert({
+    label: 'Fitur token transfer belum tersedia.',
+    variant: 'warning',
+  })
+}
+
+const openQRModal = () => {
+  isQRModalOpen.value = true
+}
 </script>
 
 <template>
@@ -20,13 +41,15 @@ const qrMenus = [{ label: 'Add QR' }]
         </div>
 
         <div class="menu-row">
-          <MenuSection title="Token" :items="tokenMenus" />
-          <MenuSection title="QR Generate" :items="qrMenus" />
+          <MenuSection title="Token" :items="tokenMenus" @select="handleTokenMenuSelect" />
+          <MenuSection title="QR Generate" :items="qrMenus" @select="openQRModal" />
         </div>
       </div>
     </main>
 
     <footer class="dashboard-footer">Copyright © 2024 PT. Pegadaian. All Rights Reserved.</footer>
+
+    <QRGenerateModal v-model="isQRModalOpen" />
   </div>
 </template>
 
@@ -53,6 +76,7 @@ const qrMenus = [{ label: 'Add QR' }]
 .dashboard-content {
   width: min(1152px, calc(100vw - 48px));
   margin: 24px auto 0;
+  padding-bottom: 48px;
 }
 
 .top-grid {
@@ -93,6 +117,7 @@ const qrMenus = [{ label: 'Add QR' }]
   .dashboard-content {
     width: calc(100vw - 32px);
     margin-top: 16px;
+    padding-bottom: 64px;
   }
 
   .dashboard-footer {

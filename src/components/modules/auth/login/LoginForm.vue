@@ -1,11 +1,23 @@
 <script setup lang="ts">
+import { ref } from 'vue'
+
 import BaseCard from '@/components/shared/card/Card.vue'
 import { GButton, GInputText } from '@/components'
 import LoginHeader from './LoginHeader.vue'
 
 import { useLogin } from '@/hooks/useLogin'
+import { useAppAlert } from '@/hooks/useAppAlert'
 
 const { username, password, loading, login } = useLogin()
+const showPassword = ref(false)
+const { showAlert } = useAppAlert()
+
+const requestPasswordReset = () => {
+  showAlert({
+    label: 'Fitur lupa password belum terhubung.',
+    variant: 'warning',
+  })
+}
 </script>
 
 <template>
@@ -31,7 +43,12 @@ const { username, password, loading, login } = useLogin()
             </template>
           </GInputText>
 
-          <GInputText v-model="password" type="password" label="Password" placeholder="Password">
+          <GInputText
+            v-model="password"
+            :type="showPassword ? 'text' : 'password'"
+            label="Password"
+            placeholder="Password"
+          >
             <template #prefix>
               <span class="field-icon field-icon-prefix" aria-hidden="true">
                 <svg viewBox="0 0 24 24" fill="none">
@@ -55,7 +72,12 @@ const { username, password, loading, login } = useLogin()
             </template>
 
             <template #suffix>
-              <button class="field-icon field-icon-button" type="button" aria-label="Tampilkan password">
+              <button
+                class="field-icon field-icon-button"
+                type="button"
+                :aria-label="showPassword ? 'Sembunyikan password' : 'Tampilkan password'"
+                @click="showPassword = !showPassword"
+              >
                 <svg viewBox="0 0 24 24" fill="none">
                   <path
                     d="M2.5 12s3.5-6 9.5-6 9.5 6 9.5 6-3.5 6-9.5 6-9.5-6-9.5-6Z"
@@ -71,7 +93,7 @@ const { username, password, loading, login } = useLogin()
           </GInputText>
         </div>
 
-        <a class="forgot" href="#">Lupa Password?</a>
+        <button class="forgot" type="button" @click="requestPasswordReset">Lupa Password?</button>
 
         <GButton
           class="login-action"
@@ -85,7 +107,7 @@ const { username, password, loading, login } = useLogin()
 
       <div class="help">
         <span>Butuh Bantuan ?</span>
-        <a href="#">Klik disini</a>
+        <RouterLink to="/register">Klik disini</RouterLink>
       </div>
     </div>
   </BaseCard>
@@ -119,11 +141,15 @@ const { username, password, loading, login } = useLogin()
 
 .forgot {
   align-self: flex-end;
+  padding: 0;
+  border: 0;
   margin-bottom: 24px;
+  background: transparent;
   color: var(--g-kit-lime-50);
   font-size: var(--g-kit-font-size-sigma);
   font-weight: var(--g-kit-font-weight-bold);
   line-height: var(--g-kit-line-height-sigma);
+  cursor: pointer;
   text-decoration: none;
 }
 

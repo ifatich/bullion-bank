@@ -9,6 +9,16 @@ defineProps<{
   title: string
   items: MenuItem[]
 }>()
+
+const emit = defineEmits<{
+  select: [item: MenuItem]
+}>()
+
+const handleSelect = (item: MenuItem) => {
+  if (!item.to) {
+    emit('select', item)
+  }
+}
 </script>
 
 <template>
@@ -23,6 +33,7 @@ defineProps<{
         class="menu-item"
         :to="item.to"
         :type="item.to ? undefined : 'button'"
+        @click="handleSelect(item)"
       >
         <span class="menu-icon" :class="{ plus: item.variant === 'plus' }">
           <svg viewBox="0 0 56 56" fill="none" aria-hidden="true">

@@ -1,5 +1,35 @@
 <script setup lang="ts">
+import { useAppAlert } from '@/hooks/useAppAlert'
+
 const walletId = 'bc1qxy2kgdygjrs3p83kkfjhx0wlhbc1qxy2kgdygjrs3p83kkfjhx0wlh'
+const companyId = '001PXTID'
+const emailAddress = 'pegadaian@bullion.co.id'
+
+const { showAlert } = useAppAlert()
+
+const copyToClipboard = async (value: string) => {
+  if (!navigator.clipboard?.writeText) {
+    window.prompt('Copy value', value)
+    showAlert({
+      label: 'Clipboard browser tidak tersedia. Salin nilai secara manual.',
+      variant: 'warning',
+    })
+    return
+  }
+
+  try {
+    await navigator.clipboard.writeText(value)
+    showAlert({
+      label: 'Data berhasil disalin.',
+      variant: 'success',
+    })
+  } catch {
+    showAlert({
+      label: 'Data gagal disalin.',
+      variant: 'danger',
+    })
+  }
+}
 </script>
 
 <template>
@@ -17,7 +47,7 @@ const walletId = 'bc1qxy2kgdygjrs3p83kkfjhx0wlhbc1qxy2kgdygjrs3p83kkfjhx0wlh'
           <span>Wallet ID</span>
           <p>
             <span>{{ walletId }}</span>
-            <button type="button" aria-label="Copy wallet ID">
+            <button type="button" aria-label="Copy wallet ID" @click="copyToClipboard(walletId)">
               <svg viewBox="0 0 24 24" fill="none">
                 <path
                   d="M8 8h11v11H8V8ZM5 16H4V4h12v1"
@@ -41,10 +71,18 @@ const walletId = 'bc1qxy2kgdygjrs3p83kkfjhx0wlhbc1qxy2kgdygjrs3p83kkfjhx0wlh'
           <div class="meta-block">
             <span>Company ID</span>
             <p>
-              <span>001PXTID</span>
-              <button type="button" aria-label="Copy company ID">
+              <span>{{ companyId }}</span>
+              <button
+                type="button"
+                aria-label="Copy company ID"
+                @click="copyToClipboard(companyId)"
+              >
                 <svg viewBox="0 0 24 24" fill="none">
-                  <path d="M8 8h11v11H8V8ZM5 16H4V4h12v1" stroke="currentColor" stroke-width="1.8" />
+                  <path
+                    d="M8 8h11v11H8V8ZM5 16H4V4h12v1"
+                    stroke="currentColor"
+                    stroke-width="1.8"
+                  />
                 </svg>
               </button>
             </p>
@@ -52,10 +90,18 @@ const walletId = 'bc1qxy2kgdygjrs3p83kkfjhx0wlhbc1qxy2kgdygjrs3p83kkfjhx0wlh'
           <div class="meta-block">
             <span>Email Address</span>
             <p>
-              <span>pegadaian@bullion.co.id</span>
-              <button type="button" aria-label="Copy email address">
+              <span>{{ emailAddress }}</span>
+              <button
+                type="button"
+                aria-label="Copy email address"
+                @click="copyToClipboard(emailAddress)"
+              >
                 <svg viewBox="0 0 24 24" fill="none">
-                  <path d="M8 8h11v11H8V8ZM5 16H4V4h12v1" stroke="currentColor" stroke-width="1.8" />
+                  <path
+                    d="M8 8h11v11H8V8ZM5 16H4V4h12v1"
+                    stroke="currentColor"
+                    stroke-width="1.8"
+                  />
                 </svg>
               </button>
             </p>

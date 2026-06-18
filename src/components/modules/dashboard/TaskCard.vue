@@ -1,106 +1,160 @@
 <script setup lang="ts">
-import { GBadge, GButton } from '@/components'
+import { GButton } from '@/components'
 
-const tasks = [
-  { label: '---------------------------------------', count: '2' },
-  { label: '---------------------------------------', count: '99+' },
-  { label: '---------------------------------------', count: '99+' }
+const transactions = [
+  {
+    id: 1,
+    name: 'Token Swap',
+    status: 'Success'
+  },
+  {
+    id: 2,
+    name: 'QR Add',
+    status: 'Success'
+  },
+  {
+    id: 3,
+    name: 'Token Swap',
+    status: 'Pending'
+  },
+  {
+    id: 4,
+    name: 'Token Redemption',
+    status: 'Success'
+  },
+  {
+    id: 5,
+    name: 'Token Transfer',
+    status: 'Pending'
+  }
 ]
 </script>
 
 <template>
-  <section class="task-card" aria-labelledby="task-title">
-    <div class="task-header">
-      <div class="task-title">
-        <h2 id="task-title">Tugasku</h2>
-        <GBadge class="task-badge" label="99+" type="danger" />
-      </div>
-      <GButton class="see-all" :icon="false" label="Lihat Semua" size="sm" type="outline-primary" />
+  <section class="transaction-card" aria-labelledby="transaction-preview-title">
+    <div class="transaction-header">
+      <h2 id="transaction-preview-title">Transaction History</h2>
+      <RouterLink class="see-all-link" to="/transaction-history">
+        <GButton class="see-all" :icon="false" label="Lihat Semua" size="sm" type="outline-primary" />
+      </RouterLink>
     </div>
 
-    <div class="task-list">
-      <div v-for="task in tasks" :key="`${task.label}-${task.count}`" class="task-row">
-        <span>{{ task.label }}</span>
-        <strong>{{ task.count }}</strong>
+    <div class="transaction-list" aria-label="5 transaksi terakhir">
+      <div v-for="transaction in transactions" :key="transaction.id" class="transaction-row">
+        <span>{{ transaction.name }}</span>
+        <strong>{{ transaction.status }}</strong>
       </div>
     </div>
   </section>
 </template>
 
 <style scoped>
-.task-card {
+.transaction-card {
   width: 368px;
-  height: 226px;
+  height: 238px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  overflow: hidden;
   padding: 12px 16px 24px;
   border-radius: 12px;
   background: var(--g-kit-white);
   box-shadow: var(--bb-elevation-1);
 }
 
-.task-header {
+.transaction-header {
+  min-height: 30px;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 16px;
-}
-
-.task-title {
-  display: flex;
-  align-items: center;
-  gap: 4px;
+  gap: 12px;
 }
 
 h2 {
+  overflow: hidden;
   margin: 0;
   color: var(--g-kit-black-80);
   font-size: var(--g-kit-font-size-kappa);
-  font-weight: var(--g-kit-font-weight-bold);
+  font-weight: var(--g-kit-font-weight-extrabold, 800);
   line-height: var(--g-kit-line-height-kappa);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.see-all-link {
+  flex: 0 0 auto;
+  text-decoration: none;
 }
 
 .see-all {
   width: auto;
 }
 
-.task-list {
+.transaction-list {
+  width: 100%;
+  height: 156px;
+  min-height: 156px;
   display: flex;
   flex-direction: column;
+  overflow-y: auto;
+  overflow-x: hidden;
+  scrollbar-width: thin;
 }
 
-.task-row {
+.transaction-row {
+  width: 100%;
   min-height: 52px;
+  flex: 0 0 52px;
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 16px;
+  padding: 16px 0;
   border-bottom: 1px solid var(--g-kit-black-20);
   color: var(--g-kit-black-80);
+  box-sizing: border-box;
 }
 
-.task-row:last-child {
+.transaction-row:last-child {
   border-bottom: 0;
 }
 
-.task-row span {
+.transaction-row span {
+  min-width: 0;
   overflow: hidden;
   color: var(--g-kit-black-80);
   font-size: var(--g-kit-font-size-sigma);
-  font-weight: var(--g-kit-font-weight-normal);
+  font-weight: var(--g-kit-font-weight-semibold, 600);
   line-height: var(--g-kit-line-height-sigma);
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
-.task-row strong {
+.transaction-row strong {
+  flex: 0 0 auto;
+  margin-left: auto;
   color: var(--g-kit-lime-50);
   font-size: var(--g-kit-font-size-sigma);
-  font-weight: var(--g-kit-font-weight-bold);
+  font-weight: var(--g-kit-font-weight-extrabold, 800);
   line-height: var(--g-kit-line-height-sigma);
+  text-align: right;
 }
 
 @media (max-width: 1180px) {
-  .task-card {
+  .transaction-card {
     width: 100%;
+  }
+}
+
+@media (max-width: 420px) {
+  .transaction-card {
+    height: auto;
+    min-height: 238px;
+  }
+
+  .transaction-header {
+    align-items: flex-start;
+    flex-direction: column;
   }
 }
 </style>

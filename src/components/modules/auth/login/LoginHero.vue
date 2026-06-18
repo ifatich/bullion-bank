@@ -34,7 +34,7 @@
 
 .content {
   margin-top: auto;
-  margin-bottom: 40px;
+  margin-bottom: 240px;
 }
 
 .subtitle {

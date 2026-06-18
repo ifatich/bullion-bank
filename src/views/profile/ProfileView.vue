@@ -1,37 +1,37 @@
 <script setup lang="ts">
-import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 
 import { GButton } from '@/components'
 import DashboardTopbar from '@/components/modules/dashboard/DashboardTopbar.vue'
-import TokenSwapForm from '@/components/modules/token-swap/TokenSwapForm.vue'
+import ProfileForm from '@/components/modules/profile/ProfileForm.vue'
 import Breadcrumb from '@/components/shared/breadcrumb/Breadcrumb.vue'
-import TransactionAlertModal from '@/components/shared/modals/TransactionAlertModal.vue'
 import NavBack from '@/components/shared/navBack/navBack.vue'
 import { useAppAlert } from '@/hooks/useAppAlert'
 
-const breadcrumbItems = [{ label: 'Dashboard', to: '/dashboard' }, { label: 'Token Swap' }]
+const breadcrumbItems = [{ label: 'Dashboard', to: '/dashboard' }, { label: 'Profile' }]
 
 const router = useRouter()
 const { showAlert } = useAppAlert()
-const isTransactionModalOpen = ref(false)
 
-const abortSwap = () => {
+const abortProfile = () => {
   showAlert({
-    label: 'Token swap dibatalkan.',
+    label: 'Perubahan profile dibatalkan.',
     variant: 'info',
   })
   router.push('/dashboard')
 }
 
-const submitSwap = () => {
-  isTransactionModalOpen.value = true
+const submitProfile = () => {
+  showAlert({
+    label: 'Perubahan profile berhasil disimpan.',
+    variant: 'success',
+  })
 }
 </script>
 
 <template>
-  <div class="token-swap-page">
-    <main class="token-swap-main">
+  <div class="profile-page">
+    <main class="profile-main">
       <DashboardTopbar />
 
       <nav class="breadcrumb-row" aria-label="Breadcrumb">
@@ -40,17 +40,18 @@ const submitSwap = () => {
 
       <div class="header-line" aria-hidden="true" />
 
-      <section class="swap-content" aria-labelledby="swap-page-title">
-        <NavBack id="swap-page-title" label="Dashboard" to="/dashboard" />
+      <section class="profile-content" aria-labelledby="profile-page-title">
+        <NavBack id="profile-page-title" label="Dashboard" to="/dashboard" />
 
         <aside class="info-banner">
           <p>
-            Instantly exchange bullion-backed tokens with secure, fast and transparent transactions.
+            Manage your personal information and security preferences in one place, ensuring a
+            seamless and secure Bullion Bank experience.
           </p>
           <span class="info-accent" aria-hidden="true" />
         </aside>
 
-        <TokenSwapForm />
+        <ProfileForm />
       </section>
     </main>
 
@@ -62,32 +63,25 @@ const submitSwap = () => {
           label="Abort"
           size="md"
           type="neutral"
-          @click="abortSwap"
+          @click="abortProfile"
         />
         <GButton
           class="action-button"
           :icon="false"
-          label="Swap Token"
+          label="Save Changes"
           size="md"
           type="primary"
-          @click="submitSwap"
+          @click="submitProfile"
         />
       </div>
     </div>
 
-    <footer class="swap-footer">Copyright © 2024 PT. Pegadaian. All Rights Reserved.</footer>
-
-    <TransactionAlertModal
-      v-model="isTransactionModalOpen"
-      variant="success"
-      title="Swap Successful"
-      description="Your tokens have been successfully swapped. The updated balance is now reflected in your account."
-    />
+    <footer class="profile-footer">Copyright © 2024 PT. Pegadaian. All Rights Reserved.</footer>
   </div>
 </template>
 
 <style scoped>
-.token-swap-page {
+.profile-page {
   min-height: 100svh;
   display: flex;
   flex-direction: column;
@@ -102,14 +96,14 @@ const submitSwap = () => {
     sans-serif;
 }
 
-.token-swap-main {
+.profile-main {
   flex: 1;
   padding-bottom: 24px;
 }
 
 .breadcrumb-row,
 .header-line,
-.swap-content,
+.profile-content,
 .action-inner {
   width: min(1152px, calc(100vw - 48px));
   margin-right: auto;
@@ -121,7 +115,7 @@ const submitSwap = () => {
   background: var(--g-kit-black-20);
 }
 
-.swap-content {
+.profile-content {
   display: flex;
   flex-direction: column;
   gap: 16px;
@@ -170,7 +164,7 @@ const submitSwap = () => {
   background: color-mix(in srgb, var(--g-kit-blue-40) 18%, transparent);
 }
 
-.swap-footer {
+.profile-footer {
   width: 100%;
   min-height: 48px;
   display: flex;
@@ -211,16 +205,16 @@ const submitSwap = () => {
 @media (max-width: 760px) {
   .breadcrumb-row,
   .header-line,
-  .swap-content,
+  .profile-content,
   .action-inner {
     width: calc(100vw - 32px);
   }
 
-  .swap-content {
+  .profile-content {
     margin-top: 24px;
   }
 
-  .swap-footer {
+  .profile-footer {
     padding: 12px 16px;
     text-align: center;
     font-size: var(--g-kit-font-size-sigma);

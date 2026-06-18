@@ -8,7 +8,7 @@ Bullion Bank CMS adalah aplikasi internal untuk operator bisnis bullion-backed t
 
 | Role | Primary Need | Current Coverage |
 | --- | --- | --- |
-| CMS Operator | Melihat ringkasan aktivitas dan menjalankan transaksi token | Dashboard, Token Swap |
+| CMS Operator | Melihat ringkasan aktivitas dan menjalankan transaksi token | Dashboard, Token Swap, Token Redemption, Transaction History |
 | Approver / Supervisor | Meninjau aktivitas dan tugas tertunda | Dashboard task card, belum ada detail task |
 | Admin | Mengelola profil, akses, dan konfigurasi | Belum tersedia |
 
@@ -16,11 +16,13 @@ Bullion Bank CMS adalah aplikasi internal untuk operator bisnis bullion-backed t
 
 ```text
 /
-└── Login
+├── Login
+└── Register
 
 /dashboard
 ├── Dashboard Summary
 ├── Task List Preview
+├── Transaction History
 ├── Token
 │   ├── Swap
 │   ├── Redemption
@@ -37,6 +39,16 @@ Bullion Bank CMS adalah aplikasi internal untuk operator bisnis bullion-backed t
 └── Action Bar
     ├── Abort
     └── Swap Token
+
+/transaction-history
+├── Breadcrumb: Dashboard > Transaction History
+├── Back Navigation
+├── Information Banner
+└── Transaction History Table
+    ├── Last Updated
+    ├── Row Limit Control
+    ├── Empty State
+    └── Pagination Summary
 ```
 
 ## Route Inventory
@@ -44,13 +56,14 @@ Bullion Bank CMS adalah aplikasi internal untuk operator bisnis bullion-backed t
 | Route | Name | View | Status | Purpose |
 | --- | --- | --- | --- | --- |
 | `/` | `Login` | `src/views/auth/LoginView.vue` | Implemented | Entry point untuk autentikasi pengguna. |
+| `/register` | `Register` | `src/views/auth/RegisterView.vue` | Implemented | Flow registrasi akun baru dalam 3 langkah. |
 | `/dashboard` | `Dashboard` | `src/views/dashboard/DashboardView.vue` | Implemented | Landing page setelah login, berisi ringkasan, task, dan menu modul. |
 | `/token/swap` | `TokenSwap` | `src/views/token/TokenSwapView.vue` | Implemented | Form transaksi pertukaran token. |
-| `/token/redemption` | `TokenRedemption` | TBD | Planned | Penukaran token menjadi underlying asset / nilai terkait. |
+| `/token/redemption` | `TokenRedemption` | `src/views/token/TokenRedemptionView.vue` | Implemented | Penukaran token menjadi underlying asset / nilai terkait. |
 | `/token/transfer` | `TokenTransfer` | TBD | Planned | Transfer token antar akun atau entitas. |
 | `/qr/add` | `QRAdd` | TBD | Planned | Generate atau registrasi QR. |
-| `/transaction-history` | `TransactionHistory` | TBD | Planned | Riwayat transaksi dan audit aktivitas. |
-| `/profile` | `Profile` | TBD | Planned | Informasi pengguna dan pengaturan akun. |
+| `/transaction-history` | `TransactionHistory` | `src/views/transaction-history/TransactionHistoryView.vue` | Implemented | Riwayat transaksi dan audit aktivitas. |
+| `/profile` | `Profile` | `src/views/profile/ProfileView.vue` | Implemented | Informasi pengguna dan pengaturan akun. |
 
 ## Navigation Model
 
@@ -61,8 +74,8 @@ Global navigation ditampilkan pada halaman authenticated melalui `DashboardTopba
 | Label | Target | Status |
 | --- | --- | --- |
 | Dashboard | `/dashboard` | Implemented |
-| Transaction History | `/transaction-history` | Planned |
-| Profile | `/profile` | Planned |
+| Transaction History | `/transaction-history` | Implemented |
+| Profile | `/profile` | Implemented |
 
 ### Dashboard Module Navigation
 
@@ -71,7 +84,7 @@ Dashboard menggunakan menu berbasis modul melalui `MenuSection`.
 | Section | Menu Item | Target | Status |
 | --- | --- | --- | --- |
 | Token | Swap | `/token/swap` | Implemented |
-| Token | Redemption | `/token/redemption` | Planned |
+| Token | Redemption | `/token/redemption` | Implemented |
 | Token | Transfer | `/token/transfer` | Planned |
 | QR Generate | Add QR | `/qr/add` | Planned |
 
@@ -99,6 +112,33 @@ LoginView
 
 Primary action: login ke dashboard.  
 Success destination: `/dashboard`.
+
+### Register
+
+```text
+RegisterView
+├── LoginHero
+└── RegisterForm
+    ├── Step 1: Personal Information
+    │   ├── Nama Lengkap
+    │   ├── Tempat Lahir
+    │   ├── Kewarganegaraan
+    │   ├── Alamat Email
+    │   └── Tanggal Lahir
+    ├── Step 2: Identity Information
+    │   ├── Jenis Identitas
+    │   ├── Bukti Identitas
+    │   ├── Alamat Lengkap
+    │   └── Alamat Domisili
+    └── Step 3: Account Information
+        ├── Nomor Telepon
+        ├── Pekerjaan Utama
+        ├── Kata Sandi
+        └── Konfirmasi Kata Sandi
+```
+
+Primary action: complete registration.  
+Secondary action: return to login.
 
 ### Dashboard
 
@@ -144,6 +184,52 @@ TokenSwapView
 Primary action: submit token swap.  
 Secondary action: abort and return to previous flow.
 
+### Token Redemption
+
+```text
+TokenRedemptionView
+├── DashboardTopbar
+├── Breadcrumb
+├── NavBack
+├── Information Banner
+├── TokenRedemptionForm
+│   ├── Header
+│   ├── Last Updated
+│   ├── Amount
+│   ├── Redemption Date
+│   ├── Transaction Fee
+│   └── Grand Total
+├── Footer
+└── Action Bar
+    ├── Abort
+    └── Request Redemption
+```
+
+Primary action: request token redemption.  
+Secondary action: abort and return to previous flow.
+
+### Transaction History
+
+```text
+TransactionHistoryView
+├── DashboardTopbar
+├── Breadcrumb
+├── NavBack
+├── Information Banner
+├── TransactionHistoryTable
+│   ├── Header
+│   ├── Last Updated
+│   ├── Row Limit Control
+│   ├── Table
+│   │   ├── No
+│   │   ├── Transaction Name
+│   │   └── Action
+│   └── Pagination Summary
+└── Footer
+```
+
+Primary purpose: menampilkan riwayat transaksi dan menyediakan empty state saat belum ada data.
+
 ## Content Types
 
 | Content Type | Description | Example Fields |
@@ -174,6 +260,7 @@ src/
 │   │   ├── token-swap/
 │   │   ├── token-redemption/
 │   │   ├── token-transfer/
+│   │   ├── transaction-history/
 │   │   └── qr/
 │   └── shared/
 ├── services/
@@ -193,8 +280,6 @@ src/
 
 ## Next IA Tasks
 
-1. Define route and page contract for Token Redemption.
-2. Define route and page contract for Token Transfer.
-3. Convert `DashboardTopbar` navigation items from placeholder anchors to router links.
-4. Add authenticated route guard once auth integration is finalized.
-5. Add empty, loading, error, and success states per transaction page.
+1. Define route and page contract for Token Transfer.
+2. Add authenticated route guard once auth integration is finalized.
+3. Add empty, loading, error, and success states per transaction page.

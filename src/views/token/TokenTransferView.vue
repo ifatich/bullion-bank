@@ -4,34 +4,34 @@ import { useRouter } from 'vue-router'
 
 import { GButton } from '@/components'
 import DashboardTopbar from '@/components/modules/dashboard/DashboardTopbar.vue'
-import TokenSwapForm from '@/components/modules/token-swap/TokenSwapForm.vue'
+import TokenTransferForm from '@/components/modules/token-transfer/TokenTransferForm.vue'
 import Breadcrumb from '@/components/shared/breadcrumb/Breadcrumb.vue'
 import TransactionAlertModal from '@/components/shared/modals/TransactionAlertModal.vue'
 import NavBack from '@/components/shared/navBack/navBack.vue'
 import { useAppAlert } from '@/hooks/useAppAlert'
 
-const breadcrumbItems = [{ label: 'Dashboard', to: '/dashboard' }, { label: 'Token Swap' }]
+const breadcrumbItems = [{ label: 'Dashboard', to: '/dashboard' }, { label: 'Token Transfer' }]
 
 const router = useRouter()
 const { showAlert } = useAppAlert()
 const isTransactionModalOpen = ref(false)
 
-const abortSwap = () => {
+const abortTransfer = () => {
   showAlert({
-    label: 'Token swap dibatalkan.',
+    label: 'Token transfer dibatalkan.',
     variant: 'info',
   })
   router.push('/dashboard')
 }
 
-const submitSwap = () => {
+const submitTransfer = () => {
   isTransactionModalOpen.value = true
 }
 </script>
 
 <template>
-  <div class="token-swap-page">
-    <main class="token-swap-main">
+  <div class="token-transfer-page">
+    <main class="token-transfer-main">
       <DashboardTopbar />
 
       <nav class="breadcrumb-row" aria-label="Breadcrumb">
@@ -40,17 +40,18 @@ const submitSwap = () => {
 
       <div class="header-line" aria-hidden="true" />
 
-      <section class="swap-content" aria-labelledby="swap-page-title">
-        <NavBack id="swap-page-title" label="Dashboard" to="/dashboard" />
+      <section class="transfer-content" aria-labelledby="transfer-page-title">
+        <NavBack id="transfer-page-title" label="Dashboard" to="/dashboard" />
 
         <aside class="info-banner">
           <p>
-            Instantly exchange bullion-backed tokens with secure, fast and transparent transactions.
+            Seamlessly convert digital bullion tokens into physical gold with a trusted redemption
+            process.
           </p>
           <span class="info-accent" aria-hidden="true" />
         </aside>
 
-        <TokenSwapForm />
+        <TokenTransferForm />
       </section>
     </main>
 
@@ -62,32 +63,32 @@ const submitSwap = () => {
           label="Abort"
           size="md"
           type="neutral"
-          @click="abortSwap"
+          @click="abortTransfer"
         />
         <GButton
           class="action-button"
           :icon="false"
-          label="Swap Token"
+          label="Request Transfer"
           size="md"
           type="primary"
-          @click="submitSwap"
+          @click="submitTransfer"
         />
       </div>
     </div>
 
-    <footer class="swap-footer">Copyright © 2024 PT. Pegadaian. All Rights Reserved.</footer>
+    <footer class="transfer-footer">Copyright © 2024 PT. Pegadaian. All Rights Reserved.</footer>
 
     <TransactionAlertModal
       v-model="isTransactionModalOpen"
       variant="success"
-      title="Swap Successful"
-      description="Your tokens have been successfully swapped. The updated balance is now reflected in your account."
+      title="Transfer Successful"
+      description="Your tokens have been successfully transferred. The updated balance is now reflected in your account."
     />
   </div>
 </template>
 
 <style scoped>
-.token-swap-page {
+.token-transfer-page {
   min-height: 100svh;
   display: flex;
   flex-direction: column;
@@ -102,14 +103,14 @@ const submitSwap = () => {
     sans-serif;
 }
 
-.token-swap-main {
+.token-transfer-main {
   flex: 1;
   padding-bottom: 24px;
 }
 
 .breadcrumb-row,
 .header-line,
-.swap-content,
+.transfer-content,
 .action-inner {
   width: min(1152px, calc(100vw - 48px));
   margin-right: auto;
@@ -121,7 +122,7 @@ const submitSwap = () => {
   background: var(--g-kit-black-20);
 }
 
-.swap-content {
+.transfer-content {
   display: flex;
   flex-direction: column;
   gap: 16px;
@@ -170,7 +171,7 @@ const submitSwap = () => {
   background: color-mix(in srgb, var(--g-kit-blue-40) 18%, transparent);
 }
 
-.swap-footer {
+.transfer-footer {
   width: 100%;
   min-height: 48px;
   display: flex;
@@ -211,16 +212,16 @@ const submitSwap = () => {
 @media (max-width: 760px) {
   .breadcrumb-row,
   .header-line,
-  .swap-content,
+  .transfer-content,
   .action-inner {
     width: calc(100vw - 32px);
   }
 
-  .swap-content {
+  .transfer-content {
     margin-top: 24px;
   }
 
-  .swap-footer {
+  .transfer-footer {
     padding: 12px 16px;
     text-align: center;
     font-size: var(--g-kit-font-size-sigma);

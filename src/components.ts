@@ -15,12 +15,14 @@ import LoadAnimate from 'kitvue-public/src/components/Modal/Load.vue'
 import TablePagination from 'kitvue-public/src/components/Table/TablePagination.vue'
 import DateRangePicker from 'kitvue-public/src/components/Input/DateRangePicker.vue'
 import DateRangePickerOption from 'kitvue-public/src/components/Input/DateRangePickerOption.vue'
+import FilePickerLG from 'kitvue-public/src/components/Filepicker/FilePickerLG.vue'
 import InputCamera from 'kitvue-public/src/components/Input/InputCamera.vue'
 import InputRadio from 'kitvue-public/src/components/Radio/Radio.vue'
 import BadgeComponent from 'kitvue-public/src/components/Badge/Badge.vue'
 import CardContent from 'kitvue-public/src/components/Card/CardContent.vue'
 import Breadcrumb from 'kitvue-public/src/components/Breadcrumb/Breadcrumb.vue'
 import NavBackNavigator from 'kitvue-public/src/components/Navbar/NavBackNavigator.vue'
+import BerandaHeader from 'kitvue-public/src/components/Navbar/BerandaHeader.vue'
 
 
 export const GButton = ButtonComponent
@@ -40,9 +42,11 @@ export const GLoading = LoadAnimate
 export const GTablePagination = TablePagination
 export const GRangeDatePicker = DateRangePicker
 export const GDateRangePickerOption = DateRangePickerOption
+export const GFilePicker = FilePickerLG
 export const GInputCamera = InputCamera
 export const GRadio = InputRadio
 export const GBadge = BadgeComponent
 export const GCardContent = CardContent
 export const GBreadcrumb = Breadcrumb
 export const GNavBackNavigator = NavBackNavigator
+export const GBerandaHeader = BerandaHeader
