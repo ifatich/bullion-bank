@@ -1,15 +1,24 @@
+<script setup lang="ts">
+import GoldPriceChart from './GoldPriceChart.vue'
+</script>
+
 <template>
   <div class="hero">
     <img class="logo" src="@/assets/images/pegadaian-logo.svg" alt="Pegadaian" />
 
     <div class="content">
+      
       <span class="subtitle"> Selamat Datang di </span>
-
+      
       <h1>
         Tokenized Gold
         <br />
         Receipt
       </h1>
+      
+      <div class="line" />
+
+      <GoldPriceChart class="price-chart" />
 
       <div class="line" />
 
@@ -33,8 +42,10 @@
 }
 
 .content {
+  width: 100%;
+  max-width: 540px;
   margin-top: auto;
-  margin-bottom: 240px;
+  margin-bottom: 40px;
 }
 
 .subtitle {
@@ -52,6 +63,11 @@ h1 {
   font-weight: var(--g-kit-font-weight-bold);
   line-height: 80px;
   letter-spacing: 0;
+}
+
+.price-chart {
+  margin-top: 24px;
+  margin-bottom: 24px;
 }
 
 .line {

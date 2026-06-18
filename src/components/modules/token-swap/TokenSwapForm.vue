@@ -62,8 +62,18 @@ const refreshData = () => {
       <section class="swap-section" aria-labelledby="sell-token-title">
         <h2 id="sell-token-title">Sell Token</h2>
         <div class="field-grid">
-          <GInputText class="mb-0" v-model="sellAmount" label="Sell" placeholder="Sell" />
+          <GInputText
+            id="token-swap-sell-amount"
+            name="sellAmount"
+            class="mb-0"
+            v-model="sellAmount"
+            label="Sell"
+            placeholder="Sell"
+            autocomplete="off"
+          />
           <GDropdown
+            id="token-swap-sell-token"
+            name="sellToken"
             class="mb-0"
             v-model="sellToken"
             label="Token"
@@ -80,8 +90,18 @@ const refreshData = () => {
       <section class="swap-section" aria-labelledby="buy-token-title">
         <h2 id="buy-token-title">Buy Token</h2>
         <div class="field-grid">
-          <GInputText class="mb-0" v-model="buyAmount" label="Buy" placeholder="Buy" />
+          <GInputText
+            id="token-swap-buy-amount"
+            name="buyAmount"
+            class="mb-0"
+            v-model="buyAmount"
+            label="Buy"
+            placeholder="Buy"
+            autocomplete="off"
+          />
           <GDropdown
+            id="token-swap-buy-token"
+            name="buyToken"
             class="mb-0"
             v-model="buyToken"
             label="Token"

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { computed, ref } from 'vue'
 
 import { GInputText } from '@/components'
 
@@ -17,6 +17,13 @@ const confirmPassword = ref('')
 const showOldPassword = ref(false)
 const showNewPassword = ref(false)
 const showConfirmPassword = ref(false)
+const passwordMismatchError = computed(() => {
+  if (!newPassword.value || !confirmPassword.value) return ''
+
+  return newPassword.value === confirmPassword.value
+    ? ''
+    : 'Password baru dan konfirmasi password tidak sama'
+})
 </script>
 
 <template>
@@ -41,13 +48,53 @@ const showConfirmPassword = ref(false)
 
       <div v-show="isUserProfileOpen" id="user-profile-panel" class="section-panel">
         <div class="field-grid">
-          <GInputText class="mb-0" v-model="walletId" label="Wallet ID" disabled />
-          <GInputText class="mb-0" v-model="companyId" label="Company ID" disabled />
-          <GInputText class="mb-0" v-model="fullName" label="Nama Lengkap" disabled />
-          <GInputText class="mb-0" v-model="phoneNumber" label="Nomor Telepon" disabled />
+          <GInputText
+            id="profile-wallet-id"
+            name="walletId"
+            class="mb-0"
+            v-model="walletId"
+            label="Wallet ID"
+            autocomplete="off"
+            disabled
+          />
+          <GInputText
+            id="profile-company-id"
+            name="companyId"
+            class="mb-0"
+            v-model="companyId"
+            label="Company ID"
+            autocomplete="off"
+            disabled
+          />
+          <GInputText
+            id="profile-full-name"
+            name="fullName"
+            class="mb-0"
+            v-model="fullName"
+            label="Nama Lengkap"
+            autocomplete="name"
+            disabled
+          />
+          <GInputText
+            id="profile-phone-number"
+            name="phoneNumber"
+            class="mb-0"
+            v-model="phoneNumber"
+            label="Nomor Telepon"
+            autocomplete="tel"
+            disabled
+          />
         </div>
 
-        <GInputText class="mb-0" v-model="fullAddress" label="Alamat Lengkap" disabled />
+        <GInputText
+          id="profile-full-address"
+          name="fullAddress"
+          class="mb-0"
+          v-model="fullAddress"
+          label="Alamat Lengkap"
+          autocomplete="street-address"
+          disabled
+        />
       </div>
     </section>
 
@@ -74,13 +121,24 @@ const showConfirmPassword = ref(false)
       </header>
 
       <div v-show="isSecurityOpen" id="security-panel" class="section-panel">
-        <GInputText class="mb-0" v-model="email" label="Email" disabled />
         <GInputText
+          id="profile-email"
+          name="email"
+          class="mb-0"
+          v-model="email"
+          label="Email"
+          autocomplete="email"
+          disabled
+        />
+        <GInputText
+          id="profile-old-password"
+          name="oldPassword"
           class="mb-0"
           v-model="oldPassword"
           :type="showOldPassword ? 'text' : 'password'"
           label="Password Lama"
           placeholder="Masukkan password lama"
+          autocomplete="current-password"
         >
           <template #suffix>
             <button
@@ -107,11 +165,14 @@ const showConfirmPassword = ref(false)
 
         <div class="field-grid">
           <GInputText
+            id="profile-new-password"
+            name="newPassword"
             class="mb-0"
             v-model="newPassword"
             :type="showNewPassword ? 'text' : 'password'"
             label="Masukkan Password Baru"
             placeholder="Masukkan password baru"
+            autocomplete="new-password"
           >
             <template #suffix>
               <button
@@ -137,11 +198,15 @@ const showConfirmPassword = ref(false)
           </GInputText>
 
           <GInputText
+            id="profile-confirm-password"
+            name="confirmPassword"
             class="mb-0"
             v-model="confirmPassword"
             :type="showConfirmPassword ? 'text' : 'password'"
             label="Konfirmasi Password Baru"
             placeholder="Konfirmasi password baru"
+            autocomplete="new-password"
+            :error="passwordMismatchError"
           >
             <template #suffix>
               <button

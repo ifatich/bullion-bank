@@ -41,7 +41,7 @@ import RegisterForm from '@/components/modules/auth/register/RegisterForm.vue'
 
 .right-side {
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   justify-content: flex-end;
   min-width: 0;
 }
