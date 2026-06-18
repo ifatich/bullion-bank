@@ -3,30 +3,35 @@ import { GButton } from '@/components'
 
 const transactions = [
   {
-    id: 1,
-    name: 'Token Swap',
-    status: 'Success'
+    id: 11,
+    name: 'Withdrawal',
+    amount: '18 KG',
+    status: 'Success',
   },
   {
-    id: 2,
-    name: 'QR Add',
-    status: 'Success'
+    id: 12,
+    name: 'Deposit',
+    amount: '41 KG',
+    status: 'Success',
   },
   {
-    id: 3,
-    name: 'Token Swap',
-    status: 'Pending'
+    id: 13,
+    name: 'Swap',
+    amount: '27 KG',
+    status: 'Success',
   },
   {
-    id: 4,
-    name: 'Token Redemption',
-    status: 'Success'
+    id: 14,
+    name: 'Transfer',
+    amount: '11 KG',
+    status: 'Success',
   },
   {
-    id: 5,
-    name: 'Token Transfer',
-    status: 'Pending'
-  }
+    id: 15,
+    name: 'Deposit',
+    amount: '64 KG',
+    status: 'Success',
+  },
 ]
 </script>
 
@@ -35,14 +40,21 @@ const transactions = [
     <div class="transaction-header">
       <h2 id="transaction-preview-title">Transaction History</h2>
       <RouterLink class="see-all-link" to="/transaction-history">
-        <GButton class="see-all" :icon="false" label="Lihat Semua" size="sm" type="outline-primary" />
+        <GButton
+          class="see-all"
+          :icon="false"
+          label="Lihat Semua"
+          size="sm"
+          type="outline-primary"
+        />
       </RouterLink>
     </div>
 
     <div class="transaction-list" aria-label="5 transaksi terakhir">
       <div v-for="transaction in transactions" :key="transaction.id" class="transaction-row">
-        <span>{{ transaction.name }}</span>
-        <strong>{{ transaction.status }}</strong>
+        <span class="transaction-name">{{ transaction.name }}</span>
+        <span class="transaction-amount">{{ transaction.amount }}</span>
+        <strong class="transaction-status">{{ transaction.status }}</strong>
       </div>
     </div>
   </section>
@@ -105,10 +117,10 @@ h2 {
   width: 100%;
   min-height: 52px;
   flex: 0 0 52px;
-  display: flex;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 72px 72px;
   align-items: center;
-  justify-content: space-between;
-  gap: 16px;
+  column-gap: 12px;
   padding: 16px 0;
   border-bottom: 1px solid var(--g-kit-black-20);
   color: var(--g-kit-black-80);
@@ -119,7 +131,7 @@ h2 {
   border-bottom: 0;
 }
 
-.transaction-row span {
+.transaction-name {
   min-width: 0;
   overflow: hidden;
   color: var(--g-kit-black-80);
@@ -130,9 +142,16 @@ h2 {
   white-space: nowrap;
 }
 
-.transaction-row strong {
-  flex: 0 0 auto;
-  margin-left: auto;
+.transaction-amount {
+  color: var(--g-kit-black-60);
+  font-size: var(--g-kit-font-size-sigma);
+  font-weight: var(--g-kit-font-weight-bold);
+  line-height: var(--g-kit-line-height-sigma);
+  text-align: right;
+  white-space: nowrap;
+}
+
+.transaction-status {
   color: var(--g-kit-lime-50);
   font-size: var(--g-kit-font-size-sigma);
   font-weight: var(--g-kit-font-weight-extrabold, 800);

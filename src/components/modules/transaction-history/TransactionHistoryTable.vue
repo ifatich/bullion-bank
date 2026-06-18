@@ -786,91 +786,93 @@ const closeTransactionDetail = () => {
 
           <div class="detail-divider" aria-hidden="true" />
 
-          <dl class="detail-list">
-            <div class="detail-item">
-              <dt>No</dt>
-              <dd>{{ selectedTransaction.no }}</dd>
-            </div>
-            <div class="detail-item">
-              <dt>Transaction Hash</dt>
-              <dd>{{ selectedTransaction.transactionHash }}</dd>
-            </div>
-            <div class="detail-item">
-              <dt>Reference Number</dt>
-              <dd>{{ selectedTransaction.referenceNumber }}</dd>
-            </div>
-            <div class="detail-item">
-              <dt>Transaction Type</dt>
-              <dd>{{ selectedTransaction.transactionType }}</dd>
-            </div>
-            <div class="detail-item">
-              <dt>Status</dt>
-              <dd>
-                <span
-                  :class="[
-                    'status-badge',
-                    `status-badge--${selectedTransaction.status.toLowerCase()}`,
-                  ]"
-                >
-                  {{ selectedTransaction.status }}
-                </span>
-              </dd>
-            </div>
-            <div class="detail-item">
-              <dt>Date</dt>
-              <dd>{{ selectedTransaction.date }}</dd>
-            </div>
-            <div class="detail-item">
-              <dt>Confirmed At</dt>
-              <dd>{{ selectedTransaction.confirmedAt }}</dd>
-            </div>
-            <div class="detail-item">
-              <dt>Asset</dt>
-              <dd>{{ selectedTransaction.asset }}</dd>
-            </div>
-            <div class="detail-item">
-              <dt>Network</dt>
-              <dd>{{ selectedTransaction.network }}</dd>
-            </div>
-            <div class="detail-item">
-              <dt>Amount</dt>
-              <dd>{{ selectedTransaction.amount }}</dd>
-            </div>
-            <div class="detail-item">
-              <dt>Fee</dt>
-              <dd>{{ selectedTransaction.fee }}</dd>
-            </div>
-            <div class="detail-item">
-              <dt>Net Amount</dt>
-              <dd>{{ selectedTransaction.netAmount }}</dd>
-            </div>
-            <div class="detail-item">
-              <dt>Fiat Value</dt>
-              <dd>{{ selectedTransaction.fiatValue }}</dd>
-            </div>
-            <div class="detail-item">
-              <dt>Block Number</dt>
-              <dd>{{ selectedTransaction.blockNumber }}</dd>
-            </div>
-            <div class="detail-item">
-              <dt>Confirmations</dt>
-              <dd>{{ selectedTransaction.confirmations }}</dd>
-            </div>
-          </dl>
+          <div class="detail-modal-content">
+            <dl class="detail-list">
+              <div class="detail-item">
+                <dt>No</dt>
+                <dd>{{ selectedTransaction.no }}</dd>
+              </div>
+              <div class="detail-item">
+                <dt>Transaction Hash</dt>
+                <dd>{{ selectedTransaction.transactionHash }}</dd>
+              </div>
+              <div class="detail-item">
+                <dt>Reference Number</dt>
+                <dd>{{ selectedTransaction.referenceNumber }}</dd>
+              </div>
+              <div class="detail-item">
+                <dt>Transaction Type</dt>
+                <dd>{{ selectedTransaction.transactionType }}</dd>
+              </div>
+              <div class="detail-item">
+                <dt>Status</dt>
+                <dd>
+                  <span
+                    :class="[
+                      'status-badge',
+                      `status-badge--${selectedTransaction.status.toLowerCase()}`,
+                    ]"
+                  >
+                    {{ selectedTransaction.status }}
+                  </span>
+                </dd>
+              </div>
+              <div class="detail-item">
+                <dt>Date</dt>
+                <dd>{{ selectedTransaction.date }}</dd>
+              </div>
+              <div class="detail-item">
+                <dt>Confirmed At</dt>
+                <dd>{{ selectedTransaction.confirmedAt }}</dd>
+              </div>
+              <div class="detail-item">
+                <dt>Asset</dt>
+                <dd>{{ selectedTransaction.asset }}</dd>
+              </div>
+              <div class="detail-item">
+                <dt>Network</dt>
+                <dd>{{ selectedTransaction.network }}</dd>
+              </div>
+              <div class="detail-item">
+                <dt>Amount</dt>
+                <dd>{{ selectedTransaction.amount }}</dd>
+              </div>
+              <div class="detail-item">
+                <dt>Fee</dt>
+                <dd>{{ selectedTransaction.fee }}</dd>
+              </div>
+              <div class="detail-item">
+                <dt>Net Amount</dt>
+                <dd>{{ selectedTransaction.netAmount }}</dd>
+              </div>
+              <div class="detail-item">
+                <dt>Fiat Value</dt>
+                <dd>{{ selectedTransaction.fiatValue }}</dd>
+              </div>
+              <div class="detail-item">
+                <dt>Block Number</dt>
+                <dd>{{ selectedTransaction.blockNumber }}</dd>
+              </div>
+              <div class="detail-item">
+                <dt>Confirmations</dt>
+                <dd>{{ selectedTransaction.confirmations }}</dd>
+              </div>
+            </dl>
 
-          <div class="detail-party-grid">
-            <article class="detail-party-card">
-              <span>From</span>
-              <strong>{{ selectedTransaction.fromCompany }}</strong>
-              <p>{{ selectedTransaction.fromWallet }}</p>
-              <p>{{ selectedTransaction.fromAddress }}</p>
-            </article>
-            <article class="detail-party-card">
-              <span>To</span>
-              <strong>{{ selectedTransaction.toCompany }}</strong>
-              <p>{{ selectedTransaction.toWallet }}</p>
-              <p>{{ selectedTransaction.toAddress }}</p>
-            </article>
+            <div class="detail-party-grid">
+              <article class="detail-party-card">
+                <span>From</span>
+                <strong>{{ selectedTransaction.fromCompany }}</strong>
+                <p>{{ selectedTransaction.fromWallet }}</p>
+                <p>{{ selectedTransaction.fromAddress }}</p>
+              </article>
+              <article class="detail-party-card">
+                <span>To</span>
+                <strong>{{ selectedTransaction.toCompany }}</strong>
+                <p>{{ selectedTransaction.toWallet }}</p>
+                <p>{{ selectedTransaction.toAddress }}</p>
+              </article>
+            </div>
           </div>
         </section>
       </div>
@@ -1446,7 +1448,7 @@ h1 {
   flex-direction: column;
   gap: 16px;
   overflow: hidden;
-  padding: 24px;
+  padding-top: 16px;
   border-radius: 12px;
   background: var(--g-kit-white);
   box-shadow: var(--bb-elevation-1);
@@ -1457,6 +1459,8 @@ h1 {
   align-items: flex-start;
   justify-content: space-between;
   gap: 16px;
+  width: 100%;
+  padding: 0 16px;
 }
 
 .detail-modal-header h2 {
@@ -1498,7 +1502,17 @@ h1 {
 .detail-divider {
   width: 100%;
   height: 1px;
+  flex: 0 0 auto;
   background: var(--g-kit-black-20);
+}
+
+.detail-modal-content {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  width: 100%;
+  padding: 0 16px 16px;
+  overflow-y: auto;
 }
 
 .detail-list {
@@ -1574,7 +1588,7 @@ h1 {
 
 .detail-modal-fade-enter-active,
 .detail-modal-fade-leave-active {
-  transition: opacity 0.2s ease;
+  transition: opacity 0.16s ease;
 }
 
 .detail-modal-fade-enter-from,
@@ -1620,29 +1634,50 @@ h1 {
 
   .detail-modal-backdrop {
     align-items: flex-end;
+    justify-content: stretch;
     padding: 0;
   }
 
   .detail-modal {
     width: 100%;
-    max-height: calc(100vh - 48px);
-    overflow-y: auto;
+    max-height: calc(100svh - 48px);
     border-radius: 16px 16px 0 0;
+    padding-top: 12px;
   }
 
   .detail-modal::before {
     content: '';
     width: 48px;
     height: 4px;
+    display: block;
+    flex: 0 0 auto;
     align-self: center;
-    margin-bottom: 4px;
     border-radius: 999px;
     background: var(--g-kit-black-20);
+  }
+
+  .detail-modal-header {
+    align-items: flex-start;
+  }
+
+  .detail-modal-content {
+    max-height: calc(100svh - 148px);
+    padding-bottom: 24px;
   }
 
   .detail-list,
   .detail-party-grid {
     grid-template-columns: 1fr;
+  }
+
+  .detail-modal-fade-enter-active .detail-modal,
+  .detail-modal-fade-leave-active .detail-modal {
+    transition: transform 0.2s ease;
+  }
+
+  .detail-modal-fade-enter-from .detail-modal,
+  .detail-modal-fade-leave-to .detail-modal {
+    transform: translateY(100%);
   }
 }
 
