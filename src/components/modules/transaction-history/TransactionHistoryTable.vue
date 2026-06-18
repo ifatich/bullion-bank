@@ -171,12 +171,16 @@ const editTransaction = (row: TransactionHistoryRow) => {
             <td class="col-no">{{ row.no }}</td>
             <td class="col-hash">{{ row.transactionHash }}</td>
             <td class="party-cell">
-              <strong>{{ row.fromCompany }}</strong>
-              <span>{{ row.fromWallet }}</span>
+              <div class="party-cell-content">
+                <strong>{{ row.fromCompany }}</strong>
+                <span>{{ row.fromWallet }}</span>
+              </div>
             </td>
             <td class="party-cell">
-              <strong>{{ row.toCompany }}</strong>
-              <span>{{ row.toWallet }}</span>
+              <div class="party-cell-content">
+                <strong>{{ row.toCompany }}</strong>
+                <span>{{ row.toWallet }}</span>
+              </div>
             </td>
             <td class="col-date">{{ row.date }}</td>
             <td class="col-amount">{{ row.amount }}</td>
@@ -385,19 +389,19 @@ h1 {
   white-space: nowrap;
 }
 
-.party-cell {
+.party-cell-content {
   display: flex;
   flex-direction: column;
   gap: 4px;
 }
 
-.party-cell strong,
-.party-cell span {
+.party-cell-content strong,
+.party-cell-content span {
   min-width: 0;
   color: var(--g-kit-black-60);
 }
 
-.party-cell strong {
+.party-cell-content strong {
   overflow: hidden;
   font-size: var(--g-kit-font-size-kappa);
   font-weight: var(--g-kit-font-weight-extrabold, 800);
@@ -406,7 +410,7 @@ h1 {
   white-space: nowrap;
 }
 
-.party-cell span {
+.party-cell-content span {
   font-size: var(--g-kit-font-size-omicron);
   font-weight: var(--g-kit-font-weight-semibold, 600);
   line-height: var(--g-kit-line-height-omicron);
