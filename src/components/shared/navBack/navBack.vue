@@ -6,7 +6,7 @@ import arrowLeftGreen from 'kitvue-public/src/assets/images/arrow-left-green.svg
 
 defineOptions({
   name: 'NavBackNavigator',
-  inheritAttrs: false
+  inheritAttrs: false,
 })
 
 const props = withDefaults(
@@ -18,8 +18,8 @@ const props = withDefaults(
   {
     label: 'Beli Tabungan Emas',
     to: undefined,
-    action: undefined
-  }
+    action: undefined,
+  },
 )
 
 const router = useRouter()

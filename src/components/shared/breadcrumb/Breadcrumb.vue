@@ -5,24 +5,26 @@ import { useRouter } from 'vue-router'
 
 import { GBreadcrumb } from '@/components'
 
-type BreadcrumbItem = string | {
-  label: string
-  to?: string
-}
+type BreadcrumbItem =
+  | string
+  | {
+      label: string
+      to?: string
+    }
 
 const props = withDefaults(
   defineProps<{
     items: BreadcrumbItem[]
   }>(),
   {
-    items: () => []
-  }
+    items: () => [],
+  },
 )
 
 const router = useRouter()
 
 const labels = computed(() =>
-  props.items.map((item) => (typeof item === 'string' ? item : item.label))
+  props.items.map((item) => (typeof item === 'string' ? item : item.label)),
 )
 
 const handleClick = (event: MouseEvent) => {
@@ -54,7 +56,7 @@ const handleClick = (event: MouseEvent) => {
 .app-breadcrumb {
   display: flex;
   align-items: center;
-  padding: 16px 0
+  padding: 16px 0;
 }
 
 .app-breadcrumb :deep(.breadcrumb) {

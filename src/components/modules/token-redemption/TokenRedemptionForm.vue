@@ -65,8 +65,20 @@ const refreshData = () => {
       <div class="section-divider" aria-hidden="true" />
 
       <div class="summary-grid">
-        <GInputText class="mb-0" v-model="transactionFee" label="Transaction Fee" disabled placeholder="---" />
-        <GInputText class="mb-0" v-model="grandTotal" label="Grand Total" disabled placeholder="---" />
+        <GInputText
+          class="mb-0"
+          v-model="transactionFee"
+          label="Transaction Fee"
+          disabled
+          placeholder="---"
+        />
+        <GInputText
+          class="mb-0"
+          v-model="grandTotal"
+          label="Grand Total"
+          disabled
+          placeholder="---"
+        />
       </div>
     </div>
   </section>

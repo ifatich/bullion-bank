@@ -45,8 +45,20 @@ const handleSelect = (item: MenuItem) => {
               stroke-linecap="round"
               stroke-linejoin="round"
             />
-            <circle cx="39" cy="39" r="7" fill="var(--g-kit-lime-50)" stroke="var(--g-kit-white)" stroke-width="2" />
-            <path d="M39 35v8M35 39h8" stroke="var(--g-kit-white)" stroke-width="1.8" stroke-linecap="round" />
+            <circle
+              cx="39"
+              cy="39"
+              r="7"
+              fill="var(--g-kit-lime-50)"
+              stroke="var(--g-kit-white)"
+              stroke-width="2"
+            />
+            <path
+              d="M39 35v8M35 39h8"
+              stroke="var(--g-kit-white)"
+              stroke-width="1.8"
+              stroke-linecap="round"
+            />
           </svg>
         </span>
         <span>{{ item.label }}</span>

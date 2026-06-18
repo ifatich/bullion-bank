@@ -4,10 +4,7 @@ import TransactionHistoryTable from '@/components/modules/transaction-history/Tr
 import Breadcrumb from '@/components/shared/breadcrumb/Breadcrumb.vue'
 import NavBack from '@/components/shared/navBack/navBack.vue'
 
-const breadcrumbItems = [
-  { label: 'Dashboard', to: '/dashboard' },
-  { label: 'Transaction History' }
-]
+const breadcrumbItems = [{ label: 'Dashboard', to: '/dashboard' }, { label: 'Transaction History' }]
 </script>
 
 <template>
@@ -25,7 +22,10 @@ const breadcrumbItems = [
         <NavBack id="transaction-history-page-title" label="Dashboard" to="/dashboard" />
 
         <aside class="info-banner">
-          <p>Seamlessly convert digital bullion tokens into physical gold with a trusted redemption process.</p>
+          <p>
+            Seamlessly convert digital bullion tokens into physical gold with a trusted redemption
+            process.
+          </p>
           <span class="info-accent" aria-hidden="true" />
         </aside>
 

@@ -24,7 +24,6 @@ import Breadcrumb from 'kitvue-public/src/components/Breadcrumb/Breadcrumb.vue'
 import NavBackNavigator from 'kitvue-public/src/components/Navbar/NavBackNavigator.vue'
 import BerandaHeader from 'kitvue-public/src/components/Navbar/BerandaHeader.vue'
 
-
 export const GButton = ButtonComponent
 export const GModal = ModalComponent
 export const GListGroup = ListGroupUnit

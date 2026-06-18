@@ -1,0 +1,73 @@
+{
+  "summary": [
+    {
+      "label": "Total Minted Token",
+      "period": "Per bulan Maret 2026",
+      "trend": "+20%",
+      "value": "25 PGT"
+    },
+    {
+      "label": "Total User",
+      "period": "Per bulan Maret 2026",
+      "trend": "+0%",
+      "value": "25 User's"
+    },
+    {
+      "label": "Total Admin",
+      "period": "Per bulan Maret 2026",
+      "trend": "+0%",
+      "value": "5 User's"
+    }
+  ],
+  "approvalRequests": [
+    {
+      "walletAddress": "bbc1qxy2kgdygjrs3p83kkfjhx0wlhbc1qxy2kgdygjrs3p83kkfjhx0wlh",
+      "approvalProgress": "0/3"
+    },
+    {
+      "walletAddress": "bbc1qxy2kgdygjrs3p83kkfjhx0wlhbc1qxy2kgdygjrs3p83kkfjhx0wlh",
+      "approvalProgress": "1/3"
+    },
+    {
+      "walletAddress": "bbc1qxy2kgdygjrs3p83kkfjhx0wlhbc1qxy2kgdygjrs3p83kkfjhx0wlh",
+      "approvalProgress": "1/3"
+    }
+  ],
+  "vehicleIdentities": [
+    {
+      "companyId": "CMP-BBP-2026-000421",
+      "companyName": "PT Indonesia Blockchain Persada",
+      "walletId": "BBP-WAL-2026-001245",
+      "segment": "Corporate",
+      "pgtHolding": "12.5 PGT"
+    },
+    {
+      "companyId": "CMP-BBP-2026-000422",
+      "companyName": "PT Indonesia Maju",
+      "walletId": "BBP-WAL-2026-008210",
+      "segment": "Corporate",
+      "pgtHolding": "8.5 PGT"
+    },
+    {
+      "companyId": "CMP-BBP-2026-000421",
+      "companyName": "PT Indonesia Blockchain Persada",
+      "walletId": "BBP-WAL-2026-001245",
+      "segment": "Corporate",
+      "pgtHolding": "6.1 PGT"
+    },
+    {
+      "companyId": "CMP-BBP-2026-000422",
+      "companyName": "PT Indonesia Maju",
+      "walletId": "BBP-WAL-2026-008210",
+      "segment": "Corporate",
+      "pgtHolding": "4.8 PGT"
+    },
+    {
+      "companyId": "CMP-BBP-2026-000421",
+      "companyName": "PT Indonesia Blockchain Persada",
+      "walletId": "BBP-WAL-2026-001245",
+      "segment": "Corporate",
+      "pgtHolding": "22 PGT"
+    }
+  ]
+}
