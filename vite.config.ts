@@ -8,6 +8,7 @@ export default ({ mode }: { mode: string }) => {
   loadEnv(mode, process.cwd())
 
   return defineConfig({
+    base: mode === 'production' ? '/bullion-bank/' : '/',
     plugins: [vue(), VueDevTools()],
     define: {
       'import.meta.env.PACKAGE_VERSION': JSON.stringify(process.env.npm_package_version)
