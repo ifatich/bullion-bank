@@ -27,7 +27,14 @@ const requestPasswordReset = () => {
 
       <form class="login-form" @submit.prevent="login">
         <div class="fields">
-          <GInputText v-model="username" label="Username" placeholder="Username HCMS / Aralia">
+          <GInputText
+            id="login-username"
+            name="username"
+            v-model="username"
+            label="Username"
+            placeholder="Username HCMS / Aralia"
+            autocomplete="username"
+          >
             <template #prefix>
               <span class="field-icon field-icon-prefix" aria-hidden="true">
                 <svg viewBox="0 0 24 24" fill="none">
@@ -44,10 +51,13 @@ const requestPasswordReset = () => {
           </GInputText>
 
           <GInputText
+            id="login-password"
+            name="password"
             v-model="password"
             :type="showPassword ? 'text' : 'password'"
             label="Password"
             placeholder="Password"
+            autocomplete="current-password"
           >
             <template #prefix>
               <span class="field-icon field-icon-prefix" aria-hidden="true">

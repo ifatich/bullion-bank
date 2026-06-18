@@ -74,7 +74,7 @@ Sebelum membuat komponen baru, cek urutan ini:
 
 1. `src/components.ts`
 2. `node_modules/kitvue-public/src/components`
-3. [design.md](../design.md)
+3. [design.md](./design.md)
 4. [kitvue-public-design-system.md](kitvue-public-design-system.md)
 
 Gunakan perintah berikut saat eksplorasi:

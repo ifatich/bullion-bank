@@ -3,6 +3,7 @@ import { computed, reactive, ref } from 'vue'
 import { useRouter } from 'vue-router'
 
 import { GButton, GDatePicker, GDropdown, GFilePicker, GInputText, GTextArea } from '@/components'
+import { uniqueDatePickerFields as vUniqueDatePickerFields } from '@/directives/uniqueDatePickerFields'
 import { useAppAlert } from '@/hooks/useAppAlert'
 
 const router = useRouter()
@@ -38,10 +39,30 @@ const identityOptions = [
   { label: 'KITAS', value: 'kitas' },
 ]
 
+const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+const passwordPattern = /^(?=.*[A-Za-z])(?=.*\d)(?=.*[^A-Za-z\d\s])\S{8,}$/
+const passwordRequirementText =
+  'Minimal 8 karakter, wajib mengandung huruf, angka, dan simbol.'
+const isPasswordValid = computed(() => passwordPattern.test(form.password))
+const passwordError = computed(() => {
+  if (!form.password || isPasswordValid.value) return ''
+
+  return passwordRequirementText
+})
+const confirmPasswordError = computed(() => {
+  if (!form.password || !form.confirmPassword) return ''
+
+  return form.password === form.confirmPassword ? '' : 'Konfirmasi kata sandi tidak sama'
+})
+
 const isStepValid = computed(() => {
   if (currentStep.value === 1) {
     return Boolean(
-      form.fullName && form.birthPlace && form.nationality && form.email && form.birthDate,
+      form.fullName &&
+      form.birthPlace &&
+      form.nationality &&
+      emailPattern.test(form.email) &&
+      form.birthDate,
     )
   }
 
@@ -54,7 +75,7 @@ const isStepValid = computed(() => {
   return Boolean(
     form.phoneNumber &&
     form.occupation &&
-    form.password &&
+    isPasswordValid.value &&
     form.confirmPassword &&
     form.password === form.confirmPassword,
   )
@@ -125,16 +146,24 @@ const goNext = () => {
       <form class="register-form" @submit.prevent="goNext">
         <div v-if="currentStep === 1" class="fields">
           <GInputText
+            id="register-full-name"
+            name="fullName"
             v-model="form.fullName"
             label="Nama Lengkap"
             placeholder="Masukkan nama lengkap"
+            autocomplete="name"
           />
           <GInputText
+            id="register-birth-place"
+            name="birthPlace"
             v-model="form.birthPlace"
             label="Tempat Lahir"
             placeholder="Masukkan tempat lahir"
+            autocomplete="address-level2"
           />
           <GDropdown
+            id="register-nationality"
+            name="nationality"
             v-model="form.nationality"
             label="Kewarganegaraan"
             placeholder="Pilih kewarganegaraan"
@@ -143,20 +172,35 @@ const goNext = () => {
             item-text="label"
           />
           <GInputText
+            id="register-email"
+            name="email"
             v-model="form.email"
-            type="email"
+            type="text"
             label="Alamat Email"
             placeholder="Masukkan alamat email"
+            autocomplete="email"
+            autocapitalize="none"
+            spellcheck="false"
+            :pattern="emailPattern.source"
           />
           <GDatePicker
+            v-unique-date-picker-fields="{
+              id: 'register-birth-date',
+              name: 'birthDate',
+            }"
+            id="register-birth-date"
+            name="birthDate"
             v-model="form.birthDate"
             title="Tanggal Lahir"
             placeholder="Pilih tanggal lahir"
+            autocomplete="off"
           />
         </div>
 
         <div v-else-if="currentStep === 2" class="fields">
           <GDropdown
+            id="register-identity-type"
+            name="identityType"
             v-model="form.identityType"
             label="Jenis Identitas"
             placeholder="Pilih jenis identitas"
@@ -166,50 +210,66 @@ const goNext = () => {
           />
 
           <div class="upload-field">
-            <label>Bukti Identitas</label>
+            <label for="gallery-photo-add">Bukti Identitas</label>
             <GFilePicker
               unique-key="identity-proof"
               :file="form.identityFile"
-              :image-only="false"
-              csv-only
-              error-text="Ukuran file CSV maksimal 10 MB"
+              :image-only="true"
+              error-text="Ukuran file Image maksimal 10 MB"
               @file-dropped="handleIdentityFile"
               @file-removed="removeIdentityFile"
             />
-            <p>Ukuran file CSV maksimal 10 MB</p>
+            <p>Ukuran file Image maksimal 10 MB</p>
           </div>
 
           <GTextArea
+            id="register-full-address"
+            name="fullAddress"
             v-model="form.fullAddress"
             label="Alamat Lengkap"
             placeholder="Masukkan alamat lengkap"
+            autocomplete="street-address"
           />
           <GTextArea
+            id="register-domicile-address"
+            name="domicileAddress"
             v-model="form.domicileAddress"
             label="Alamat Domisili"
             placeholder="Masukkan alamat domisili"
+            autocomplete="street-address"
           />
         </div>
 
         <div v-else class="fields step-three">
           <GInputText
+            id="register-phone-number"
+            name="phoneNumber"
             v-model="form.phoneNumber"
             label="Nomor Telepon"
             placeholder="Masukkan nomor telepon"
+            autocomplete="tel"
           />
           <GInputText
+            id="register-occupation"
+            name="occupation"
             v-model="form.occupation"
             label="Pekerjaan Utama"
             placeholder="Masukkan pekerjaan utama"
+            autocomplete="organization-title"
           />
 
           <section class="account-section" aria-label="Informasi Akun">
             <h2>Informasi Akun</h2>
             <GInputText
+              id="register-password"
+              name="password"
               v-model="form.password"
               :type="showPassword ? 'text' : 'password'"
               label="Kata Sandi"
               placeholder="Masukkan kata sandi"
+              autocomplete="new-password"
+              :helper-text="passwordRequirementText"
+              :error="passwordError"
             >
               <template #suffix>
                 <button
@@ -232,10 +292,14 @@ const goNext = () => {
               </template>
             </GInputText>
             <GInputText
+              id="register-confirm-password"
+              name="confirmPassword"
               v-model="form.confirmPassword"
               :type="showConfirmPassword ? 'text' : 'password'"
               label="Konfirmasi Kata Sandi"
               placeholder="Masukkan konfirmasi kata sandi"
+              autocomplete="new-password"
+              :error="confirmPasswordError"
             >
               <template #suffix>
                 <button

@@ -14,6 +14,11 @@ dist-ssr
 coverage
 *.local
 
+# Local Codex plugin exports
+.agents/
+plugins/
+exports/
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json

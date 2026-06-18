@@ -23,6 +23,7 @@ import CardContent from 'kitvue-public/src/components/Card/CardContent.vue'
 import Breadcrumb from 'kitvue-public/src/components/Breadcrumb/Breadcrumb.vue'
 import NavBackNavigator from 'kitvue-public/src/components/Navbar/NavBackNavigator.vue'
 import BerandaHeader from 'kitvue-public/src/components/Navbar/BerandaHeader.vue'
+import LineChart from 'kitvue-public/src/components/Chart/LineChart.vue'
 
 export const GButton = ButtonComponent
 export const GModal = ModalComponent
@@ -49,3 +50,4 @@ export const GCardContent = CardContent
 export const GBreadcrumb = Breadcrumb
 export const GNavBackNavigator = NavBackNavigator
 export const GBerandaHeader = BerandaHeader
+export const GLineChart = LineChart

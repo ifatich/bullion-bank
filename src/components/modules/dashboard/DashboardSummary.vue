@@ -7,12 +7,13 @@ const emailAddress = 'pegadaian@bullion.co.id'
 
 const { showAlert } = useAppAlert()
 
-const copyToClipboard = async (value: string) => {
+const copyToClipboard = async (fieldLabel: string, value: string) => {
   if (!navigator.clipboard?.writeText) {
-    window.prompt('Copy value', value)
+    window.prompt(`Salin ${fieldLabel}`, value)
     showAlert({
-      label: 'Clipboard browser tidak tersedia. Salin nilai secara manual.',
+      label: `Clipboard browser tidak tersedia. Salin ${fieldLabel} ${value} secara manual.`,
       variant: 'warning',
+      timeout: 5000,
     })
     return
   }
@@ -20,13 +21,15 @@ const copyToClipboard = async (value: string) => {
   try {
     await navigator.clipboard.writeText(value)
     showAlert({
-      label: 'Data berhasil disalin.',
+      label: `${fieldLabel} ${value} berhasil disalin.`,
       variant: 'success',
+      timeout: 4000,
     })
   } catch {
     showAlert({
-      label: 'Data gagal disalin.',
+      label: `${fieldLabel} ${value} gagal disalin.`,
       variant: 'danger',
+      timeout: 4000,
     })
   }
 }
@@ -47,7 +50,11 @@ const copyToClipboard = async (value: string) => {
           <span>Wallet ID</span>
           <p>
             <span>{{ walletId }}</span>
-            <button type="button" aria-label="Copy wallet ID" @click="copyToClipboard(walletId)">
+            <button
+              type="button"
+              aria-label="Copy wallet ID"
+              @click="copyToClipboard('Wallet ID', walletId)"
+            >
               <svg viewBox="0 0 24 24" fill="none">
                 <path
                   d="M8 8h11v11H8V8ZM5 16H4V4h12v1"
@@ -75,7 +82,7 @@ const copyToClipboard = async (value: string) => {
               <button
                 type="button"
                 aria-label="Copy company ID"
-                @click="copyToClipboard(companyId)"
+                @click="copyToClipboard('Company ID', companyId)"
               >
                 <svg viewBox="0 0 24 24" fill="none">
                   <path
@@ -94,7 +101,7 @@ const copyToClipboard = async (value: string) => {
               <button
                 type="button"
                 aria-label="Copy email address"
-                @click="copyToClipboard(emailAddress)"
+                @click="copyToClipboard('Email', emailAddress)"
               >
                 <svg viewBox="0 0 24 24" fill="none">
                   <path

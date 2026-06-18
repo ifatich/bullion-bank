@@ -29,8 +29,9 @@ const copyAddress = async () => {
   if (!navigator.clipboard?.writeText) {
     window.prompt('Copy address', qrAddress)
     showAlert({
-      label: 'Clipboard browser tidak tersedia. Salin address secara manual.',
+      label: `Clipboard browser tidak tersedia. Salin QR address ${qrAddress} secara manual.`,
       variant: 'warning',
+      timeout: 5000,
     })
     return
   }
@@ -39,16 +40,18 @@ const copyAddress = async () => {
     await navigator.clipboard.writeText(qrAddress)
     isCopied.value = true
     showAlert({
-      label: 'QR address berhasil disalin.',
+      label: `QR address ${qrAddress} berhasil disalin.`,
       variant: 'success',
+      timeout: 4000,
     })
     window.setTimeout(() => {
       isCopied.value = false
     }, 1400)
   } catch {
     showAlert({
-      label: 'QR address gagal disalin.',
+      label: `QR address ${qrAddress} gagal disalin.`,
       variant: 'danger',
+      timeout: 4000,
     })
   }
 }

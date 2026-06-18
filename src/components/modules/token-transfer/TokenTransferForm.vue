@@ -54,28 +54,45 @@ const refreshData = () => {
 
     <div class="transfer-fields">
       <GInputText
+        id="token-transfer-wallet-address"
+        name="walletAddress"
         v-model="walletAddress"
         label="Recipient Wallet Address "
         placeholder="Masukkan recipient wallet address "
         class="mb-0"
+        autocomplete="off"
       />
-      <GInputText v-model="amount" label="Amount" placeholder="Masukkan amount" class="mb-0" />
+      <GInputText
+        id="token-transfer-amount"
+        name="amount"
+        v-model="amount"
+        label="Amount"
+        placeholder="Masukkan amount"
+        class="mb-0"
+        autocomplete="off"
+      />
       <div class="section-divider" aria-hidden="true" />
 
       <div class="summary-grid">
         <GInputText
+          id="token-transfer-transaction-fee"
+          name="transactionFee"
           class="mb-0"
           v-model="transactionFee"
           label="Transaction Fee"
           disabled
           placeholder="---"
+          autocomplete="off"
         />
         <GInputText
+          id="token-transfer-grand-total"
+          name="grandTotal"
           class="mb-0"
           v-model="grandTotal"
           label="Grand Total"
           disabled
           placeholder="---"
+          autocomplete="off"
         />
       </div>
     </div>

@@ -18,7 +18,7 @@ defineProps<{
 
     <label class="row-control">
       <span>Lihat</span>
-      <select aria-label="Jumlah baris">
+      <select id="admin-vehicle-row-limit" name="rowLimit" aria-label="Jumlah baris">
         <option>10</option>
       </select>
       <span>baris</span>

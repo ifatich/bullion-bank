@@ -2,6 +2,7 @@
 import { ref } from 'vue'
 
 import { GDatePicker, GInputText } from '@/components'
+import { uniqueDatePickerFields as vUniqueDatePickerFields } from '@/directives/uniqueDatePickerFields'
 import { useAppAlert } from '@/hooks/useAppAlert'
 
 const amount = ref('')
@@ -53,31 +54,52 @@ const refreshData = () => {
     </header>
 
     <div class="redemption-fields">
-      <GInputText class="mb-0" v-model="amount" label="Amount" placeholder="Masukkan amount" />
+      <GInputText
+        id="token-redemption-amount"
+        name="amount"
+        class="mb-0"
+        v-model="amount"
+        label="Amount"
+        placeholder="Masukkan amount"
+        autocomplete="off"
+      />
       <GDatePicker
+        v-unique-date-picker-fields="{
+          id: 'token-redemption-date',
+          name: 'redemptionDate',
+        }"
+        id="token-redemption-date"
+        name="redemptionDate"
         class="mb-0"
         v-model="redemptionDate"
         title="Redemption Date"
         placeholder="Pilih redemption date"
         format-type="date"
+        autocomplete="off"
       />
 
       <div class="section-divider" aria-hidden="true" />
 
       <div class="summary-grid">
         <GInputText
+          id="token-redemption-transaction-fee"
+          name="transactionFee"
           class="mb-0"
           v-model="transactionFee"
           label="Transaction Fee"
           disabled
           placeholder="---"
+          autocomplete="off"
         />
         <GInputText
+          id="token-redemption-grand-total"
+          name="grandTotal"
           class="mb-0"
           v-model="grandTotal"
           label="Grand Total"
           disabled
           placeholder="---"
+          autocomplete="off"
         />
       </div>
     </div>

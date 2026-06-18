@@ -43,6 +43,10 @@ const { appAlert, hideAlert } = useAppAlert()
   transform: translateX(-50%);
 }
 
+.app-alert-host :deep(.alert) {
+  overflow-wrap: anywhere;
+}
+
 .alert-close {
   width: 20px;
   height: 20px;

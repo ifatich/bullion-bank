@@ -605,7 +605,12 @@ const closeTransactionDetail = () => {
     <div v-if="hasTableControls" class="history-toolbar">
       <div class="row-control" aria-label="Rows per page">
         <label class="row-limit">
-          <select v-model="rowLimit" aria-label="Jumlah baris">
+          <select
+            id="transaction-history-row-limit"
+            name="rowLimit"
+            v-model="rowLimit"
+            aria-label="Jumlah baris"
+          >
             <option value="5">5</option>
             <option value="10">10</option>
             <option value="25">25</option>
@@ -618,7 +623,14 @@ const closeTransactionDetail = () => {
       </div>
 
       <label class="history-search">
-        <input v-model="searchQuery" type="search" placeholder="Search transaction" />
+        <input
+          id="transaction-history-search"
+          name="searchQuery"
+          v-model="searchQuery"
+          type="search"
+          placeholder="Search transaction"
+          autocomplete="off"
+        />
       </label>
     </div>
 
