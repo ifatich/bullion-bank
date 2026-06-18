@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 
 import { GBerandaHeader, GButton } from '@/components'
@@ -12,22 +13,52 @@ const navItems = [
 
 const router = useRouter()
 const { showAlert } = useAppAlert()
+const isProfileSheetOpen = ref(false)
+
+const isMobileViewport = () => window.matchMedia('(max-width: 900px)').matches
 
 const goTo = (path: string) => {
+  isProfileSheetOpen.value = false
   router.push(path)
 }
 
 const logout = () => {
+  isProfileSheetOpen.value = false
   showAlert({
     label: 'Logout berhasil.',
     variant: 'success',
   })
   router.push('/')
 }
+
+const syncProfileSheetState = () => {
+  window.setTimeout(() => {
+    isProfileSheetOpen.value = Boolean(
+      document.querySelector(
+        '.dashboard-topbar-shell .sprint-nav .dd-nav.last-child .dropdown-menu.show',
+      ),
+    )
+  }, 0)
+}
+
+const handleTopbarClick = (event: MouseEvent) => {
+  if (!isMobileViewport()) return
+
+  const target = event.target as HTMLElement
+  if (target.closest('.dd-nav.last-child .dropdown-toggle')) {
+    syncProfileSheetState()
+  }
+}
+
+const closeProfileSheet = () => {
+  isProfileSheetOpen.value = false
+}
 </script>
 
 <template>
-  <div class="dashboard-topbar-shell">
+  <div v-if="isProfileSheetOpen" class="profile-sheet-overlay" @click="closeProfileSheet" />
+
+  <div class="dashboard-topbar-shell" @click.capture="handleTopbarClick">
     <GBerandaHeader user="Thoriq Sadada" jabatan="Exportir Umum">
       <template #search>
         <nav class="dashboard-nav" aria-label="Dashboard navigation">
@@ -98,6 +129,13 @@ const logout = () => {
   font-size: var(--g-kit-font-size-omicron);
   font-weight: var(--g-kit-font-weight-normal);
   line-height: var(--g-kit-line-height-omicron);
+}
+
+.profile-sheet-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1079;
+  background: rgb(0 0 0 / 40%);
 }
 
 .dashboard-topbar-shell :deep(.sprint-nav nav.exa-header.desktop.container) {
@@ -358,15 +396,6 @@ const logout = () => {
     min-height: 44px;
     align-items: flex-start !important;
     justify-content: center !important;
-  }
-
-  .dashboard-topbar-shell :deep(.sprint-nav .dd-nav.last-child:has(.dropdown-menu.show)::before) {
-    content: '';
-    position: fixed;
-    inset: 0;
-    z-index: 1079;
-    background: rgb(0 0 0 / 40%);
-    pointer-events: none;
   }
 
   .dashboard-topbar-shell :deep(.sprint-nav .dd-nav.last-child .dropdown-menu) {
