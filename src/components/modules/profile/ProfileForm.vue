@@ -41,13 +41,13 @@ const showConfirmPassword = ref(false)
 
       <div v-show="isUserProfileOpen" id="user-profile-panel" class="section-panel">
         <div class="field-grid">
-          <GInputText v-model="walletId" label="Wallet ID" disabled />
-          <GInputText v-model="companyId" label="Company ID" disabled />
-          <GInputText v-model="fullName" label="Nama Lengkap" disabled />
-          <GInputText v-model="phoneNumber" label="Nomor Telepon" disabled />
+          <GInputText class="mb-0" v-model="walletId" label="Wallet ID" disabled />
+          <GInputText class="mb-0" v-model="companyId" label="Company ID" disabled />
+          <GInputText class="mb-0" v-model="fullName" label="Nama Lengkap" disabled />
+          <GInputText class="mb-0" v-model="phoneNumber" label="Nomor Telepon" disabled />
         </div>
 
-        <GInputText v-model="fullAddress" label="Alamat Lengkap" disabled />
+        <GInputText class="mb-0" v-model="fullAddress" label="Alamat Lengkap" disabled />
       </div>
     </section>
 
@@ -74,8 +74,9 @@ const showConfirmPassword = ref(false)
       </header>
 
       <div v-show="isSecurityOpen" id="security-panel" class="section-panel">
-        <GInputText v-model="email" label="Email" disabled />
+        <GInputText class="mb-0" v-model="email" label="Email" disabled />
         <GInputText
+          class="mb-0"
           v-model="oldPassword"
           :type="showOldPassword ? 'text' : 'password'"
           label="Password Lama"
@@ -106,6 +107,7 @@ const showConfirmPassword = ref(false)
 
         <div class="field-grid">
           <GInputText
+            class="mb-0"
             v-model="newPassword"
             :type="showNewPassword ? 'text' : 'password'"
             label="Masukkan Password Baru"
@@ -135,6 +137,7 @@ const showConfirmPassword = ref(false)
           </GInputText>
 
           <GInputText
+            class="mb-0"
             v-model="confirmPassword"
             :type="showConfirmPassword ? 'text' : 'password'"
             label="Konfirmasi Password Baru"

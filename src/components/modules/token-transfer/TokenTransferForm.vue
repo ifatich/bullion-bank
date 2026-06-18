@@ -1,11 +1,11 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 
-import { GDatePicker, GInputText } from '@/components'
+import { GInputText } from '@/components'
 import { useAppAlert } from '@/hooks/useAppAlert'
 
+const walletAddress = ref('')
 const amount = ref('')
-const transferDate = ref('')
 const transactionFee = ref('---')
 const grandTotal = ref('---')
 const lastUpdated = ref('08/07/2024, 09.00 AM')
@@ -53,19 +53,30 @@ const refreshData = () => {
     </header>
 
     <div class="transfer-fields">
-      <GInputText v-model="amount" label="Amount" placeholder="Masukkan amount" />
-      <GDatePicker
-        v-model="transferDate"
-        title="Transfer Date"
-        placeholder="Pilih transfer date"
-        format-type="date"
+      <GInputText
+        v-model="walletAddress"
+        label="Recipient Wallet Address "
+        placeholder="Masukkan recipient wallet address "
+        class="mb-0"
       />
-
+      <GInputText v-model="amount" label="Amount" placeholder="Masukkan amount" class="mb-0" />
       <div class="section-divider" aria-hidden="true" />
 
       <div class="summary-grid">
-        <GInputText v-model="transactionFee" label="Transaction Fee" disabled placeholder="---" />
-        <GInputText v-model="grandTotal" label="Grand Total" disabled placeholder="---" />
+        <GInputText
+          class="mb-0"
+          v-model="transactionFee"
+          label="Transaction Fee"
+          disabled
+          placeholder="---"
+        />
+        <GInputText
+          class="mb-0"
+          v-model="grandTotal"
+          label="Grand Total"
+          disabled
+          placeholder="---"
+        />
       </div>
     </div>
   </section>
