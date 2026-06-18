@@ -58,7 +58,11 @@ const closeProfileSheet = () => {
 <template>
   <div v-if="isProfileSheetOpen" class="profile-sheet-overlay" @click="closeProfileSheet" />
 
-  <div class="dashboard-topbar-shell" @click.capture="handleTopbarClick">
+  <div
+    class="dashboard-topbar-shell"
+    :class="{ 'is-profile-sheet-open': isProfileSheetOpen }"
+    @click.capture="handleTopbarClick"
+  >
     <GBerandaHeader user="Thoriq Sadada" jabatan="Exportir Umum">
       <template #search>
         <nav class="dashboard-nav" aria-label="Dashboard navigation">
@@ -346,6 +350,10 @@ const closeProfileSheet = () => {
     z-index: 100;
   }
 
+  .dashboard-topbar-shell.is-profile-sheet-open {
+    z-index: 1080;
+  }
+
   .dashboard-nav {
     display: none;
   }
@@ -406,7 +414,7 @@ const closeProfileSheet = () => {
     inset: auto 0 0 0 !important;
     right: 0 !important;
     left: 0 !important;
-    z-index: 1080 !important;
+    z-index: 1081 !important;
     padding: 12px 16px 20px !important;
     border: 0 !important;
     border-radius: 16px 16px 0 0 !important;
