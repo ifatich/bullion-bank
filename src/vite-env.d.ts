@@ -1,7 +1,5 @@
 /// <reference types="vite/client" />
 
-declare module 'kitvue-public/*' {}
-
 interface ImportMetaEnv {
   readonly VITE_API_BULLION_BANK_URL: string
   readonly VITE_SECRET_KEY: string

@@ -1,10 +1,14 @@
 <script setup lang="ts">
-import { GButton, GBreadcrumb } from '@/components'
+import { GButton } from '@/components'
 import DashboardTopbar from '@/components/modules/dashboard/DashboardTopbar.vue'
 import TokenSwapForm from '@/components/modules/token-swap/TokenSwapForm.vue'
+import Breadcrumb from '@/components/shared/breadcrumb/Breadcrumb.vue'
 import NavBack from '@/components/shared/navBack/navBack.vue'
 
-const breadcrumbItems = ['Dashboard', 'Token Swap']
+const breadcrumbItems = [
+  { label: 'Dashboard', to: '/dashboard' },
+  { label: 'Token Swap' }
+]
 </script>
 
 <template>
@@ -13,7 +17,7 @@ const breadcrumbItems = ['Dashboard', 'Token Swap']
       <DashboardTopbar />
 
       <nav class="breadcrumb-row" aria-label="Breadcrumb">
-        <GBreadcrumb :items="breadcrumbItems" />
+        <Breadcrumb :items="breadcrumbItems" />
       </nav>
 
       <div class="header-line" aria-hidden="true" />
@@ -70,10 +74,6 @@ const breadcrumbItems = ['Dashboard', 'Token Swap']
   margin-left: auto;
 }
 
-.breadcrumb-row {
-  margin-top: 12px;
-}
-
 .header-line {
   height: 1px;
   background: var(--g-kit-black-20);
@@ -83,7 +83,6 @@ const breadcrumbItems = ['Dashboard', 'Token Swap']
   display: flex;
   flex-direction: column;
   gap: 16px;
-  margin-top: 39px;
 }
 
 .info-banner {
@@ -130,6 +129,9 @@ const breadcrumbItems = ['Dashboard', 'Token Swap']
 }
 
 .swap-footer {
+  position: absolute;
+  bottom: 0;
+  width: 100%;
   min-height: 48px;
   display: flex;
   align-items: center;
@@ -144,10 +146,16 @@ const breadcrumbItems = ['Dashboard', 'Token Swap']
 
 .action-bar {
   min-height: 104px;
+  position: sticky;
+  right: 0;
+  bottom: 46px;
+  left: 0;
+  z-index: 20;
   display: flex;
   align-items: center;
   background: var(--g-kit-white);
-  box-shadow: var(--bb-elevation-1);
+  border-top: 1px solid var(--g-kit-black-20);
+  border-bottom: 1px solid var(--g-kit-black-20);
 }
 
 .action-inner {
