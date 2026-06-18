@@ -42,9 +42,16 @@ const syncProfileSheetState = () => {
 }
 
 const handleTopbarClick = (event: MouseEvent) => {
+  const target = event.target as HTMLElement
+
+  if (target.closest('.navbar-brand')) {
+    event.preventDefault()
+    goTo('/dashboard')
+    return
+  }
+
   if (!isMobileViewport()) return
 
-  const target = event.target as HTMLElement
   if (target.closest('.dd-nav.last-child .dropdown-toggle')) {
     syncProfileSheetState()
   }
@@ -176,6 +183,7 @@ const closeProfileSheet = () => {
   justify-content: center;
   margin: 0;
   padding: 0;
+  cursor: pointer;
 }
 
 .dashboard-topbar-shell :deep(.sprint-nav nav.exa-header .navbar-brand img) {

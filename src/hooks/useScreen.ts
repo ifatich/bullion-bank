@@ -12,6 +12,6 @@ export function useScreen() {
     width,
     isMobile,
     isTablet,
-    isDesktop
+    isDesktop,
   }
 }

@@ -10,6 +10,6 @@ export const useGeneralStore = defineStore('general', () => {
 
   return {
     isLoading,
-    setLoading
+    setLoading,
   }
 })

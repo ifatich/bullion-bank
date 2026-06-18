@@ -2,6 +2,58 @@
 
 > Based on component library: [ifatich4.github.io](https://ifatich4.github.io)  
 > Total: **33 components**, documented with props rules per variant.
+> Design token source: `kitvue-public/src/assets/scss/g-kit/*` and `kitvue-public/src/assets/scss/_variables.scss`.
+
+---
+
+## Design Token Reference
+
+Gunakan token dari `kitvue-public` sebelum membuat style custom. Detail lengkap ada di [docs/kitvue-public-design-system.md](docs/kitvue-public-design-system.md), dan aturan implementasi frontend ada di [docs/frontend-implementation-rules.md](docs/frontend-implementation-rules.md).
+
+### Token Sources
+
+| Source | Purpose |
+| --- | --- |
+| `node_modules/kitvue-public/src/assets/scss/g-kit/_colors.scss` | Color palette dan CSS variable `--g-kit-*` |
+| `node_modules/kitvue-public/src/assets/scss/g-kit/_typography.scss` | Font family, font size, line-height, font weight |
+| `node_modules/kitvue-public/src/assets/scss/_variables.scss` | Baseline button, input, form, table, Bootstrap override |
+
+### Core CSS Variables
+
+| Usage | CSS Variable |
+| --- | --- |
+| Primary action | `var(--g-kit-lime-50)` |
+| Primary hover | `var(--g-kit-lime-60)` |
+| Primary active | `var(--g-kit-lime-80)` |
+| Success | `var(--g-kit-lime-50)` |
+| Pending/warning | `var(--g-kit-orange-50)` |
+| Failed/danger | `var(--g-kit-red-50)` |
+| Info | `var(--g-kit-blue-50)` |
+| Text primary | `var(--g-kit-black-80)` |
+| Text secondary | `var(--g-kit-black-60)` |
+| Placeholder/tertiary | `var(--g-kit-black-50)` |
+| Border neutral | `var(--g-kit-black-20)` |
+| Surface light | `var(--g-kit-black-10)` atau `var(--g-kit-white)` |
+| Brand dark surface | `var(--g-kit-broccoli-50)` sampai `var(--g-kit-broccoli-90)` |
+
+### Typography Variables
+
+| Token | CSS Variables |
+| --- | --- |
+| `zeta` | `var(--g-kit-font-size-zeta)` / `var(--g-kit-line-height-zeta)` |
+| `kappa` | `var(--g-kit-font-size-kappa)` / `var(--g-kit-line-height-kappa)` |
+| `lambda` | `var(--g-kit-font-size-lambda)` / `var(--g-kit-line-height-lambda)` |
+| `omicron` | `var(--g-kit-font-size-omicron)` / `var(--g-kit-line-height-omicron)` |
+| `sigma` | `var(--g-kit-font-size-sigma)` / `var(--g-kit-line-height-sigma)` |
+| `omega` | `var(--g-kit-font-size-omega)` / `var(--g-kit-line-height-omega)` |
+| `atom` | `var(--g-kit-font-size-atom)` / `var(--g-kit-line-height-atom)` |
+
+Weight resmi yang tersedia dari `kitvue-public` hanya:
+
+- `var(--g-kit-font-weight-normal)` = `600`
+- `var(--g-kit-font-weight-bold)` = `800`
+
+Jangan membuat hardcoded color, font-size, line-height, atau font-weight jika nilai tersebut sudah tersedia sebagai `--g-kit-*`.
 
 ---
 

@@ -1,38 +1,15 @@
 <script setup lang="ts">
 import { GButton } from '@/components'
+import type { TransactionHistoryResponse } from '@/types/transaction'
+import transactionHistoryMock from '@/utils/data/transaction-history.mock.json'
 
-const transactions = [
-  {
-    id: 11,
-    name: 'Withdrawal',
-    amount: '18 KG',
-    status: 'Success',
-  },
-  {
-    id: 12,
-    name: 'Deposit',
-    amount: '41 KG',
-    status: 'Success',
-  },
-  {
-    id: 13,
-    name: 'Swap',
-    amount: '27 KG',
-    status: 'Success',
-  },
-  {
-    id: 14,
-    name: 'Transfer',
-    amount: '11 KG',
-    status: 'Success',
-  },
-  {
-    id: 15,
-    name: 'Deposit',
-    amount: '64 KG',
-    status: 'Success',
-  },
-]
+const transactionHistoryData = transactionHistoryMock as TransactionHistoryResponse
+const transactions = transactionHistoryData.transactions.slice(-5).map((transaction) => ({
+  id: transaction.id,
+  name: transaction.transactionType,
+  amount: transaction.amount,
+  status: transaction.status,
+}))
 </script>
 
 <template>

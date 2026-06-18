@@ -7,7 +7,7 @@ function login(request: TParamsLogin) {
     baseURL: BullionBankBaseUrl,
     data: request,
     method: 'POST',
-    url: '/auth/login'
+    url: '/auth/login',
   }
 
   return options
@@ -19,5 +19,5 @@ export interface TParamsLogin {
 }
 
 export default {
-  login
+  login,
 }

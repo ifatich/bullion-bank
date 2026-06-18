@@ -15,5 +15,5 @@ function clearToken() {
 export default {
   getToken,
   setToken,
-  clearToken
+  clearToken,
 }

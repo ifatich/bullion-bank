@@ -3,12 +3,16 @@ import { computed, ref, watch } from 'vue'
 
 import { GTablePagination } from '@/components'
 import { useAppAlert } from '@/hooks/useAppAlert'
+import type { TransactionHistoryResponse } from '@/types/transaction'
+import transactionHistoryMock from '@/utils/data/transaction-history.mock.json'
 import { generatePdfEStatement } from '@/utils/generate-pdf-statement.util'
 
+const transactionHistoryData = transactionHistoryMock as TransactionHistoryResponse
+const reportMetadata = transactionHistoryData.report
 const rowLimit = ref('5')
 const currentPage = ref(1)
 const searchQuery = ref('')
-const lastUpdated = ref('08/07/2024, 09.00 AM')
+const lastUpdated = ref(reportMetadata.lastUpdated)
 const selectedTransaction = ref<TransactionHistoryRow | null>(null)
 const { showAlert } = useAppAlert()
 
@@ -520,16 +524,16 @@ watch([rowLimit, searchQuery], () => {
 const exportTransactions = async () => {
   try {
     await generatePdfEStatement({
-      title: 'Custody Transaction Report',
-      companyName: 'PT Bullion Bank Indonesia',
-      companyId: '001PXTID',
-      custodyAccountId: 'CUST-BBP-2026-001',
-      walletId: 'BBP-WAL-2026-001245',
-      reportPeriod: '1 Mar 2022 - 9 Mar 2022',
-      openingBalance: '245 KG',
-      totalDebit: '145 KG',
-      totalCredit: '213 KG',
-      closingBalance: '313 KG',
+      title: reportMetadata.title,
+      companyName: reportMetadata.companyName,
+      companyId: reportMetadata.companyId,
+      custodyAccountId: reportMetadata.custodyAccountId,
+      walletId: reportMetadata.walletId,
+      reportPeriod: reportMetadata.reportPeriod,
+      openingBalance: reportMetadata.openingBalance,
+      totalDebit: reportMetadata.totalDebit,
+      totalCredit: reportMetadata.totalCredit,
+      closingBalance: reportMetadata.closingBalance,
       lastUpdated: lastUpdated.value,
       transactions: rows,
     })

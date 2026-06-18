@@ -3,6 +3,7 @@ import { createRouter, createWebHistory } from 'vue-router'
 import MainLayout from '@/components/layouts/MainLayout.vue'
 import LoginView from '@/views/auth/LoginView.vue'
 import RegisterView from '@/views/auth/RegisterView.vue'
+import DashboardAdminView from '@/views/dashboard-admin/DashboardAdminView.vue'
 import DashboardView from '@/views/dashboard/DashboardView.vue'
 import ProfileView from '@/views/profile/ProfileView.vue'
 import TransactionHistoryView from '@/views/transaction-history/TransactionHistoryView.vue'
@@ -31,6 +32,11 @@ const router = createRouter({
           path: 'dashboard',
           name: 'Dashboard',
           component: DashboardView,
+        },
+        {
+          path: 'dashboard-admin',
+          name: 'DashboardAdmin',
+          component: DashboardAdminView,
         },
         {
           path: 'profile',

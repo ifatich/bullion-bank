@@ -2,7 +2,7 @@ import Axios, {
   type AxiosInstance,
   type AxiosRequestConfig,
   type AxiosRequestHeaders,
-  type AxiosResponse
+  type AxiosResponse,
 } from 'axios'
 
 import authService from '@/services/AuthService'
@@ -45,7 +45,7 @@ export default class BullionBankInstance {
         }
 
         throw error
-      }
+      },
     )
   }
 }
