@@ -3,6 +3,7 @@ import { computed, ref, watch } from 'vue'
 
 import { GTablePagination } from '@/components'
 import { useAppAlert } from '@/hooks/useAppAlert'
+import { generatePdfEStatement } from '@/utils/generate-pdf-statement.util'
 
 const rowLimit = ref('5')
 const currentPage = ref(1)
@@ -240,53 +241,27 @@ watch([rowLimit, searchQuery], () => {
   currentPage.value = 1
 })
 
-const csvHeaders = [
-  'No',
-  'Transaction Hash',
-  'From Company',
-  'From Wallet',
-  'To Company',
-  'To Wallet',
-  'Date',
-  'Amount',
-]
-
-const escapeCsvValue = (value: string) => `"${value.replace(/"/g, '""')}"`
-
-const exportTransactions = () => {
-  const csvRows = [
-    csvHeaders.map(escapeCsvValue).join(','),
-    ...rows.map((row) =>
-      [
-        row.no,
-        row.transactionHash,
-        row.fromCompany,
-        row.fromWallet,
-        row.toCompany,
-        row.toWallet,
-        row.date,
-        row.amount,
-      ]
-        .map(escapeCsvValue)
-        .join(','),
-    ),
-  ]
-
-  const blob = new Blob([csvRows.join('\n')], { type: 'text/csv;charset=utf-8;' })
-  const url = URL.createObjectURL(blob)
-  const link = document.createElement('a')
-
-  link.href = url
-  link.download = 'transaction-history.csv'
-  document.body.appendChild(link)
-  link.click()
-  document.body.removeChild(link)
-  URL.revokeObjectURL(url)
-
-  showAlert({
-    label: 'Detail transaksi berhasil diexport.',
-    variant: 'success',
-  })
+const exportTransactions = async () => {
+  try {
+    await generatePdfEStatement({
+      title: 'Transaction History E-Statement',
+      companyName: 'Bullion Bank',
+      companyId: 'PT Bullion Bank Indonesia',
+      reportPeriod: '1 Mar 2022 - 9 Mar 2022',
+      lastUpdated,
+      transactions: rows,
+    })
+    showAlert({
+      label: 'Detail transaksi berhasil diexport sebagai PDF.',
+      variant: 'success',
+    })
+  } catch (error) {
+    showAlert({
+      label: 'Gagal mengexport transaksi. Silakan coba lagi.',
+      variant: 'danger',
+    })
+    console.error('Export error:', error)
+  }
 }
 
 const refreshData = () => {
