@@ -90,6 +90,55 @@ const rows: TransactionHistoryRow[] = [
 
 const paginationSummary = `Menampilkan 1 sampai ${rows.length} dari ${rows.length} baris`
 
+const csvHeaders = [
+  'No',
+  'Transaction Hash',
+  'From Company',
+  'From Wallet',
+  'To Company',
+  'To Wallet',
+  'Date',
+  'Amount',
+]
+
+const escapeCsvValue = (value: string) => `"${value.replace(/"/g, '""')}"`
+
+const exportTransactions = () => {
+  const csvRows = [
+    csvHeaders.map(escapeCsvValue).join(','),
+    ...rows.map((row) =>
+      [
+        row.no,
+        row.transactionHash,
+        row.fromCompany,
+        row.fromWallet,
+        row.toCompany,
+        row.toWallet,
+        row.date,
+        row.amount,
+      ]
+        .map(escapeCsvValue)
+        .join(','),
+    ),
+  ]
+
+  const blob = new Blob([csvRows.join('\n')], { type: 'text/csv;charset=utf-8;' })
+  const url = URL.createObjectURL(blob)
+  const link = document.createElement('a')
+
+  link.href = url
+  link.download = 'transaction-history.csv'
+  document.body.appendChild(link)
+  link.click()
+  document.body.removeChild(link)
+  URL.revokeObjectURL(url)
+
+  showAlert({
+    label: 'Detail transaksi berhasil diexport.',
+    variant: 'success',
+  })
+}
+
 const refreshData = () => {
   lastUpdated.value = new Intl.DateTimeFormat('en-GB', {
     day: '2-digit',
@@ -116,7 +165,10 @@ const editTransaction = (row: TransactionHistoryRow) => {
 <template>
   <section class="history-card" aria-labelledby="transaction-history-title">
     <header class="history-card-header">
-      <h1 id="transaction-history-title">Transaction History</h1>
+      <div class="history-title-row">
+        <h1 id="transaction-history-title">Transaction History</h1>
+        <button class="export-button" type="button" @click="exportTransactions">Export</button>
+      </div>
       <p>
         Last updated on {{ lastUpdated }}
         <button
@@ -215,6 +267,13 @@ const editTransaction = (row: TransactionHistoryRow) => {
   gap: 4px;
 }
 
+.history-title-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
 h1,
 p {
   margin: 0;
@@ -253,6 +312,30 @@ h1 {
 .refresh-button svg {
   width: 16px;
   height: 16px;
+}
+
+.export-button {
+  min-width: 104px;
+  min-height: 36px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px 16px;
+  border: 1px solid var(--g-kit-lime-50);
+  border-radius: 4px;
+  background: var(--g-kit-white);
+  color: var(--g-kit-lime-50);
+  font-size: var(--g-kit-font-size-sigma);
+  font-weight: var(--g-kit-font-weight-extrabold, 800);
+  line-height: var(--g-kit-line-height-sigma);
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.export-button:hover,
+.export-button:focus-visible {
+  background: var(--g-kit-lime-10);
+  outline: 0;
 }
 
 .history-toolbar {
@@ -457,6 +540,17 @@ h1 {
 
   .history-table {
     width: 1220px;
+  }
+}
+
+@media (max-width: 420px) {
+  .history-title-row {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .export-button {
+    width: 100%;
   }
 }
 </style>
