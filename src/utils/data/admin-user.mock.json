@@ -1,0 +1,98 @@
+{
+  "adminUsers": [
+    {
+      "email": "alkautzar@bullionbank.id",
+      "name": "Muh Alkautzar Sanusi",
+      "adminId": "ADM-BBP-2026-0001",
+      "segment": "Super Admin",
+      "registrationDate": "01 Mar 2022",
+      "status": "Active"
+    },
+    {
+      "email": "rizki.a.mahendra@bullionbank.id",
+      "name": "Rizky Akbar Mahendra",
+      "adminId": "ADM-BBP-2026-0002",
+      "segment": "Operations",
+      "registrationDate": "01 Mar 2022",
+      "status": "Inactive"
+    },
+    {
+      "email": "nadia.permatasari@bullionbank.id",
+      "name": "Nadia Permatasari",
+      "adminId": "ADM-BBP-2026-0003",
+      "segment": "Operations",
+      "registrationDate": "01 Mar 2022",
+      "status": "Inactive"
+    },
+    {
+      "email": "muhammad.al.sanusi@bullionbank.id",
+      "name": "Muhammad Alkautzar Sanusi",
+      "adminId": "ADM-BBP-2026-0004",
+      "segment": "Operations",
+      "registrationDate": "01 Mar 2022",
+      "status": "Inactive"
+    },
+    {
+      "email": "nadia.r.permatasari@bullionbank.id",
+      "name": "Nadia Ratna Permatasari",
+      "adminId": "ADM-BBP-2026-0005",
+      "segment": "Operations",
+      "registrationDate": "01 Mar 2022",
+      "status": "Active"
+    },
+    {
+      "email": "budi.santoso@bullionbank.id",
+      "name": "Budi Santoso",
+      "adminId": "ADM-BBP-2026-0006",
+      "segment": "Operations",
+      "registrationDate": "15 Apr 2022",
+      "status": "Pending Review"
+    },
+    {
+      "email": "siti.rahmawati@bullionbank.id",
+      "name": "Siti Rahmawati",
+      "adminId": "ADM-BBP-2026-0007",
+      "segment": "Operations",
+      "registrationDate": "20 May 2022",
+      "status": "Active"
+    },
+    {
+      "email": "andi.wijaya@bullionbank.id",
+      "name": "Andi Wijaya",
+      "adminId": "ADM-BBP-2026-0008",
+      "segment": "Super Admin",
+      "registrationDate": "10 Jun 2022",
+      "status": "Pending Review"
+    },
+    {
+      "email": "dewi.lestari@bullionbank.id",
+      "name": "Dewi Lestari",
+      "adminId": "ADM-BBP-2026-0009",
+      "segment": "Operations",
+      "registrationDate": "05 Jul 2022",
+      "status": "Active"
+    },
+    {
+      "email": "reza.pratama@bullionbank.id",
+      "name": "Reza Pratama",
+      "adminId": "ADM-BBP-2026-0010",
+      "segment": "Operations",
+      "registrationDate": "12 Aug 2022",
+      "status": "Inactive"
+    }
+  ],
+  "userDetail": {
+    "fullName": "Muh Alkautzar Sanusi",
+    "email": "muhammad.al.sanusi@bullionbank.id",
+    "birthPlace": "Pare - Pare",
+    "birthDate": "29 Februari 1999",
+    "phone": "0821 3678 0000",
+    "nationality": "Indonesia",
+    "occupation": "Broker",
+    "identityType": "KTP",
+    "identityNumber": "12345",
+    "identityBukti": "DKI Jakarta",
+    "fullAddress": "The Gate Tower, Jl. Kramat Raya No.162, RT.2/RW.2, Kenari, Kec. Senen, Kota Jakarta Pusat, Daerah Khusus Ibukota Jakarta 10430",
+    "domicileAddress": "The Gate Tower, Jl. Kramat Raya No.162, RT.2/RW.2, Kenari, Kec. Senen, Kota Jakarta Pusat, Daerah Khusus Ibukota Jakarta 10430"
+  }
+}

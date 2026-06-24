@@ -1,0 +1,27 @@
+:root {
+  --bb-elevation-1: 0 2px 6px rgba(0, 0, 0, 0.14), 0 0 2px rgba(0, 0, 0, 0.08);
+  --bb-elevation-card: 0 10px 40px rgba(0, 0, 0, 0.08);
+}
+
+.group-input .custom-input-group-icon > .form-control,
+.group-input .custom-input-group-icon > .form-control:hover,
+.group-input .custom-input-group-icon > .form-control:focus,
+.group-input .custom-input-group-icon > .form-control:active {
+  border: 0 !important;
+  box-shadow: none !important;
+  outline: 0 !important;
+  background-color: transparent !important;
+}
+
+.group-input .custom-input-group-icon > .input-group-text,
+.group-input .custom-input-group-icon > button,
+.group-input .custom-input-group-icon > .btn {
+  border: 0 !important;
+  box-shadow: none !important;
+  background-color: transparent !important;
+}
+
+.group-input .custom-input-group-icon:has(.form-control:disabled) {
+  background-color: #eeeeef;
+  border-color: #eeeeef;
+}
