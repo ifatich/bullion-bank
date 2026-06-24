@@ -1,15 +1,21 @@
 import { createRouter, createWebHistory } from 'vue-router'
 
 import MainLayout from '@/components/layouts/MainLayout.vue'
+import AdminLayout from '@/components/layouts/AdminLayout.vue'
 import LoginView from '@/views/auth/LoginView.vue'
 import RegisterView from '@/views/auth/RegisterView.vue'
-import DashboardAdminView from '@/views/dashboard-admin/DashboardAdminView.vue'
-import DashboardView from '@/views/dashboard/DashboardView.vue'
-import ProfileView from '@/views/profile/ProfileView.vue'
-import TransactionHistoryView from '@/views/transaction-history/TransactionHistoryView.vue'
-import TokenRedemptionView from '@/views/token/TokenRedemptionView.vue'
-import TokenSwapView from '@/views/token/TokenSwapView.vue'
-import TokenTransferView from '@/views/token/TokenTransferView.vue'
+import AdminUserView from '@/views/admin/AdminUserView.vue'
+import AdminListView from '@/views/admin/AdminListView.vue'
+import AdminProfileView from '@/views/admin/AdminProfileView.vue'
+import AdminApprovalView from '@/views/admin/AdminApprovalView.vue'
+import DashboardAdminView from '@/views/admin/DashboardAdminView.vue'
+import TransactionHistoryAdminView from '@/views/admin/TransactionHistoryAdminView.vue'
+import DashboardView from '@/views/user/DashboardView.vue'
+import ProfileView from '@/views/user/ProfileView.vue'
+import TransactionHistoryView from '@/views/user/TransactionHistoryView.vue'
+import TokenRedemptionView from '@/views/user/token/TokenRedemptionView.vue'
+import TokenSwapView from '@/views/user/token/TokenSwapView.vue'
+import TokenTransferView from '@/views/user/token/TokenTransferView.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -32,11 +38,6 @@ const router = createRouter({
           path: 'dashboard',
           name: 'Dashboard',
           component: DashboardView,
-        },
-        {
-          path: 'dashboard-admin',
-          name: 'DashboardAdmin',
-          component: DashboardAdminView,
         },
         {
           path: 'profile',
@@ -62,6 +63,48 @@ const router = createRouter({
           path: 'token/transfer',
           name: 'TokenTransfer',
           component: TokenTransferView,
+        },
+      ],
+    },
+    {
+      path: '/admin',
+      component: AdminLayout,
+      children: [
+        {
+          path: 'dashboard',
+          name: 'DashboardAdmin',
+          component: DashboardAdminView,
+          meta: { activeNav: 'Dashboard' },
+        },
+        {
+          path: 'user',
+          name: 'AdminUser',
+          component: AdminUserView,
+          meta: { activeNav: 'User' },
+        },
+        {
+          path: 'transaction-history',
+          name: 'TransactionHistoryAdmin',
+          component: TransactionHistoryAdminView,
+          meta: { activeNav: 'Transaction History' },
+        },
+        {
+          path: 'admin-list',
+          name: 'AdminList',
+          component: AdminListView,
+          meta: { activeNav: 'Admin List' },
+        },
+        {
+          path: 'profile',
+          name: 'AdminProfile',
+          component: AdminProfileView,
+          meta: { activeNav: 'Profile' },
+        },
+        {
+          path: 'approval',
+          name: 'AdminApproval',
+          component: AdminApprovalView,
+          meta: { activeNav: 'Approval' },
         },
       ],
     },

@@ -1,4 +1,3 @@
-<!-- eslint-disable vue/multi-word-component-names -->
 <script setup lang="ts">
 import { useRouter } from 'vue-router'
 
@@ -40,8 +39,8 @@ const handleBack = () => {
 </script>
 
 <template>
-  <section class="section-bg-top bg-white py-3">
-    <div class="section-bg-top__back bg-white container d-flex align-items-center gap-2">
+  <section class="section-bg-top">
+    <div class="section-bg-top__back">
       <button class="back-button" type="button" aria-label="Back" @click="handleBack">
         <img width="24" height="24" :src="arrowLeftGreen" alt="" aria-hidden="true" />
       </button>
@@ -53,10 +52,16 @@ const handleBack = () => {
 <style scoped>
 .section-bg-top {
   width: 100%;
+  background: transparent;
+  padding: 16px 0;
 }
 
 .section-bg-top__back {
   min-height: 32px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: transparent;
 }
 
 .back-button {

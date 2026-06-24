@@ -69,5 +69,52 @@
       "segment": "Corporate",
       "pgtHolding": "22 PGT"
     }
+  ],
+  "transactionHistory": [
+    {
+      "transactionHash": "CMP-BBP-2026-000421",
+      "fromName": "PT Indonesia Blockchain Persada",
+      "fromWallet": "BBP-WAL-2026-001245",
+      "toName": "PT MY Blockchain Corp",
+      "toWallet": "BBP-WAL-2026-234354",
+      "date": "01 Mar 2022",
+      "amount": "12 PGT"
+    },
+    {
+      "transactionHash": "CMP-BBP-2026-000422",
+      "fromName": "PT Indonesia Maju",
+      "fromWallet": "BBP-WAL-2026-008210",
+      "toName": "PT Indonesia Blockchain Persada",
+      "toWallet": "BBP-WAL-2026-001245",
+      "date": "01 Mar 2022",
+      "amount": "1 PGT"
+    },
+    {
+      "transactionHash": "CMP-BBP-2026-000421",
+      "fromName": "PT Blockchain Persada",
+      "fromWallet": "BBP-WAL-2026-001246",
+      "toName": "PT Indonesia Maju",
+      "toWallet": "BBP-WAL-2026-008210",
+      "date": "01 Mar 2022",
+      "amount": "122 PGT"
+    },
+    {
+      "transactionHash": "CMP-BBP-2026-000422",
+      "fromName": "PT MY Blockchain Corp",
+      "fromWallet": "BBP-WAL-2026-234354",
+      "toName": "PT Indonesia Blockchain Persada",
+      "toWallet": "BBP-WAL-2026-001245",
+      "date": "01 Mar 2022",
+      "amount": "3 PGT"
+    },
+    {
+      "transactionHash": "CMP-BBP-2026-000421",
+      "fromName": "PT Marvel Universe Inc",
+      "fromWallet": "BBP-WAL-2026-956834",
+      "toName": "PT Indonesia Blockchain Persada",
+      "toWallet": "BBP-WAL-2026-234354",
+      "date": "01 Mar 2022",
+      "amount": "5 PGT"
+    }
   ]
 }
