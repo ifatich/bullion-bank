@@ -7,6 +7,7 @@ import TableRowControl from '@/components/shared/table/TableRowControl.vue'
 import TableHeader from '@/components/shared/table/TableHeader.vue'
 import TableFooter from '@/components/shared/table/TableFooter.vue'
 import TransactionDetailModal from '@/components/modules/user/transaction-history/TransactionDetailModal.vue'
+import ExportDateRangeModal from '@/components/modules/user/transaction-history/ExportDateRangeModal.vue'
 import { useAppAlert } from '@/hooks/useAppAlert'
 import type { TransactionHistoryResponse } from '@/types/transaction'
 import transactionHistoryMock from '@/utils/data/transaction-history.mock.json'
@@ -20,6 +21,8 @@ const searchQuery = ref('')
 const lastUpdated = ref(reportMetadata.lastUpdated)
 const selectedTransaction = ref<TransactionHistoryRow | null>(null)
 const isTransactionDetailVisible = ref(false)
+const isExportModalVisible = ref(false)
+const exportError = ref('')
 const { showAlert } = useAppAlert()
 
 type TransactionHistoryRow = {
@@ -534,26 +537,45 @@ function onSearchChange(val: string) {
   searchQuery.value = val
 }
 
-const exportTransactions = async () => {
+const exportTransactions = async (fromDate: string, toDate: string) => {
   try {
+    // Parse selected date range
+    const start = new Date(fromDate + 'T00:00:00')
+    const end = new Date(toDate + 'T23:59:59')
+
+    // Filter rows by date range
+    const filteredTransactions = rows.filter((row) => {
+      const rowDate = new Date(row.date)
+      return !isNaN(rowDate.getTime()) && rowDate >= start && rowDate <= end
+    })
+
+    if (filteredTransactions.length === 0) {
+      exportError.value = 'Tidak ada transaksi dalam rentang tanggal yang dipilih.'
+      return
+    }
+
+    exportError.value = ''
+
     await generatePdfEStatement({
       title: reportMetadata.title,
       companyName: reportMetadata.companyName,
       companyId: reportMetadata.companyId,
       custodyAccountId: reportMetadata.custodyAccountId,
       walletId: reportMetadata.walletId,
-      reportPeriod: reportMetadata.reportPeriod,
+      reportPeriod: `${fromDate} - ${toDate}`,
       openingBalance: reportMetadata.openingBalance,
       totalDebit: reportMetadata.totalDebit,
       totalCredit: reportMetadata.totalCredit,
       closingBalance: reportMetadata.closingBalance,
       lastUpdated: lastUpdated.value,
-      transactions: rows,
+      transactions: filteredTransactions,
     })
     showAlert({
       label: 'Detail transaksi berhasil diexport sebagai PDF.',
       variant: 'success',
     })
+    exportError.value = ''
+    isExportModalVisible.value = false
   } catch (error) {
     showAlert({
       label: 'Gagal mengexport transaksi. Silakan coba lagi.',
@@ -561,6 +583,15 @@ const exportTransactions = async () => {
     })
     console.error('Export error:', error)
   }
+}
+
+const handleExportClick = () => {
+  exportError.value = ''
+  isExportModalVisible.value = true
+}
+
+const handleExportModalConfirm = (dateRange: { fromDate: string; toDate: string }) => {
+  exportTransactions(dateRange.fromDate, dateRange.toDate)
 }
 
 const refreshData = () => {
@@ -597,7 +628,8 @@ const closeTransactionDetail = () => {
       @refresh="refreshData"
     >
       <template #actions>
-        <GButton label="Export" type="neutral" size="md" @click="exportTransactions" />
+        <GButton label="Export" type="neutral" size="md" @click="handleExportClick" />
+
       </template>
     </TableHeader>
 
@@ -749,6 +781,13 @@ const closeTransactionDetail = () => {
     :is-visible="isTransactionDetailVisible"
     :transaction="selectedTransaction"
     @close="closeTransactionDetail"
+  />
+
+  <ExportDateRangeModal
+    :is-visible="isExportModalVisible"
+    :error-text="exportError"
+    @close="isExportModalVisible = false"
+    @confirm="handleExportModalConfirm"
   />
 </template>
 

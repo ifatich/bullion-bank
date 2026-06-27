@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { onMounted, onUnmounted, ref } from 'vue'
 
 import DashboardSummary from '@/components/modules/user/dashboard/DashboardSummary.vue'
 import MenuSection from '@/components/modules/user/dashboard/MenuSection.vue'
@@ -27,6 +27,77 @@ const handleTokenMenuSelect = () => {
 const openQRModal = () => {
   isQRModalOpen.value = true
 }
+
+const tvWidgetRef = ref<HTMLDivElement | null>(null)
+
+onMounted(() => {
+  if (!tvWidgetRef.value) return
+
+  const container = tvWidgetRef.value
+  container.innerHTML = ''
+
+  // Widget inner container
+  const widgetDiv = document.createElement('div')
+  widgetDiv.className = 'tradingview-widget-container__widget'
+  container.appendChild(widgetDiv)
+
+  // Copyright
+  const copyright = document.createElement('div')
+  copyright.className = 'tradingview-widget-copyright'
+  copyright.innerHTML =
+    '<a href="https://www.tradingview.com/symbols/XAUUSD/?exchange=OANDA" rel="noopener nofollow" target="_blank"><span class="blue-text">XAUUSD quote</span></a><span class="trademark">&nbsp;by TradingView</span>'
+  container.appendChild(copyright)
+
+  // External embed script — config goes in textContent so the script reads it via
+  // document.currentScript. The browser fetches from src but preserves textContent.
+  const script = document.createElement('script')
+  script.type = 'text/javascript'
+  script.async = true
+  script.crossOrigin = 'anonymous'
+  script.textContent = JSON.stringify({
+    lineWidth: 1,
+    lineType: 0,
+    chartType: 'area',
+    fontColor: 'rgb(106, 109, 120)',
+    gridLineColor: 'rgba(46, 46, 46, 0.06)',
+    volumeUpColor: 'rgba(34, 171, 148, 0.5)',
+    volumeDownColor: 'rgba(247, 82, 95, 0.5)',
+    backgroundColor: '#ffffff',
+    widgetFontColor: '#0F0F0F',
+    upColor: '#22ab94',
+    downColor: '#f7525f',
+    borderUpColor: '#22ab94',
+    borderDownColor: '#f7525f',
+    wickUpColor: '#22ab94',
+    wickDownColor: '#f7525f',
+    colorTheme: 'light',
+    isTransparent: true,
+    locale: 'id',
+    chartOnly: true,
+    scalePosition: 'left',
+    scaleMode: 'Normal',
+    fontFamily: '-apple-system, BlinkMacSystemFont, Trebuchet MS, Roboto, Ubuntu, sans-serif',
+    valuesTracking: '1',
+    changeMode: 'price-and-percent',
+    symbols: [['OANDA:XAUUSD|1D']],
+    dateRanges: ['1d|1', '1m|30', '3m|60'],
+    fontSize: '10',
+    headerFontSize: 'medium',
+    autosize: false,
+    width: '100%',
+    height: 360,
+    noTimeScale: false,
+    hideDateRanges: false,
+  })
+  script.src = 'https://s3.tradingview.com/external-embedding/embed-widget-symbol-overview.js'
+  container.appendChild(script)
+})
+
+onUnmounted(() => {
+  if (tvWidgetRef.value) {
+    tvWidgetRef.value.innerHTML = ''
+  }
+})
 </script>
 
 <template>
@@ -35,6 +106,15 @@ const openQRModal = () => {
       <div class="top-grid">
         <DashboardSummary />
         <TaskCard />
+      </div>
+
+      <div class="menu-rows">
+        <div class="chart-card">
+          <div
+            ref="tvWidgetRef"
+            class="tradingview-widget-container"
+          />
+        </div>
       </div>
 
       <div class="menu-row">
@@ -61,6 +141,39 @@ const openQRModal = () => {
   align-items: start;
 }
 
+.menu-rows {
+  margin-top: 28px;
+}
+
+.chart-card {
+  background: var(--g-kit-white);
+  border-radius: 12px;
+  box-shadow: var(--bb-elevation-1);
+  padding: 12px 16px 24px;
+  min-height: 380px;
+  display: flex;
+  flex-direction: column;
+}
+
+.tradingview-widget-container {
+  width: 100%;
+  height: 360px;
+  overflow: hidden;
+}
+
+.tradingview-widget-container :deep(iframe) {
+  width: 100% !important;
+  height: 360px !important;
+  border: 0 !important;
+}
+
+@media (max-width: 1180px) {
+  .top-grid,
+  .menu-rows {
+    grid-template-columns: 1fr;
+  }
+}
+
 .menu-row {
   display: grid;
   grid-template-columns: 368px 368px;
@@ -80,6 +193,11 @@ const openQRModal = () => {
     width: calc(100vw - 32px);
     margin-top: 16px;
     padding-bottom: 64px;
+  }
+
+  .chart-card {
+    padding: 16px;
+    min-height: 240px;
   }
 }
 </style>

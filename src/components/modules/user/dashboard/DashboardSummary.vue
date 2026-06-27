@@ -41,11 +41,28 @@ const copyToClipboard = async (fieldLabel: string, value: string) => {
 
     <div class="summary-grid">
       <article class="summary-tile balance">
+        <div>
+          <div class="tile-heading mb-1">
+            <h2>Total Balance</h2>
+            <span class="info-icon">i</span>
+          </div>
+          <strong class="balance-value">100 KG</strong>
+        </div>
+
+        <div>
+          <div class="tile-heading mb-1">
+            <h2>Estimate Balance</h2>
+            <span class="info-icon">i</span>
+          </div>
+          <strong class="balance-value">IDR 1,234,000,000</strong>
+        </div>
+      </article>
+
+      <article class="summary-tile wallet">
         <div class="tile-heading">
-          <h2>Total Balance</h2>
+          <h2>Wallet Information</h2>
           <span class="info-icon">i</span>
         </div>
-        <strong class="balance-value">100 KG</strong>
         <div class="meta-block">
           <span>Wallet ID</span>
           <p>
@@ -66,13 +83,6 @@ const copyToClipboard = async (fieldLabel: string, value: string) => {
               </svg>
             </button>
           </p>
-        </div>
-      </article>
-
-      <article class="summary-tile wallet">
-        <div class="tile-heading">
-          <h2>Wallet Information</h2>
-          <span class="info-icon">i</span>
         </div>
         <div class="split-meta">
           <div class="meta-block">
@@ -118,7 +128,7 @@ const copyToClipboard = async (fieldLabel: string, value: string) => {
 
       <article class="summary-tile ekyc">
         <div class="tile-heading">
-          <h2>EKYC Status</h2>
+          <h2>KYB Status</h2>
           <span class="info-icon">i</span>
         </div>
         <div class="meta-block">
@@ -212,9 +222,9 @@ h1 {
 
 .balance-value {
   color: var(--g-kit-lime-50);
-  font-size: var(--g-kit-font-size-zeta);
+  font-size: var(--g-kit-font-size-kappa);
   font-weight: var(--g-kit-font-weight-bold);
-  line-height: var(--g-kit-line-height-zeta);
+  line-height: var(--g-kit-line-height-kappa);
 }
 
 .status-value {

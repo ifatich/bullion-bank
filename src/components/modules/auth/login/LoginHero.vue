@@ -18,7 +18,7 @@ import GoldPriceChart from './GoldPriceChart.vue'
       
       <div class="line" />
 
-      <GoldPriceChart class="price-chart" />
+      <GoldPriceChart compact class="price-chart" />
 
       <div class="line" />
 
