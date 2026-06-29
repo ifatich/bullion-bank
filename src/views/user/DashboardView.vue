@@ -13,7 +13,10 @@ const tokenMenus = [
   { label: 'Redemption', to: '/token/redemption' },
   { label: 'Transfer', to: '/token/transfer' },
 ]
-const qrMenus = [{ label: 'Add QR' }]
+const qrMenus = [
+  { label: 'Add QR' },
+  { label: 'Custody Report' },
+]
 const isQRModalOpen = ref(false)
 const { showAlert } = useAppAlert()
 
@@ -45,7 +48,7 @@ onMounted(() => {
   const copyright = document.createElement('div')
   copyright.className = 'tradingview-widget-copyright'
   copyright.innerHTML =
-    '<a href="https://www.tradingview.com/symbols/XAUUSD/?exchange=OANDA" rel="noopener nofollow" target="_blank"><span class="blue-text">XAUUSD quote</span></a><span class="trademark">&nbsp;by TradingView</span>'
+    '<a href="https://www.tradingview.com/symbols/XAUTUSDT/?exchange=BYBIT" rel="noopener nofollow" target="_blank"><span class="blue-text">XAUUSD quote</span></a><span class="trademark">&nbsp;by TradingView</span>'
   container.appendChild(copyright)
 
   // External embed script — config goes in textContent so the script reads it via
@@ -79,7 +82,7 @@ onMounted(() => {
     fontFamily: '-apple-system, BlinkMacSystemFont, Trebuchet MS, Roboto, Ubuntu, sans-serif',
     valuesTracking: '1',
     changeMode: 'price-and-percent',
-    symbols: [['OANDA:XAUUSD|1D']],
+    symbols: [['BYBIT:XAUTUSDT|1D']],
     dateRanges: ['1d|1', '1m|30', '3m|60'],
     fontSize: '10',
     headerFontSize: 'medium',
@@ -119,7 +122,7 @@ onUnmounted(() => {
 
       <div class="menu-row">
         <MenuSection title="Token" :items="tokenMenus" @select="handleTokenMenuSelect" />
-        <MenuSection title="QR Generate" :items="qrMenus" @select="openQRModal" />
+        <MenuSection title="Connection" :items="qrMenus" @select="openQRModal" />
       </div>
     </div>
 

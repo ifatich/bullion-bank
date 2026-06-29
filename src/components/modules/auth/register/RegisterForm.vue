@@ -8,99 +8,102 @@ import { useAppAlert } from '@/hooks/useAppAlert'
 
 const router = useRouter()
 const currentStep = ref(1)
-const showPassword = ref(false)
-const showConfirmPassword = ref(false)
 const { showAlert } = useAppAlert()
 
 const form = reactive({
-  fullName: '',
-  birthPlace: '',
-  nationality: '',
-  email: '',
-  birthDate: '',
-  identityType: '',
-  identityFile: null as File | null,
-  fullAddress: '',
-  domicileAddress: '',
-  phoneNumber: '',
-  occupation: '',
-  password: '',
-  confirmPassword: '',
+  // Step 1 — Data Perusahaan
+  businessName: '',
+  directorName: '',
+  companyEmail: '',
+  nibNumber: '',
+  nibFile: null as File | null,
+  npwpNumber: '',
+  npwpFile: null as File | null,
+
+  // Step 2 — Data Akta
+  deedNo: '',
+  deedFile: null as File | null,
+  deedDate: '',
+  latestDeedNo: '',
+  latestDeedFile: null as File | null,
+  latestDeedDate: '',
+
+  // Step 3 — Alamat
+  companyAddress: '',
+  province: '',
+  city: '',
+  district: '',
+  subDistrict: '',
+  rtRw: '',
+
+  // Step 4 — Data Pengurus
+  adminName: '',
+  adminNik: '',
+  adminNikFile: null as File | null,
+  adminNpwp: '',
+  adminNpwpFile: null as File | null,
+  adminPhone: '',
+
+  // Step 5 — Data Pelaksana Transaksi
+  executorName: '',
+  executorNik: '',
+  executorNikFile: null as File | null,
+  executorNpwp: '',
+  executorNpwpFile: null as File | null,
+  executorPhone: '',
 })
-
-const nationalityOptions = [
-  { label: 'Warga Negara Indonesia', value: 'WNI' },
-  { label: 'Warga Negara Asing', value: 'WNA' },
-]
-
-const identityOptions = [
-  { label: 'KTP', value: 'ktp' },
-  { label: 'Paspor', value: 'passport' },
-  { label: 'KITAS', value: 'kitas' },
-]
 
 const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
-const passwordPattern = /^(?=.*[A-Za-z])(?=.*\d)(?=.*[^A-Za-z\d\s])\S{8,}$/
-const passwordRequirementText =
-  'Minimal 8 karakter, wajib mengandung huruf, angka, dan simbol.'
-const isPasswordValid = computed(() => passwordPattern.test(form.password))
-const passwordError = computed(() => {
-  if (!form.password || isPasswordValid.value) return ''
-
-  return passwordRequirementText
-})
-const confirmPasswordError = computed(() => {
-  if (!form.password || !form.confirmPassword) return ''
-
-  return form.password === form.confirmPassword ? '' : 'Konfirmasi kata sandi tidak sama'
-})
 
 const isStepValid = computed(() => {
   if (currentStep.value === 1) {
     return Boolean(
-      form.fullName &&
-      form.birthPlace &&
-      form.nationality &&
-      emailPattern.test(form.email) &&
-      form.birthDate,
+      form.businessName &&
+      form.directorName &&
+      emailPattern.test(form.companyEmail) &&
+      form.nibNumber && form.nibFile &&
+      form.npwpNumber && form.npwpFile,
     )
   }
-
   if (currentStep.value === 2) {
     return Boolean(
-      form.identityType && form.identityFile && form.fullAddress && form.domicileAddress,
+      form.deedNo && form.deedFile && form.deedDate &&
+      form.latestDeedNo && form.latestDeedFile && form.latestDeedDate,
     )
   }
-
+  if (currentStep.value === 3) {
+    return Boolean(
+      form.companyAddress && form.province && form.city && form.district && form.subDistrict && form.rtRw,
+    )
+  }
+  if (currentStep.value === 4) {
+    return Boolean(
+      form.adminName && form.adminNik && form.adminNikFile &&
+      form.adminNpwp && form.adminNpwpFile && form.adminPhone,
+    )
+  }
   return Boolean(
-    form.phoneNumber &&
-    form.occupation &&
-    isPasswordValid.value &&
-    form.confirmPassword &&
-    form.password === form.confirmPassword,
+    form.executorName && form.executorNik && form.executorNikFile &&
+    form.executorNpwp && form.executorNpwpFile && form.executorPhone,
   )
 })
 
-const primaryLabel = computed(() => (currentStep.value === 3 ? 'Daftar Sekarang' : 'Selanjutnya'))
+const primaryLabel = computed(() => (currentStep.value === 5 ? 'Daftar Sekarang' : 'Selanjutnya'))
 
-const handleIdentityFile = (file: File) => {
-  form.identityFile = file
+const handleFile = (field: keyof typeof form) => (file: File) => {
+  ;(form[field] as unknown as File | null) = file
 }
-
-const removeIdentityFile = () => {
-  form.identityFile = null
+const removeFile = (field: keyof typeof form) => () => {
+  ;(form[field] as unknown as File | null) = null
 }
 
 const goBack = () => {
-  if (currentStep.value > 1) {
-    currentStep.value -= 1
-  }
+  if (currentStep.value > 1) currentStep.value -= 1
 }
 
 const goNext = () => {
   if (!isStepValid.value) return
-
-  if (currentStep.value < 3) {
+  if (currentStep.value < 5) {
     currentStep.value += 1
     showAlert({
       label: `Form pendaftaran step ${currentStep.value} siap dilengkapi.`,
@@ -108,11 +111,7 @@ const goNext = () => {
     })
     return
   }
-
-  showAlert({
-    label: 'Pendaftaran berhasil dikirim.',
-    variant: 'success',
-  })
+  showAlert({ label: 'Pendaftaran berhasil dikirim.', variant: 'success' })
   router.push('/')
 }
 </script>
@@ -130,203 +129,360 @@ const goNext = () => {
             @click="goBack"
           >
             <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
-              <path
-                d="m15 5-7 7 7 7"
-                stroke="currentColor"
-                stroke-width="2"
-                stroke-linecap="round"
-              />
+              <path d="m15 5-7 7 7 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
             </svg>
           </button>
           <h1 id="register-title">Form Pendaftaran</h1>
         </div>
-        <span>{{ currentStep }}/3</span>
+        <span>{{ currentStep }}/5</span>
       </header>
 
       <form class="register-form" @submit.prevent="goNext">
-        <div v-if="currentStep === 1" class="fields">
+        <div class="register-scroll">
+          <!-- ==================== STEP 1 — Data Perusahaan ==================== -->
+          <div v-if="currentStep === 1" class="fields">
           <GInputText
-            id="register-full-name"
-            name="fullName"
-            v-model="form.fullName"
-            label="Nama Lengkap"
-            placeholder="Masukkan nama lengkap"
-            autocomplete="name"
+            id="reg-business-name"
+            name="businessName"
+            v-model="form.businessName"
+            label="Nama Badan Usaha"
+            placeholder="Masukkan nama badan usaha"
           />
           <GInputText
-            id="register-birth-place"
-            name="birthPlace"
-            v-model="form.birthPlace"
-            label="Tempat Lahir"
-            placeholder="Masukkan tempat lahir"
-            autocomplete="address-level2"
-          />
-          <GDropdown
-            id="register-nationality"
-            name="nationality"
-            v-model="form.nationality"
-            label="Kewarganegaraan"
-            placeholder="Pilih kewarganegaraan"
-            :items="nationalityOptions"
-            item-value="value"
-            item-text="label"
+            id="reg-director-name"
+            name="directorName"
+            v-model="form.directorName"
+            label="Nama Direktur Utama / CEO"
+            placeholder="Masukkan nama direktur utama"
           />
           <GInputText
-            id="register-email"
-            name="email"
-            v-model="form.email"
+            id="reg-company-email"
+            name="companyEmail"
+            v-model="form.companyEmail"
             type="text"
-            label="Alamat Email"
-            placeholder="Masukkan alamat email"
+            label="Email Perusahaan"
+            placeholder="Masukkan email perusahaan"
             autocomplete="email"
             autocapitalize="none"
             spellcheck="false"
             :pattern="emailPattern.source"
           />
-          <GDatePicker
-            v-unique-date-picker-fields="{
-              id: 'register-birth-date',
-              name: 'birthDate',
-            }"
-            id="register-birth-date"
-            name="birthDate"
-            v-model="form.birthDate"
-            title="Tanggal Lahir"
-            placeholder="Pilih tanggal lahir"
-            autocomplete="off"
-          />
+
+          <div class="upload-field">
+            <label>No NIB</label>
+            <div class="upload-row">
+              <GInputText
+                id="reg-nib-number"
+                name="nibNumber"
+                v-model="form.nibNumber"
+                placeholder="Masukkan No NIB"
+                type="number"
+                inputmode="numeric"
+                pattern="[0-9]*"
+                maxlength="30"
+              />
+              <GFilePicker
+                unique-key="nib"
+                :file="form.nibFile"
+                :image-only="false"
+                error-text="Ukuran file maksimal 10 MB"
+                @file-dropped="handleFile('nibFile')"
+                @file-removed="removeFile('nibFile')"
+              />
+            </div>
+          </div>
+
+          <div class="upload-field">
+            <label>No NPWP Perusahaan</label>
+            <div class="upload-row">
+              <GInputText
+                id="reg-npwp-number"
+                name="npwpNumber"
+                v-model="form.npwpNumber"
+                placeholder="Masukkan No NPWP"
+                type="number"
+                inputmode="numeric"
+                pattern="[0-9]*"
+                maxlength="15"
+              />
+              <GFilePicker
+                unique-key="npwp"
+                :file="form.npwpFile"
+                :image-only="false"
+                error-text="Ukuran file maksimal 10 MB"
+                @file-dropped="handleFile('npwpFile')"
+                @file-removed="removeFile('npwpFile')"
+              />
+            </div>
+          </div>
         </div>
 
-        <div v-else-if="currentStep === 2" class="fields">
-          <GDropdown
-            id="register-identity-type"
-            name="identityType"
-            v-model="form.identityType"
-            label="Jenis Identitas"
-            placeholder="Pilih jenis identitas"
-            :items="identityOptions"
-            item-value="value"
-            item-text="label"
+        <!-- ==================== STEP 2 — Data Akta ==================== -->
+        <div v-if="currentStep === 2" class="fields">
+          <div class="upload-field">
+            <label>No Akta Pendirian</label>
+            <div class="upload-row">
+              <GInputText
+                id="reg-deed-no"
+                name="deedNo"
+                v-model="form.deedNo"
+                placeholder="Masukkan No Akta"
+              />
+              <GFilePicker
+                unique-key="deed"
+                :file="form.deedFile"
+                :image-only="false"
+                error-text="Ukuran file maksimal 10 MB"
+                @file-dropped="handleFile('deedFile')"
+                @file-removed="removeFile('deedFile')"
+              />
+            </div>
+          </div>
+          <GDatePicker
+            v-unique-date-picker-fields="{ id: 'reg-deed-date', name: 'deedDate' }"
+            id="reg-deed-date"
+            name="deedDate"
+            v-model="form.deedDate"
+            title="Tanggal Akta Pendirian"
+            placeholder="Pilih tanggal"
+            autocomplete="off"
+            disableFutureDates
+            :maxYear="0"
           />
 
           <div class="upload-field">
-            <label for="gallery-photo-add">Bukti Identitas</label>
-            <GFilePicker
-              unique-key="identity-proof"
-              :file="form.identityFile"
-              :image-only="true"
-              error-text="Ukuran file Image maksimal 10 MB"
-              @file-dropped="handleIdentityFile"
-              @file-removed="removeIdentityFile"
-            />
-            <p>Ukuran file Image maksimal 10 MB</p>
+            <label>No Akta Terakhir</label>
+            <div class="upload-row">
+              <GInputText
+                id="reg-latest-deed-no"
+                name="latestDeedNo"
+                v-model="form.latestDeedNo"
+                placeholder="Masukkan No Akta"
+              />
+              <GFilePicker
+                unique-key="latest-deed"
+                :file="form.latestDeedFile"
+                :image-only="false"
+                error-text="Ukuran file maksimal 10 MB"
+                @file-dropped="handleFile('latestDeedFile')"
+                @file-removed="removeFile('latestDeedFile')"
+              />
+            </div>
           </div>
-
-          <GTextArea
-            id="register-full-address"
-            name="fullAddress"
-            v-model="form.fullAddress"
-            label="Alamat Lengkap"
-            placeholder="Masukkan alamat lengkap"
-            autocomplete="street-address"
-          />
-          <GTextArea
-            id="register-domicile-address"
-            name="domicileAddress"
-            v-model="form.domicileAddress"
-            label="Alamat Domisili"
-            placeholder="Masukkan alamat domisili"
-            autocomplete="street-address"
+          <GDatePicker
+            v-unique-date-picker-fields="{ id: 'reg-latest-deed-date', name: 'latestDeedDate' }"
+            id="reg-latest-deed-date"
+            name="latestDeedDate"
+            v-model="form.latestDeedDate"
+            title="Tanggal Akta Terakhir"
+            placeholder="Pilih tanggal"
+            autocomplete="off"
+            disableFutureDates
+            :maxYear="0"
           />
         </div>
 
-        <div v-else class="fields step-three">
-          <GInputText
-            id="register-phone-number"
-            name="phoneNumber"
-            v-model="form.phoneNumber"
-            label="Nomor Telepon"
-            placeholder="Masukkan nomor telepon"
-            autocomplete="tel"
+        <!-- ==================== STEP 3 — Alamat ==================== -->
+        <div v-else-if="currentStep === 3" class="fields">
+          <GTextArea
+            id="reg-company-address"
+            name="companyAddress"
+            v-model="form.companyAddress"
+            label="Alamat Perusahaan"
+            placeholder="Masukkan alamat lengkap perusahaan"
+            autocomplete="street-address"
+          />
+          <GDropdown
+            id="reg-province"
+            name="province"
+            v-model="form.province"
+            label="Provinsi"
+            placeholder="Pilih provinsi"
+            :items="[]"
+            item-value="value"
+            item-text="label"
+          />
+          <GDropdown
+            id="reg-city"
+            name="city"
+            v-model="form.city"
+            label="Kota/Kabupaten"
+            placeholder="Pilih kota/kabupaten"
+            :items="[]"
+            item-value="value"
+            item-text="label"
+          />
+          <GDropdown
+            id="reg-district"
+            name="district"
+            v-model="form.district"
+            label="Kecamatan"
+            placeholder="Pilih kecamatan"
+            :items="[]"
+            item-value="value"
+            item-text="label"
+          />
+          <GDropdown
+            id="reg-sub-district"
+            name="subDistrict"
+            v-model="form.subDistrict"
+            label="Kelurahan"
+            placeholder="Pilih kelurahan"
+            :items="[]"
+            item-value="value"
+            item-text="label"
           />
           <GInputText
-            id="register-occupation"
-            name="occupation"
-            v-model="form.occupation"
-            label="Pekerjaan Utama"
-            placeholder="Masukkan pekerjaan utama"
-            autocomplete="organization-title"
+            id="reg-rt-rw"
+            name="rtRw"
+            v-model="form.rtRw"
+            label="RT/RW"
+            placeholder="Contoh: 001/002"
           />
+        </div>
 
-          <section class="account-section" aria-label="Informasi Akun">
-            <h2>Informasi Akun</h2>
+        <!-- ==================== STEP 4 — Data Pengurus ==================== -->
+        <div v-else-if="currentStep === 4" class="fields">
+          <section class="section-block" aria-label="Data Pengurus">
+            <h2>Data Pengurus</h2>
             <GInputText
-              id="register-password"
-              name="password"
-              v-model="form.password"
-              :type="showPassword ? 'text' : 'password'"
-              label="Kata Sandi"
-              placeholder="Masukkan kata sandi"
-              autocomplete="new-password"
-              :helper-text="passwordRequirementText"
-              :error="passwordError"
-            >
-              <template #suffix>
-                <button
-                  class="password-icon password-button"
-                  type="button"
-                  :aria-label="showPassword ? 'Sembunyikan kata sandi' : 'Tampilkan kata sandi'"
-                  @click="showPassword = !showPassword"
-                >
-                  <svg viewBox="0 0 24 24" fill="none">
-                    <path
-                      d="M2.5 12s3.5-6 9.5-6 9.5 6 9.5 6-3.5 6-9.5 6-9.5-6-9.5-6Z"
-                      stroke="currentColor"
-                      stroke-width="1.8"
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                    />
-                    <circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="1.8" />
-                  </svg>
-                </button>
-              </template>
-            </GInputText>
+              id="reg-admin-name"
+              name="adminName"
+              v-model="form.adminName"
+              label="Nama Pengurus"
+              placeholder="Masukkan nama pengurus"
+            />
+            <div class="upload-field">
+              <label>NIK KTP Pengurus</label>
+              <div class="upload-row">
+                <GInputText
+                  id="reg-admin-nik"
+                  name="adminNik"
+                  v-model="form.adminNik"
+                  placeholder="Masukkan NIK"
+                  type="number"
+                  inputmode="numeric"
+                  pattern="[0-9]*"
+                  maxlength="16"
+                />
+                <GFilePicker
+                  unique-key="admin-nik"
+                  :file="form.adminNikFile"
+                  :image-only="true"
+                  error-text="Ukuran file Image maksimal 10 MB"
+                  @file-dropped="handleFile('adminNikFile')"
+                  @file-removed="removeFile('adminNikFile')"
+                />
+              </div>
+            </div>
+            <div class="upload-field">
+              <label>No NPWP Pengurus</label>
+              <div class="upload-row">
+                <GInputText
+                  id="reg-admin-npwp"
+                  name="adminNpwp"
+                  v-model="form.adminNpwp"
+                  placeholder="Masukkan No NPWP"
+                  type="number"
+                  inputmode="numeric"
+                  pattern="[0-9]*"
+                  maxlength="15"
+                />
+                <GFilePicker
+                  unique-key="admin-npwp"
+                  :file="form.adminNpwpFile"
+                  :image-only="false"
+                  error-text="Ukuran file maksimal 10 MB"
+                  @file-dropped="handleFile('adminNpwpFile')"
+                  @file-removed="removeFile('adminNpwpFile')"
+                />
+              </div>
+            </div>
             <GInputText
-              id="register-confirm-password"
-              name="confirmPassword"
-              v-model="form.confirmPassword"
-              :type="showConfirmPassword ? 'text' : 'password'"
-              label="Konfirmasi Kata Sandi"
-              placeholder="Masukkan konfirmasi kata sandi"
-              autocomplete="new-password"
-              :error="confirmPasswordError"
-            >
-              <template #suffix>
-                <button
-                  class="password-icon password-button"
-                  type="button"
-                  :aria-label="
-                    showConfirmPassword
-                      ? 'Sembunyikan konfirmasi kata sandi'
-                      : 'Tampilkan konfirmasi kata sandi'
-                  "
-                  @click="showConfirmPassword = !showConfirmPassword"
-                >
-                  <svg viewBox="0 0 24 24" fill="none">
-                    <path
-                      d="M2.5 12s3.5-6 9.5-6 9.5 6 9.5 6-3.5 6-9.5 6-9.5-6-9.5-6Z"
-                      stroke="currentColor"
-                      stroke-width="1.8"
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                    />
-                    <circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="1.8" />
-                  </svg>
-                </button>
-              </template>
-            </GInputText>
+              id="reg-admin-phone"
+              name="adminPhone"
+              v-model="form.adminPhone"
+              label="No Hp Pengurus"
+              placeholder="Masukkan nomor telepon"
+              type="number"
+              inputmode="numeric"
+              pattern="[0-9]*"
+              autocomplete="tel"
+            />
           </section>
         </div>
+
+        <!-- ==================== STEP 5 — Data Pelaksana Transaksi ==================== -->
+        <div v-else class="fields">
+          <section class="section-block" aria-label="Data Pelaksana Transaksi">
+            <h2>Data Pelaksana Transaksi</h2>
+            <GInputText
+              id="reg-executor-name"
+              name="executorName"
+              v-model="form.executorName"
+              label="Nama Pelaksana Transaksi"
+              placeholder="Masukkan nama pelaksana"
+            />
+            <div class="upload-field">
+              <label>NIK KTP Pelaksana Transaksi</label>
+              <div class="upload-row">
+                <GInputText
+                  id="reg-executor-nik"
+                  name="executorNik"
+                  v-model="form.executorNik"
+                  placeholder="Masukkan NIK"
+                  type="number"
+                  inputmode="numeric"
+                  pattern="[0-9]*"
+                  maxlength="16"
+                />
+                <GFilePicker
+                  unique-key="executor-nik"
+                  :file="form.executorNikFile"
+                  :image-only="true"
+                  error-text="Ukuran file Image maksimal 10 MB"
+                  @file-dropped="handleFile('executorNikFile')"
+                  @file-removed="removeFile('executorNikFile')"
+                />
+              </div>
+            </div>
+            <div class="upload-field">
+              <label>No NPWP Pelaksana Transaksi</label>
+              <div class="upload-row">
+                <GInputText
+                  id="reg-executor-npwp"
+                  name="executorNpwp"
+                  v-model="form.executorNpwp"
+                  placeholder="Masukkan No NPWP"
+                  type="number"
+                  inputmode="numeric"
+                  pattern="[0-9]*"
+                  maxlength="15"
+                />
+                <GFilePicker
+                  unique-key="executor-npwp"
+                  :file="form.executorNpwpFile"
+                  :image-only="false"
+                  error-text="Ukuran file maksimal 10 MB"
+                  @file-dropped="handleFile('executorNpwpFile')"
+                  @file-removed="removeFile('executorNpwpFile')"
+                />
+              </div>
+            </div>
+            <GInputText
+              id="reg-executor-phone"
+              name="executorPhone"
+              v-model="form.executorPhone"
+              label="No Hp Pelaksana Transaksi"
+              placeholder="Masukkan nomor telepon"
+              type="number"
+              inputmode="numeric"
+              pattern="[0-9]*"
+              autocomplete="tel"
+            />
+          </section>
+        </div>
+        </div><!-- /register-scroll -->
 
         <footer class="form-footer">
           <GButton
@@ -337,7 +493,7 @@ const goNext = () => {
             size="md"
             type="primary"
           />
-          <p>
+          <p class="help">
             Sudah punya akun?
             <RouterLink to="/">Klik disini</RouterLink>
           </p>
@@ -350,17 +506,20 @@ const goNext = () => {
 <style scoped>
 .register-card {
   width: 542px;
-  min-height: 688px;
+  max-height: 70vh;
+  display: flex;
+  flex-direction: column;
   border-radius: 10px;
   background: var(--g-kit-white);
   color: var(--g-kit-black-80);
 }
 
 .register-content {
-  min-height: 688px;
   display: flex;
   flex-direction: column;
   padding: 24px;
+  overflow-y: auto;
+  min-height: 0;
 }
 
 .register-header {
@@ -371,20 +530,29 @@ const goNext = () => {
   margin-bottom: 32px;
 }
 
+.help {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 12px;
+  margin-top: 40px;
+  color: var(--g-kit-black-60);
+  font-size: var(--g-kit-font-size-sigma);
+  font-weight: var(--g-kit-font-weight-normal);
+  line-height: var(--g-kit-line-height-sigma);
+}
+
 .title-row {
   display: flex;
   align-items: center;
   gap: 8px;
 }
 
-h1,
-h2,
-p {
+h1, h2, p {
   margin: 0;
 }
 
-h1,
-h2 {
+h1, h2 {
   color: var(--g-kit-black-80);
   font-size: var(--g-kit-font-size-kappa);
   font-weight: var(--g-kit-font-weight-bold);
@@ -417,10 +585,13 @@ h2 {
 }
 
 .register-form {
-  min-height: 588px;
   display: flex;
   flex: 1;
   flex-direction: column;
+}
+
+.register-scroll {
+  flex: 1;
 }
 
 .fields {
@@ -429,11 +600,11 @@ h2 {
   gap: 16px;
 }
 
-.step-three {
-  gap: 24px;
+.fields .group-input {
+  margin-bottom: 0;
 }
 
-.account-section {
+.section-block {
   display: flex;
   flex-direction: column;
   gap: 16px;
@@ -445,40 +616,17 @@ h2 {
   gap: 6px;
 }
 
-.upload-field label {
+.upload-field > label {
   color: var(--g-kit-black-80);
   font-size: var(--g-kit-font-size-sigma);
   font-weight: var(--g-kit-font-weight-bold);
   line-height: var(--g-kit-line-height-sigma);
 }
 
-.upload-field p {
-  color: var(--g-kit-black-50);
-  font-size: var(--g-kit-font-size-omega);
-  font-weight: var(--g-kit-font-weight-normal);
-  line-height: var(--g-kit-line-height-omega);
-}
-
-.password-icon {
-  width: 20px;
-  height: 20px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  margin-right: 14px;
-  color: var(--g-kit-black-60);
-}
-
-.password-button {
-  padding: 0;
-  border: 0;
-  background: transparent;
-  cursor: pointer;
-}
-
-.password-icon svg {
-  width: 20px;
-  height: 20px;
+.upload-row {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
 }
 
 .form-footer {
@@ -511,10 +659,8 @@ h2 {
 @media (max-width: 768px) {
   .register-card {
     width: min(542px, calc(100vw - 32px));
-    min-height: auto;
   }
 
-  .register-content,
   .register-form {
     min-height: auto;
   }

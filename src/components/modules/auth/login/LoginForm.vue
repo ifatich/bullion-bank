@@ -170,6 +170,7 @@ const requestPasswordReset = () => {
 .help {
   display: flex;
   justify-content: center;
+  align-items: center;
   gap: 12px;
   margin-top: 40px;
   color: var(--g-kit-black-60);

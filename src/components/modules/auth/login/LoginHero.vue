@@ -1,5 +1,78 @@
 <script setup lang="ts">
 import GoldPriceChart from './GoldPriceChart.vue'
+import { onMounted, onUnmounted, ref } from 'vue'
+
+
+const tvWidgetRef = ref<HTMLDivElement | null>(null)
+
+onMounted(() => {
+  if (!tvWidgetRef.value) return
+
+  const container = tvWidgetRef.value
+  container.innerHTML = ''
+
+  // Widget inner container
+  const widgetDiv = document.createElement('div')
+  widgetDiv.className = 'tradingview-widget-container__widget'
+  container.appendChild(widgetDiv)
+
+  // Copyright
+  const copyright = document.createElement('div')
+  copyright.className = 'tradingview-widget-copyright'
+  copyright.innerHTML =
+    '<a href="https://www.tradingview.com/symbols/XAUTUSDT/?exchange=BYBIT" rel="noopener nofollow" target="_blank"><span class="blue-text">XAUUSD quote</span></a><span class="trademark">&nbsp;by TradingView</span>'
+  container.appendChild(copyright)
+
+  // External embed script — config goes in textContent so the script reads it via
+  // document.currentScript. The browser fetches from src but preserves textContent.
+  const script = document.createElement('script')
+  script.type = 'text/javascript'
+  script.async = true
+  script.crossOrigin = 'anonymous'
+  script.textContent = JSON.stringify({
+    lineWidth: 1,
+    lineType: 0,
+    chartType: 'candlestick',
+    fontColor: 'rgb(106, 109, 120)',
+    gridLineColor: 'rgba(46, 46, 46, 0.06)',
+    volumeUpColor: 'rgba(34, 171, 148, 0.5)',
+    volumeDownColor: 'rgba(247, 82, 95, 0.5)',
+    backgroundColor: '#ffffff',
+    widgetFontColor: '#0F0F0F',
+    upColor: '#22ab94',
+    downColor: '#f7525f',
+    borderUpColor: '#22ab94',
+    borderDownColor: '#f7525f',
+    wickUpColor: '#22ab94',
+    wickDownColor: '#f7525f',
+    colorTheme: 'light',
+    isTransparent: true,
+    locale: 'id',
+    chartOnly: true,
+    scalePosition: 'left',
+    scaleMode: 'Normal',
+    fontFamily: '-apple-system, BlinkMacSystemFont, Trebuchet MS, Roboto, Ubuntu, sans-serif',
+    valuesTracking: '1',
+    changeMode: 'price-and-percent',
+    symbols: [['BYBIT:XAUTUSDT|1D']],
+    dateRanges: ['1d|1', '1m|30', '3m|60'],
+    fontSize: '10',
+    headerFontSize: 'medium',
+    autosize: false,
+    width: '100%',
+    height: 260,
+    noTimeScale: false,
+    hideDateRanges: true,
+  })
+  script.src = 'https://s3.tradingview.com/external-embedding/embed-widget-symbol-overview.js'
+  container.appendChild(script)
+})
+
+onUnmounted(() => {
+  if (tvWidgetRef.value) {
+    tvWidgetRef.value.innerHTML = ''
+  }
+})
 </script>
 
 <template>
@@ -18,7 +91,12 @@ import GoldPriceChart from './GoldPriceChart.vue'
       
       <div class="line" />
 
-      <GoldPriceChart compact class="price-chart" />
+      <div
+        ref="tvWidgetRef"
+        class="tradingview-widget-container"
+      />
+
+      <!-- <GoldPriceChart compact class="price-chart" /> -->
 
       <div class="line" />
 
@@ -85,4 +163,17 @@ p {
   font-weight: var(--g-kit-font-weight-normal);
   line-height: var(--g-kit-line-height-omicron);
 }
+
+.tradingview-widget-container {
+  width: 100%;
+  height: 260px;
+  overflow: hidden;
+}
+
+.tradingview-widget-container :deep(iframe) {
+  width: 100% !important;
+  height: 260px !important;
+  border: 0 !important;
+}
+
 </style>

@@ -15,4 +15,14 @@ export default defineConfig({
       '@': fileURLToPath(new URL('./src', import.meta.url)),
     },
   },
+  server: {
+    headers: {
+      'Content-Security-Policy': [
+        "default-src 'self' https: wss: ws: data:",
+        "script-src 'self' 'unsafe-eval' 'unsafe-inline' https:",
+        "style-src 'self' 'unsafe-inline' https:",
+        "frame-src 'self' https://www.tradingview-widget.com https://www.tradingview.com",
+      ].join('; '),
+    },
+  },
 })
