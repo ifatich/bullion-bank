@@ -35,6 +35,9 @@ jobs:
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
+        env:
+          PNPM_ONLY_BUILT_DEPENDENCIES: core-js,esbuild,vue-demi
+          PNPM_IGNORED_BUILT_DEPENDENCIES: '@parcel/watcher'
 
       - name: Build
         run: pnpm build-only
