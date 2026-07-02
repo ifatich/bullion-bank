@@ -2,54 +2,17 @@
 import { ref } from 'vue'
 
 import { GInputText } from '@/components'
-import { useAppAlert } from '@/hooks/useAppAlert'
 
 const walletAddress = ref('')
 const amount = ref('')
 const transactionFee = ref('---')
 const grandTotal = ref('---')
-const lastUpdated = ref('08/07/2024, 09.00 AM')
-const { showAlert } = useAppAlert()
-
-const refreshData = () => {
-  lastUpdated.value = new Intl.DateTimeFormat('en-GB', {
-    day: '2-digit',
-    month: '2-digit',
-    year: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit',
-    hour12: true,
-  }).format(new Date())
-  showAlert({
-    label: 'Data token transfer berhasil diperbarui.',
-    variant: 'info',
-  })
-}
 </script>
 
 <template>
   <section class="transfer-card" aria-labelledby="token-transfer-title">
     <header class="transfer-card-header">
       <h1 id="token-transfer-title">Token Transfer</h1>
-      <p>
-        Last updated on {{ lastUpdated }}
-        <button
-          class="refresh-button"
-          type="button"
-          aria-label="Refresh token transfer data"
-          @click="refreshData"
-        >
-          <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
-            <path
-              d="M20 11a8 8 0 0 0-14.6-4.5M4 4v5h5M4 13a8 8 0 0 0 14.6 4.5M20 20v-5h-5"
-              stroke="currentColor"
-              stroke-width="1.8"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-            />
-          </svg>
-        </button>
-      </p>
     </header>
 
     <div class="transfer-fields">
