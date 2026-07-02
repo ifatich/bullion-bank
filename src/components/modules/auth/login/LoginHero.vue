@@ -53,7 +53,7 @@ onMounted(() => {
     fontFamily: '-apple-system, BlinkMacSystemFont, Trebuchet MS, Roboto, Ubuntu, sans-serif',
     valuesTracking: '1',
     changeMode: 'price-and-percent',
-    symbols: [['BYBIT:XAUTUSDT|1D']],
+    symbols: [['OANDA:XAUUSD']],
     dateRanges: ['1d|1', '1m|30', '3m|60'],
     fontSize: '10',
     headerFontSize: 'medium',
@@ -93,6 +93,7 @@ onUnmounted(() => {
       <div
         ref="tvWidgetRef"
         class="tradingview-widget-container"
+        style="height:260px;width:100%"
       />
 
       <!-- <GoldPriceChart compact class="price-chart" /> -->
@@ -167,12 +168,24 @@ p {
   width: 100%;
   height: 260px;
   overflow: hidden;
+  border: none !important;
+}
+
+.tradingview-widget-container :deep(div) {
+  border: none !important;
 }
 
 .tradingview-widget-container :deep(iframe) {
-  width: 100% !important;
-  height: 260px !important;
-  border: 0 !important;
+  width: calc(100% + 2px) !important;
+  height: calc(260px + 2px) !important;
+  margin: -1px !important;
+  border: none !important;
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+:deep([class*="toolbox"]) {
+  display: none !important;
 }
 
 </style>

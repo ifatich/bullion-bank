@@ -9,7 +9,17 @@ import UserPageLayout from '@/components/shared/layouts/UserPageLayout.vue'
 import ExportDateRangeModal from '@/components/modules/user/transaction-history/ExportDateRangeModal.vue'
 import { useAppAlert } from '@/hooks/useAppAlert'
 import { generatePdfEStatement } from '@/utils/generate-pdf-statement.util'
-import transactionHistoryMock from '@/utils/data/transaction-history.mock.json'
+import { useTransactions } from '@/hooks/useTransactions'
+import { useAuthStore } from '@/stores/auth'
+
+const {
+  rows: transactions,
+  reportMetadata,
+  fetchTransactions,
+  fetchReportMetadata
+} = useTransactions()
+
+const authStore = useAuthStore()
 
 const tokenMenus = [
   { label: 'Swap', to: '/token/swap', icon: 'swap' },
@@ -57,7 +67,11 @@ const handleExportConfirm = async (dateRange: { fromDate: string; toDate: string
     const start = new Date(dateRange.fromDate + 'T00:00:00')
     const end = new Date(dateRange.toDate + 'T23:59:59')
 
-    const filteredTransactions = transactionHistoryMock.transactions
+    if (transactions.value.length === 0) {
+      await fetchTransactions({ fromDate: dateRange.fromDate, toDate: dateRange.toDate })
+    }
+
+    const filteredTransactions = transactions.value
       .filter((tx) => {
         const txDate = new Date(tx.date)
         return !isNaN(txDate.getTime()) && txDate >= start && txDate <= end
@@ -74,23 +88,25 @@ const handleExportConfirm = async (dateRange: { fromDate: string; toDate: string
 
     exportError.value = ''
 
+    await fetchReportMetadata({ fromDate: dateRange.fromDate, toDate: dateRange.toDate })
+
     const fromFormatted = formatToDDMMYYYYSpaced(dateRange.fromDate)
     const toFormatted = formatToDDMMYYYYSpaced(dateRange.toDate)
-    const company = transactionHistoryMock.report.companyName
+    const company = reportMetadata.value?.companyName || authStore.companyName
     const filename = `Custody Report - ${company} - ${fromFormatted} - ${toFormatted}.pdf`
 
     await generatePdfEStatement({
-      title: transactionHistoryMock.report.title,
-      companyName: transactionHistoryMock.report.companyName,
-      companyId: transactionHistoryMock.report.companyId,
-      custodyAccountId: transactionHistoryMock.report.custodyAccountId,
-      walletId: transactionHistoryMock.report.walletId,
+      title: reportMetadata.value?.title || 'Custody Transaction Report',
+      companyName: reportMetadata.value?.companyName || authStore.companyName,
+      companyId: reportMetadata.value?.companyId || authStore.companyId,
+      custodyAccountId: reportMetadata.value?.custodyAccountId || 'CUST-BBP-2026-001',
+      walletId: reportMetadata.value?.walletId || authStore.walletAddress,
       reportPeriod: `${dateRange.fromDate} - ${dateRange.toDate}`,
-      openingBalance: transactionHistoryMock.report.openingBalance,
-      totalDebit: transactionHistoryMock.report.totalDebit,
-      totalCredit: transactionHistoryMock.report.totalCredit,
-      closingBalance: transactionHistoryMock.report.closingBalance,
-      lastUpdated: transactionHistoryMock.report.lastUpdated,
+      openingBalance: reportMetadata.value?.openingBalance || '0 KG',
+      totalDebit: reportMetadata.value?.totalDebit || '0 KG',
+      totalCredit: reportMetadata.value?.totalCredit || '0 KG',
+      closingBalance: reportMetadata.value?.closingBalance || '0 KG',
+      lastUpdated: reportMetadata.value?.lastUpdated || new Date().toLocaleString(),
       filename,
       transactions: filteredTransactions,
     })
@@ -118,55 +134,38 @@ onMounted(() => {
   widgetDiv.className = 'tradingview-widget-container__widget'
   container.appendChild(widgetDiv)
 
-  // Copyright
-  const copyright = document.createElement('div')
-  copyright.className = 'tradingview-widget-copyright'
-  copyright.innerHTML =
-    '<a href="https://www.tradingview.com/symbols/XAUTUSDT/?exchange=BYBIT" rel="noopener nofollow" target="_blank"><span class="blue-text">XAUUSD quote</span></a><span class="trademark">&nbsp;by TradingView</span>'
-  container.appendChild(copyright)
-
-  // External embed script — config goes in textContent so the script reads it via
-  // document.currentScript. The browser fetches from src but preserves textContent.
+  // External embed script — advanced chart widget
   const script = document.createElement('script')
   script.type = 'text/javascript'
   script.async = true
   script.crossOrigin = 'anonymous'
   script.textContent = JSON.stringify({
-    lineWidth: 1,
-    lineType: 0,
-    chartType: 'area',
-    fontColor: 'rgb(106, 109, 120)',
-    gridLineColor: 'rgba(46, 46, 46, 0.06)',
-    volumeUpColor: 'rgba(34, 171, 148, 0.5)',
-    volumeDownColor: 'rgba(247, 82, 95, 0.5)',
-    backgroundColor: '#ffffff',
-    widgetFontColor: '#0F0F0F',
-    upColor: '#22ab94',
-    downColor: '#f7525f',
-    borderUpColor: '#22ab94',
-    borderDownColor: '#f7525f',
-    wickUpColor: '#22ab94',
-    wickDownColor: '#f7525f',
-    colorTheme: 'light',
+    allow_symbol_change: false,
+    calendar: false,
+    details: false,
+    hide_side_toolbar: true,
+    hide_top_toolbar: true,
+    hide_legend: false,
+    hide_volume: true,
+    hotlist: false,
+    interval: "1",
+    locale: "id",
+    save_image: false,
+    style: "1",
+    symbol: "OANDA:XAUUSD",
+    theme: "light",
+    timezone: "Asia/Jakarta",
     isTransparent: true,
-    locale: 'id',
-    chartOnly: true,
-    scalePosition: 'left',
-    scaleMode: 'Normal',
-    fontFamily: '-apple-system, BlinkMacSystemFont, Trebuchet MS, Roboto, Ubuntu, sans-serif',
-    valuesTracking: '1',
-    changeMode: 'price-and-percent',
-    symbols: [['BYBIT:XAUTUSDT|1D']],
-    dateRanges: ['1d|1', '1m|30', '3m|60'],
-    fontSize: '10',
-    headerFontSize: 'medium',
+    gridColor: "#2e2e2e0f",
+    watchlist: [],
+    withdateranges: false,
+    compareSymbols: [],
+    studies: [],
     autosize: false,
-    width: '100%',
-    height: 360,
-    noTimeScale: false,
-    hideDateRanges: false,
+    width: "100%",
+    height: "360"
   })
-  script.src = 'https://s3.tradingview.com/external-embedding/embed-widget-symbol-overview.js'
+  script.src = 'https://s3.tradingview.com/external-embedding/embed-widget-advanced-chart.js'
   container.appendChild(script)
 })
 
@@ -232,22 +231,43 @@ onUnmounted(() => {
   background: var(--g-kit-white);
   border-radius: 12px;
   box-shadow: var(--bb-elevation-1);
+  overflow: hidden;
   padding: 12px 16px 24px;
   min-height: 380px;
   display: flex;
   flex-direction: column;
 }
 
+/* Hide TradingView floating navigation zoom/reset controls */
+.chart-card :deep(iframe) {
+  pointer-events: auto;
+  border: none !important;
+}
+.chart-card :deep(.tradingview-widget-container) {
+  position: relative;
+}
+:deep([class*="toolbox"]) {
+  display: none !important;
+}
+
 .tradingview-widget-container {
   width: 100%;
   height: 360px;
   overflow: hidden;
+  border: none !important;
+}
+
+.tradingview-widget-container :deep(div) {
+  border: none !important;
 }
 
 .tradingview-widget-container :deep(iframe) {
-  width: 100% !important;
-  height: 360px !important;
-  border: 0 !important;
+  width: calc(100% + 4px) !important;
+  height: calc(360px + 4px) !important;
+  margin: -2px !important;
+  border: none !important;
+  outline: none !important;
+  box-shadow: none !important;
 }
 
 @media (max-width: 1180px) {

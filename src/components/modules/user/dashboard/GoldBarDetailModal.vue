@@ -1,18 +1,7 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import { GButton } from '@/components'
-
-// Import denomination images
-import img1g from '@/assets/img/denominasi=1.svg'
-import img5g from '@/assets/img/denominasi=5.svg'
-import img10g from '@/assets/img/denominasi=10.svg'
-import img20g from '@/assets/img/denominasi=20.svg'
-import img25g from '@/assets/img/denominasi=25.svg'
-import img50g from '@/assets/img/denominasi=50.svg'
-import img100g from '@/assets/img/denominasi=100.svg'
-import img250g from '@/assets/img/denominasi=250.svg'
-import img500g from '@/assets/img/denominasi=500.svg'
-import img1000g from '@/assets/img/denominasi=1000.svg'
+import { useBalanceStore } from '@/stores/balance'
 
 const props = defineProps<{
   isVisible: boolean
@@ -35,21 +24,8 @@ const closeModal = () => {
   emit('close')
 }
 
-// Mock data breakdown of denominations that sums up to 100 KG
-const denominations = [
-  { denomination: '1 Gram', pcs: 0, totalWeight: '0 Gram', image: img1g },
-  { denomination: '5 Gram', pcs: 0, totalWeight: '0 Gram', image: img5g },
-  { denomination: '10 Gram', pcs: 10, totalWeight: '100 Gram', image: img10g },
-  { denomination: '20 Gram', pcs: 0, totalWeight: '0 Gram', image: img20g },
-  { denomination: '25 Gram', pcs: 0, totalWeight: '0 Gram', image: img25g },
-  { denomination: '50 Gram', pcs: 8, totalWeight: '400 Gram', image: img50g },
-  { denomination: '100 Gram', pcs: 5, totalWeight: '500 Gram', image: img100g },
-  { denomination: '250 Gram', pcs: 0, totalWeight: '0 Gram', image: img250g },
-  { denomination: '500 Gram', pcs: 0, totalWeight: '0 Gram', image: img500g },
-  { denomination: '1 Kilogram', pcs: 99, totalWeight: '99,000 Gram', image: img1000g },
-]
-
-const activeDenominations = computed(() => denominations.filter(item => item.pcs > 0))
+const balanceStore = useBalanceStore()
+const activeDenominations = computed(() => balanceStore.activeDenominations)
 </script>
 
 <template>
@@ -87,22 +63,22 @@ const activeDenominations = computed(() => denominations.filter(item => item.pcs
                   </tr>
                 </thead>
                 <tbody>
-                  <tr v-for="item in activeDenominations" :key="item.denomination">
+                  <tr v-for="item in activeDenominations" :key="item.label">
                     <td>
                       <div class="gold-badge">
-                        <img :src="item.image" :alt="item.denomination" class="gold-image" />
-                        <span>{{ item.denomination }}</span>
+                        <img :src="item.image" :alt="item.label" class="gold-image" />
+                        <span>{{ item.label }}</span>
                       </div>
                     </td>
                     <td class="text-right font-bold">{{ item.pcs }}</td>
-                    <td class="text-right font-semibold text-primary">{{ item.totalWeight }}</td>
+                    <td class="text-right font-semibold text-primary">{{ item.totalWeightLabel }}</td>
                   </tr>
                 </tbody>
                 <tfoot>
                   <tr class="total-row">
                     <td>Total Balance</td>
-                    <td class="text-right">122 Pcs</td>
-                    <td class="text-right font-bold text-primary">100 KG</td>
+                    <td class="text-right">{{ balanceStore.totalPcs }} Pcs</td>
+                    <td class="text-right font-bold text-primary">{{ balanceStore.totalKg }}</td>
                   </tr>
                 </tfoot>
               </table>

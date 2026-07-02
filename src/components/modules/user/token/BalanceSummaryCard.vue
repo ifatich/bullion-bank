@@ -1,31 +1,18 @@
 <script setup lang="ts">
-import { computed } from 'vue'
-
-import img10g from '@/assets/img/denominasi=10.svg'
-import img50g from '@/assets/img/denominasi=50.svg'
-import img100g from '@/assets/img/denominasi=100.svg'
-import img1000g from '@/assets/img/denominasi=1000.svg'
-
-// Mock balance data — replace with composable/store when API is available
-const totalBalance = '100 KG'
-const estimateCurrency = 'IDR'
-const estimateAmount = '1,234,000,000'
+import { useBalance } from '@/hooks/useBalance'
 
 /**
- * Denomination breakdown.
- * Each entry represents a physical gold bar size, its count (pcs), and total weight.
+ * BalanceSummaryCard — sidebar card on the Transfer page.
+ * Data is sourced from balanceStore via the useBalance composable,
+ * shared with DashboardSummary and GoldBarDetailModal.
  */
-const denominations = [
-  { denomination: '10 Gram', pcs: 10, totalWeight: '100 Gram', image: img10g },
-  { denomination: '50 Gram', pcs: 8, totalWeight: '400 Gram', image: img50g },
-  { denomination: '100 Gram', pcs: 5, totalWeight: '500 Gram', image: img100g },
-  { denomination: '1 Kilogram', pcs: 99, totalWeight: '99,000 Gram', image: img1000g },
-]
-
-/** Only show denominations that have at least 1 piece */
-const activeDenominations = computed(() => denominations.filter((d) => d.pcs > 0))
-
-const totalPcs = computed(() => activeDenominations.value.reduce((acc, d) => acc + d.pcs, 0))
+const {
+  totalKg,
+  estimateIdrFormatted,
+  activeDenominations,
+  totalPcs,
+  isLoading,
+} = useBalance()
 </script>
 
 <template>
@@ -39,14 +26,16 @@ const totalPcs = computed(() => activeDenominations.value.reduce((acc, d) => acc
     <div class="balance-totals">
       <div class="balance-row">
         <span class="balance-label">Total Balance</span>
-        <strong class="balance-value">{{ totalBalance }}</strong>
+        <strong class="balance-value" :aria-busy="isLoading">
+          {{ isLoading ? '...' : totalKg }}
+        </strong>
       </div>
       <div class="balance-divider" aria-hidden="true" />
       <div class="balance-row balance-row--top">
         <span class="balance-label">Estimate Balance</span>
         <div class="estimate-value-block">
-          <span class="estimate-currency">{{ estimateCurrency }}</span>
-          <strong class="balance-value estimate">{{ estimateAmount }}</strong>
+          <span class="estimate-currency">IDR</span>
+          <strong class="balance-value estimate">{{ isLoading ? '...' : estimateIdrFormatted }}</strong>
         </div>
       </div>
     </div>
@@ -61,15 +50,15 @@ const totalPcs = computed(() => activeDenominations.value.reduce((acc, d) => acc
       <ul class="denom-list" aria-label="Rincian keping emas">
         <li
           v-for="item in activeDenominations"
-          :key="item.denomination"
+          :key="item.label"
           class="denom-item"
         >
           <div class="denom-icon-wrap">
-            <img :src="item.image" :alt="item.denomination" class="denom-img" />
+            <img :src="item.image" :alt="item.label" class="denom-img" />
           </div>
           <div class="denom-info">
-            <span class="denom-name">{{ item.denomination }}</span>
-            <span class="denom-weight">{{ item.totalWeight }}</span>
+            <span class="denom-name">{{ item.label }}</span>
+            <span class="denom-weight">{{ item.totalWeightLabel }}</span>
           </div>
           <span class="denom-pcs">{{ item.pcs }} keping</span>
         </li>

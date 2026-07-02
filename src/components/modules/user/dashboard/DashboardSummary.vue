@@ -1,11 +1,12 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import { useAppAlert } from '@/hooks/useAppAlert'
+import { useAuthStore } from '@/stores/auth'
+import { useBalance } from '@/hooks/useBalance'
 import GoldBarDetailModal from './GoldBarDetailModal.vue'
 
-const walletId = 'bc1qxy2kgdygjrs3p83kkfjhx0wlhbc1qxy2kgdygjrs3p83kkfjhx0wlh'
-const companyId = '001PXTID'
-
+const authStore = useAuthStore()
+const { totalKg, estimateIdrFormatted, isLoading: isBalanceLoading } = useBalance()
 const { showAlert } = useAppAlert()
 const isDetailModalOpen = ref(false)
 
@@ -56,7 +57,9 @@ const copyToClipboard = async (fieldLabel: string, value: string) => {
             <h2>Total Balance</h2>
             <span class="info-icon">i</span>
           </div>
-          <strong class="balance-value">100 KG</strong>
+          <strong class="balance-value" :aria-busy="isBalanceLoading">
+            {{ isBalanceLoading ? '...' : totalKg }}
+          </strong>
         </div>
 
         <div>
@@ -64,7 +67,9 @@ const copyToClipboard = async (fieldLabel: string, value: string) => {
             <h2>Estimate Balance</h2>
             <span class="info-icon">i</span>
           </div>
-          <strong class="balance-value">IDR 1,234,000,000</strong>
+          <strong class="balance-value">
+            IDR {{ isBalanceLoading ? '...' : estimateIdrFormatted }}
+          </strong>
         </div>
       </article>
 
@@ -76,11 +81,11 @@ const copyToClipboard = async (fieldLabel: string, value: string) => {
         <div class="meta-block">
           <span>Wallet ID</span>
           <p>
-            <span>{{ walletId }}</span>
+            <span>{{ authStore.walletAddress }}</span>
             <button
               type="button"
-              aria-label="Copy wallet ID"
-              @click="copyToClipboard('Wallet ID', walletId)"
+              aria-label="Copy wallet address"
+              @click="copyToClipboard('Wallet Address', authStore.walletAddress)"
             >
               <svg viewBox="0 0 24 24" fill="none">
                 <path
@@ -97,11 +102,11 @@ const copyToClipboard = async (fieldLabel: string, value: string) => {
         <div class="meta-block">
           <span>Company ID</span>
           <p>
-            <span>{{ companyId }}</span>
+            <span>{{ authStore.companyId }}</span>
             <button
               type="button"
               aria-label="Copy company ID"
-              @click="copyToClipboard('Company ID', companyId)"
+              @click="copyToClipboard('Company ID', authStore.companyId)"
             >
               <svg viewBox="0 0 24 24" fill="none">
                 <path
@@ -113,46 +118,6 @@ const copyToClipboard = async (fieldLabel: string, value: string) => {
             </button>
           </p>
         </div>
-        <!-- <div class="split-meta">
-          <div class="meta-block">
-            <span>Company ID</span>
-            <p>
-              <span>{{ companyId }}</span>
-              <button
-                type="button"
-                aria-label="Copy company ID"
-                @click="copyToClipboard('Company ID', companyId)"
-              >
-                <svg viewBox="0 0 24 24" fill="none">
-                  <path
-                    d="M8 8h11v11H8V8ZM5 16H4V4h12v1"
-                    stroke="currentColor"
-                    stroke-width="1.8"
-                  />
-                </svg>
-              </button>
-            </p>
-          </div>
-          <div class="meta-block">
-            <span>Email Address</span>
-            <p>
-              <span>{{ emailAddress }}</span>
-              <button
-                type="button"
-                aria-label="Copy email address"
-                @click="copyToClipboard('Email', emailAddress)"
-              >
-                <svg viewBox="0 0 24 24" fill="none">
-                  <path
-                    d="M8 8h11v11H8V8ZM5 16H4V4h12v1"
-                    stroke="currentColor"
-                    stroke-width="1.8"
-                  />
-                </svg>
-              </button>
-            </p>
-          </div>
-        </div> -->
       </article>
 
       <article class="summary-tile ekyc">
@@ -163,7 +128,7 @@ const copyToClipboard = async (fieldLabel: string, value: string) => {
 
         <div class="meta-block">
           <span>Status</span>
-          <strong class="status-value">VERIFIED</strong>
+          <strong class="status-value">{{ authStore.kybStatus }}</strong>
         </div>
       </article>
     </div>

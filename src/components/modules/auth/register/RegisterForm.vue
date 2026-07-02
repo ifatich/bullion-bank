@@ -12,6 +12,10 @@ const currentStep = ref(1)
 const { showAlert } = useAppAlert()
 const isMobile = useMediaQuery('(max-width: 768px)')
 
+const emit = defineEmits<{
+  (e: 'submit', payload: typeof form): void
+}>()
+
 const form = reactive({
   // Step 1 — Data Perusahaan
   businessName: '',
@@ -152,37 +156,108 @@ watch(() => form.district, (newVal) => {
 })
 
 const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+const numericOnlyPattern = /^\d+$/
+const alphabetOnlyPattern = /^[a-zA-Z\s.,'-]+$/
+
+// Helper validation functions
+const formatNumericSpaced = (val: string) => {
+  // If value contains non-digits (like slashes or dashes), do not format with spaces
+  if (/[^\d\s]/.test(val)) {
+    return val
+  }
+  const digits = val.replace(/\D/g, '')
+  return digits.replace(/(\d{4})(?=\d)/g, '$1 ')
+}
+
+// Watchers to apply space formatting on numerical fields
+watch(() => form.nibNumber, (newVal) => {
+  form.nibNumber = formatNumericSpaced(newVal)
+})
+watch(() => form.npwpNumber, (newVal) => {
+  form.npwpNumber = formatNumericSpaced(newVal)
+})
+watch(() => form.deedNo, (newVal) => {
+  form.deedNo = formatNumericSpaced(newVal)
+})
+watch(() => form.latestDeedNo, (newVal) => {
+  form.latestDeedNo = formatNumericSpaced(newVal)
+})
+watch(() => form.rt, (newVal) => {
+  form.rt = formatNumericSpaced(newVal)
+})
+watch(() => form.rw, (newVal) => {
+  form.rw = formatNumericSpaced(newVal)
+})
+watch(() => form.adminNik, (newVal) => {
+  form.adminNik = formatNumericSpaced(newVal)
+})
+watch(() => form.adminNpwp, (newVal) => {
+  form.adminNpwp = formatNumericSpaced(newVal)
+})
+watch(() => form.adminPhone, (newVal) => {
+  form.adminPhone = formatNumericSpaced(newVal)
+})
+watch(() => form.executorNik, (newVal) => {
+  form.executorNik = formatNumericSpaced(newVal)
+})
+watch(() => form.executorNpwp, (newVal) => {
+  form.executorNpwp = formatNumericSpaced(newVal)
+})
+watch(() => form.executorPhone, (newVal) => {
+  form.executorPhone = formatNumericSpaced(newVal)
+})
+
+const validateNumeric = (val: string, length?: number) => {
+  const cleanVal = val.replace(/\s/g, '')
+  if (!numericOnlyPattern.test(cleanVal)) return false
+  if (length !== undefined && cleanVal.length !== length) return false
+  return true
+}
+
+const validatePhone = (val: string) => {
+  const cleanVal = val.replace(/\s/g, '')
+  return numericOnlyPattern.test(cleanVal) && cleanVal.length >= 9 && cleanVal.length <= 15
+}
+
+const validateName = (val: string) => {
+  return alphabetOnlyPattern.test(val) && val.trim().length >= 2
+}
 
 const isStepValid = computed(() => {
   if (currentStep.value === 1) {
     return Boolean(
-      form.businessName &&
-      form.directorName &&
+      form.businessName.trim() &&
+      validateName(form.directorName) &&
       emailPattern.test(form.companyEmail) &&
-      form.nibNumber && form.nibFile &&
-      form.npwpNumber && form.npwpFile,
+      validateNumeric(form.nibNumber, 13) && form.nibFile &&
+      (validateNumeric(form.npwpNumber, 15) || validateNumeric(form.npwpNumber, 16)) && form.npwpFile,
     )
   }
   if (currentStep.value === 2) {
     return Boolean(
-      form.deedNo && form.deedFile && form.deedDate &&
-      form.latestDeedNo && form.latestDeedFile && form.latestDeedDate,
+      form.deedNo.trim() && form.deedFile && form.deedDate &&
+      form.latestDeedNo.trim() && form.latestDeedFile && form.latestDeedDate,
     )
   }
   if (currentStep.value === 3) {
     return Boolean(
-      form.companyAddress && form.province && form.city && form.district && form.subDistrict && form.rt && form.rw,
+      form.companyAddress.trim() && form.province && form.city && form.district && form.subDistrict &&
+      validateNumeric(form.rt) && validateNumeric(form.rw),
     )
   }
   if (currentStep.value === 4) {
     return Boolean(
-      form.adminName && form.adminNik && form.adminNikFile &&
-      form.adminNpwp && form.adminNpwpFile && form.adminPhone,
+      validateName(form.adminName) &&
+      validateNumeric(form.adminNik, 16) && form.adminNikFile &&
+      (validateNumeric(form.adminNpwp, 15) || validateNumeric(form.adminNpwp, 16)) && form.adminNpwpFile &&
+      validatePhone(form.adminPhone),
     )
   }
   return Boolean(
-    form.executorName && form.executorNik && form.executorNikFile &&
-    form.executorNpwp && form.executorNpwpFile && form.executorPhone,
+    validateName(form.executorName) &&
+    validateNumeric(form.executorNik, 16) && form.executorNikFile &&
+    (validateNumeric(form.executorNpwp, 15) || validateNumeric(form.executorNpwp, 16)) && form.executorNpwpFile &&
+    validatePhone(form.executorPhone),
   )
 })
 
@@ -211,13 +286,45 @@ const goNext = () => {
     })
     return
   }
+
+  // Create a clean payload clone removing formatting spaces from numeric fields
+  const cleanPayload = JSON.parse(JSON.stringify(form))
+  cleanPayload.nibNumber = form.nibNumber.replace(/\s/g, '')
+  cleanPayload.npwpNumber = form.npwpNumber.replace(/\s/g, '')
+  cleanPayload.deedNo = form.deedNo.replace(/\s/g, '')
+  cleanPayload.latestDeedNo = form.latestDeedNo.replace(/\s/g, '')
+  cleanPayload.rt = form.rt.replace(/\s/g, '')
+  cleanPayload.rw = form.rw.replace(/\s/g, '')
+  cleanPayload.adminNik = form.adminNik.replace(/\s/g, '')
+  cleanPayload.adminNpwp = form.adminNpwp.replace(/\s/g, '')
+  cleanPayload.adminPhone = form.adminPhone.replace(/\s/g, '')
+  cleanPayload.executorNik = form.executorNik.replace(/\s/g, '')
+  cleanPayload.executorNpwp = form.executorNpwp.replace(/\s/g, '')
+  cleanPayload.executorPhone = form.executorPhone.replace(/\s/g, '')
+
+  // Preserve file objects as they are stripped by JSON serialization
+  cleanPayload.nibFile = form.nibFile
+  cleanPayload.npwpFile = form.npwpFile
+  cleanPayload.deedFile = form.deedFile
+  cleanPayload.latestDeedFile = form.latestDeedFile
+  cleanPayload.adminNikFile = form.adminNikFile
+  cleanPayload.adminNpwpFile = form.adminNpwpFile
+  cleanPayload.executorNikFile = form.executorNikFile
+  cleanPayload.executorNpwpFile = form.executorNpwpFile
+
+  // Log sanitized payload for debugging
+  console.log('Sanitized Registration Payload:', cleanPayload)
+
+  // Emit clean payload
+  emit('submit', cleanPayload)
+
   showAlert({ label: 'Pendaftaran berhasil dikirim.', variant: 'success' })
   router.push('/')
 }
 </script>
 
 <template>
-  <section class="register-card" aria-labelledby="register-title">
+  <section class="register-card" :class="{ 'is-step-1': currentStep === 1 }" aria-labelledby="register-title">
     <div class="register-content">
       <header class="register-header">
         <div class="title-row">
@@ -238,7 +345,7 @@ const goNext = () => {
       </header>
 
       <form class="register-form" @submit.prevent="goNext">
-        <div class="register-scroll">
+        <div class="register-scroll" :class="{ 'is-step-1': currentStep === 1 }">
           <!-- ==================== STEP 1 — Data Perusahaan ==================== -->
           <div v-if="currentStep === 1" class="fields">
             <GInputText
@@ -277,9 +384,9 @@ const goNext = () => {
                   name="nibNumber"
                   v-model="form.nibNumber"
                   placeholder="Masukkan No NIB"
-                  type="number"
+                  type="text"
                   inputmode="numeric"
-                  maxlength="30"
+                  maxlength="16"
                 />
                  <GFilePicker
                   unique-key="nib"
@@ -301,9 +408,9 @@ const goNext = () => {
                   name="npwpNumber"
                   v-model="form.npwpNumber"
                   placeholder="Masukkan No NPWP"
-                  type="number"
+                  type="text"
                   inputmode="numeric"
-                  maxlength="25"
+                  maxlength="19"
                 />
                 <GFilePicker
                   unique-key="npwp"
@@ -328,8 +435,7 @@ const goNext = () => {
                   name="deedNo"
                   v-model="form.deedNo"
                   placeholder="Masukkan No Akta"
-                  type="number"
-                  inputmode="numeric"
+                  type="text"
                   maxlength="50"
                 />
                  <GFilePicker
@@ -351,8 +457,7 @@ const goNext = () => {
                   name="latestDeedNo"
                   v-model="form.latestDeedNo"
                   placeholder="Masukkan No Akta"
-                  type="number"
-                  inputmode="numeric"
+                  type="text"
                   maxlength="50"
                 />
                  <GFilePicker
@@ -454,7 +559,7 @@ const goNext = () => {
                 v-model="form.rt"
                 label="RT"
                 placeholder="Contoh: 001"
-                type="number"
+                type="text"
                 inputmode="numeric"
                 maxlength="5"
               />
@@ -464,7 +569,7 @@ const goNext = () => {
                 v-model="form.rw"
                 label="RW"
                 placeholder="Contoh: 002"
-                type="number"
+                type="text"
                 inputmode="numeric"
                 maxlength="5"
               />
@@ -486,9 +591,9 @@ const goNext = () => {
               v-model="form.adminPhone"
               label="No Hp Pengurus"
               placeholder="Masukkan nomor telepon"
-              type="number"
+              type="text"
               inputmode="numeric"
-              maxlength="20"
+              maxlength="18"
               autocomplete="tel"
             />
             <div class="upload-field col-span-2">
@@ -499,14 +604,14 @@ const goNext = () => {
                   name="adminNik"
                   v-model="form.adminNik"
                   placeholder="Masukkan NIK"
-                  type="number"
+                  type="text"
                   inputmode="numeric"
-                  maxlength="25"
+                  maxlength="19"
                 />
                  <GFilePicker
                   unique-key="admin-nik"
                   :file="typeof form.adminNikFile === 'string' ? form.adminNikFile : null"
-                  :image-only="true"
+                  :image-only="false"
                   error-text="Ukuran file Image maksimal 10 MB"
                   @file-dropped="(file: any) => handleFile('adminNikFile', file)"
                   @file-removed="() => removeFile('adminNikFile')"
@@ -522,14 +627,14 @@ const goNext = () => {
                   name="adminNpwp"
                   v-model="form.adminNpwp"
                   placeholder="Masukkan No NPWP"
-                  type="number"
+                  type="text"
                   inputmode="numeric"
-                  maxlength="25"
+                  maxlength="19"
                 />
                  <GFilePicker
                   unique-key="admin-npwp"
                   :file="typeof form.adminNpwpFile === 'string' ? form.adminNpwpFile : null"
-                  :image-only="true"
+                  :image-only="false"
                   error-text="Ukuran file maksimal 10 MB"
                   @file-dropped="(file: any) => handleFile('adminNpwpFile', file)"
                   @file-removed="() => removeFile('adminNpwpFile')"
@@ -554,9 +659,9 @@ const goNext = () => {
               v-model="form.executorPhone"
               label="No Hp Pelaksana Transaksi"
               placeholder="Masukkan nomor telepon"
-              type="number"
+              type="text"
               inputmode="numeric"
-              maxlength="20"
+              maxlength="18"
               autocomplete="tel"
             />
             <div class="upload-field col-span-2">
@@ -567,14 +672,14 @@ const goNext = () => {
                   name="executorNik"
                   v-model="form.executorNik"
                   placeholder="Masukkan NIK"
-                  type="number"
+                  type="text"
                   inputmode="numeric"
-                  maxlength="25"
+                  maxlength="19"
                 />
                  <GFilePicker
                   unique-key="executor-nik"
                   :file="typeof form.executorNikFile === 'string' ? form.executorNikFile : null"
-                  :image-only="true"
+                  :image-only="false"
                   error-text="Ukuran file Image maksimal 10 MB"
                   @file-dropped="(file: any) => handleFile('executorNikFile', file)"
                   @file-removed="() => removeFile('executorNikFile')"
@@ -590,9 +695,9 @@ const goNext = () => {
                   name="executorNpwp"
                   v-model="form.executorNpwp"
                   placeholder="Masukkan No NPWP"
-                  type="number"
+                  type="text"
                   inputmode="numeric"
-                  maxlength="25"
+                  maxlength="19"
                 />
                  <GFilePicker
                   unique-key="executor-npwp"
@@ -636,13 +741,18 @@ const goNext = () => {
   border-radius: 10px;
   background: var(--g-kit-white);
   color: var(--g-kit-black-80);
+  overflow-y: auto;
+}
+
+.register-card.is-step-1 {
+  overflow: hidden;
 }
 
 .register-content {
   display: flex;
   flex-direction: column;
   padding: 24px;
-  overflow-y: visible;
+  overflow: hidden;
   min-height: 0;
 }
 
@@ -716,6 +826,12 @@ h1, h2 {
 
 .register-scroll {
   flex: 1;
+  padding-right: 4px;
+}
+
+.register-scroll.is-step-1 {
+  overflow-y: auto;
+  max-height: 60vh;
 }
 
 .fields {
@@ -769,6 +885,14 @@ h1, h2 {
   align-items: center;
 }
 
+:deep(.custom-file-upload) {
+  min-height: 120px !important;
+  max-height: 120px !important;
+  p {
+    width: max-content;
+  }
+}
+
 :deep(.custom-file-upload.hns) {
   min-height: 120px !important;
   max-height: 120px !important;
@@ -819,18 +943,6 @@ h1, h2 {
     display: grid;
     grid-template-columns: 1fr;
     align-items: center;
-
-    :deep(.custom-file-upload) {
-      min-height: 120px;
-      max-height: 120px !important;
-      p {
-        width: max-content;
-      }
-    }
-    :deep(.custom-file-upload.hns) {
-      min-height: 120px;
-      max-height: 120px !important;
-    }
   }
 
   .fields {

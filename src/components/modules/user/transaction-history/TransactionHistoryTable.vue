@@ -8,17 +8,25 @@ import TableHeader from '@/components/shared/table/TableHeader.vue'
 import TableFooter from '@/components/shared/table/TableFooter.vue'
 import TransactionDetailModal from '@/components/modules/user/transaction-history/TransactionDetailModal.vue'
 import ExportDateRangeModal from '@/components/modules/user/transaction-history/ExportDateRangeModal.vue'
+import { useTransactions } from '@/hooks/useTransactions'
+import { useAuthStore } from '@/stores/auth'
+import { onMounted } from 'vue'
 import { useAppAlert } from '@/hooks/useAppAlert'
-import type { TransactionHistoryResponse } from '@/types/transaction'
-import transactionHistoryMock from '@/utils/data/transaction-history.mock.json'
 import { generatePdfEStatement } from '@/utils/generate-pdf-statement.util'
 
-const transactionHistoryData = transactionHistoryMock as TransactionHistoryResponse
-const reportMetadata = transactionHistoryData.report
+const {
+  rows,
+  reportMetadata,
+  fetchTransactions,
+  fetchReportMetadata
+} = useTransactions()
+
+const authStore = useAuthStore()
+
 const rowLimit = ref(5)
 const currentPage = ref(1)
 const searchQuery = ref('')
-const lastUpdated = ref(reportMetadata.lastUpdated)
+const lastUpdated = ref('08/07/2024, 09.00 AM')
 const selectedTransaction = ref<TransactionHistoryRow | null>(null)
 const isTransactionDetailVisible = ref(false)
 const isExportModalVisible = ref(false)
@@ -50,433 +58,27 @@ type TransactionHistoryRow = {
   referenceNumber: string
 }
 
-type BaseTransactionRow = Pick<
-  TransactionHistoryRow,
-  | 'id'
-  | 'no'
-  | 'transactionHash'
-  | 'fromCompany'
-  | 'fromWallet'
-  | 'toCompany'
-  | 'toWallet'
-  | 'date'
-  | 'amount'
->
+// API types are derived dynamically from @/types/transaction.ts
 
-type CustodyTransactionMetadata = Omit<TransactionHistoryRow, keyof BaseTransactionRow>
+// Mock data removed. Data fetched dynamically from APIs via onMounted.
 
-const baseRows: BaseTransactionRow[] = [
-  {
-    id: 1,
-    no: '1',
-    transactionHash: 'CMP-BBP-2026-000421',
-    fromCompany: 'PT Indonesia Blockchain Persada',
-    fromWallet: 'BBP-WAL-2026-001245',
-    toCompany: 'PT MY Blockchain Corp',
-    toWallet: 'BBP-WAL-2026-234354',
-    date: '01 Mar 2022',
-    amount: '12 KG',
-  },
-  {
-    id: 2,
-    no: '2',
-    transactionHash: 'CMP-BBP-2026-000422',
-    fromCompany: 'PT Indonesia Maju',
-    fromWallet: 'BBP-WAL-2026-008210',
-    toCompany: 'PT Indonesia Blockchain Persada',
-    toWallet: 'BBP-WAL-2026-001245',
-    date: '01 Mar 2022',
-    amount: '1 KG',
-  },
-  {
-    id: 3,
-    no: '3',
-    transactionHash: 'CMP-BBP-2026-000423',
-    fromCompany: 'PT Blockchain Persada',
-    fromWallet: 'BBP-WAL-2026-001246',
-    toCompany: 'PT Indonesia Maju',
-    toWallet: 'BBP-WAL-2026-008210',
-    date: '01 Mar 2022',
-    amount: '122 KG',
-  },
-  {
-    id: 4,
-    no: '4',
-    transactionHash: 'CMP-BBP-2026-000424',
-    fromCompany: 'PT MY Blockchain Corp',
-    fromWallet: 'BBP-WAL-2026-234354',
-    toCompany: 'PT Indonesia Blockchain Persada',
-    toWallet: 'BBP-WAL-2026-001245',
-    date: '01 Mar 2022',
-    amount: '3 KG',
-  },
-  {
-    id: 5,
-    no: '5',
-    transactionHash: 'CMP-BBP-2026-000425',
-    fromCompany: 'PT Pegadaian Digital Aset',
-    fromWallet: 'BBP-WAL-2026-002819',
-    toCompany: 'PT Nusantara Token Emas',
-    toWallet: 'BBP-WAL-2026-009127',
-    date: '02 Mar 2022',
-    amount: '24 KG',
-  },
-  {
-    id: 6,
-    no: '6',
-    transactionHash: 'CMP-BBP-2026-000426',
-    fromCompany: 'PT Sentra Bullion Indonesia',
-    fromWallet: 'BBP-WAL-2026-110043',
-    toCompany: 'PT Indonesia Maju',
-    toWallet: 'BBP-WAL-2026-008210',
-    date: '03 Mar 2022',
-    amount: '8 KG',
-  },
-  {
-    id: 7,
-    no: '7',
-    transactionHash: 'CMP-BBP-2026-000427',
-    fromCompany: 'PT Nusantara Token Emas',
-    fromWallet: 'BBP-WAL-2026-009127',
-    toCompany: 'PT Pegadaian Digital Aset',
-    toWallet: 'BBP-WAL-2026-002819',
-    date: '03 Mar 2022',
-    amount: '15 KG',
-  },
-  {
-    id: 8,
-    no: '8',
-    transactionHash: 'CMP-BBP-2026-000428',
-    fromCompany: 'PT Indonesia Blockchain Persada',
-    fromWallet: 'BBP-WAL-2026-001245',
-    toCompany: 'PT Sentra Bullion Indonesia',
-    toWallet: 'BBP-WAL-2026-110043',
-    date: '04 Mar 2022',
-    amount: '9 KG',
-  },
-  {
-    id: 9,
-    no: '9',
-    transactionHash: 'CMP-BBP-2026-000429',
-    fromCompany: 'PT MY Blockchain Corp',
-    fromWallet: 'BBP-WAL-2026-234354',
-    toCompany: 'PT Blockchain Persada',
-    toWallet: 'BBP-WAL-2026-001246',
-    date: '05 Mar 2022',
-    amount: '32 KG',
-  },
-  {
-    id: 10,
-    no: '10',
-    transactionHash: 'CMP-BBP-2026-000430',
-    fromCompany: 'PT Indonesia Maju',
-    fromWallet: 'BBP-WAL-2026-008210',
-    toCompany: 'PT Nusantara Token Emas',
-    toWallet: 'BBP-WAL-2026-009127',
-    date: '05 Mar 2022',
-    amount: '5 KG',
-  },
-  {
-    id: 11,
-    no: '11',
-    transactionHash: 'CMP-BBP-2026-000431',
-    fromCompany: 'PT Pegadaian Digital Aset',
-    fromWallet: 'BBP-WAL-2026-002819',
-    toCompany: 'PT Indonesia Blockchain Persada',
-    toWallet: 'BBP-WAL-2026-001245',
-    date: '06 Mar 2022',
-    amount: '18 KG',
-  },
-  {
-    id: 12,
-    no: '12',
-    transactionHash: 'CMP-BBP-2026-000432',
-    fromCompany: 'PT Sentra Bullion Indonesia',
-    fromWallet: 'BBP-WAL-2026-110043',
-    toCompany: 'PT MY Blockchain Corp',
-    toWallet: 'BBP-WAL-2026-234354',
-    date: '07 Mar 2022',
-    amount: '41 KG',
-  },
-  {
-    id: 13,
-    no: '13',
-    transactionHash: 'CMP-BBP-2026-000433',
-    fromCompany: 'PT Blockchain Persada',
-    fromWallet: 'BBP-WAL-2026-001246',
-    toCompany: 'PT Pegadaian Digital Aset',
-    toWallet: 'BBP-WAL-2026-002819',
-    date: '07 Mar 2022',
-    amount: '27 KG',
-  },
-  {
-    id: 14,
-    no: '14',
-    transactionHash: 'CMP-BBP-2026-000434',
-    fromCompany: 'PT Indonesia Blockchain Persada',
-    fromWallet: 'BBP-WAL-2026-001245',
-    toCompany: 'PT Indonesia Maju',
-    toWallet: 'BBP-WAL-2026-008210',
-    date: '08 Mar 2022',
-    amount: '11 KG',
-  },
-  {
-    id: 15,
-    no: '15',
-    transactionHash: 'CMP-BBP-2026-000435',
-    fromCompany: 'PT Nusantara Token Emas',
-    fromWallet: 'BBP-WAL-2026-009127',
-    toCompany: 'PT Sentra Bullion Indonesia',
-    toWallet: 'BBP-WAL-2026-110043',
-    date: '09 Mar 2022',
-    amount: '64 KG',
-  },
-]
-
-const custodyMetadata: CustodyTransactionMetadata[] = [
-  {
-    transactionType: 'Transfer',
-    status: 'Success',
-    fromAddress: 'bb1qpx8n9du2s7v6m4wxahk9pr80qx2k4c2n6tyg5l',
-    toAddress: 'bb1qmx4d9lv2p8r7yq0cnt6gwh3e2uf5s9adk1zpa',
-    confirmedAt: '01 Mar 2022, 10:24 WIB',
-    asset: 'PAXG',
-    network: 'Bullion Private Ledger',
-    fee: '0.01 KG',
-    netAmount: '11.99 KG',
-    fiatValue: 'Rp 13.188.000',
-    blockNumber: 'BBP-2022-0301-000184',
-    confirmations: '12/12',
-    referenceNumber: 'BB-CUST-2022-000421',
-  },
-  {
-    transactionType: 'QR Receive',
-    status: 'Success',
-    fromAddress: 'bb1q8xlt6v2d94ka3sjp0hmwfq5gny7cerz1b2vdx',
-    toAddress: 'bb1qpx8n9du2s7v6m4wxahk9pr80qx2k4c2n6tyg5l',
-    confirmedAt: '01 Mar 2022, 11:08 WIB',
-    asset: 'PAXG',
-    network: 'Bullion Private Ledger',
-    fee: '0.00 KG',
-    netAmount: '1 KG',
-    fiatValue: 'Rp 1.100.000',
-    blockNumber: 'BBP-2022-0301-000193',
-    confirmations: '12/12',
-    referenceNumber: 'BB-CUST-2022-000422',
-  },
-  {
-    transactionType: 'Deposit',
-    status: 'Success',
-    fromAddress: 'bb1q3m7sjx5enr88q0zp6twyk9d4ufxlt92avh6sn',
-    toAddress: 'bb1q8xlt6v2d94ka3sjp0hmwfq5gny7cerz1b2vdx',
-    confirmedAt: '01 Mar 2022, 13:45 WIB',
-    asset: 'PAXG',
-    network: 'Bullion Private Ledger',
-    fee: '0.03 KG',
-    netAmount: '121.97 KG',
-    fiatValue: 'Rp 134.200.000',
-    blockNumber: 'BBP-2022-0301-000205',
-    confirmations: '12/12',
-    referenceNumber: 'BB-CUST-2022-000423',
-  },
-  {
-    transactionType: 'Transfer',
-    status: 'Pending',
-    fromAddress: 'bb1qmx4d9lv2p8r7yq0cnt6gwh3e2uf5s9adk1zpa',
-    toAddress: 'bb1qpx8n9du2s7v6m4wxahk9pr80qx2k4c2n6tyg5l',
-    confirmedAt: '01 Mar 2022, 15:17 WIB',
-    asset: 'PAXG',
-    network: 'Bullion Private Ledger',
-    fee: '0.01 KG',
-    netAmount: '2.99 KG',
-    fiatValue: 'Rp 3.300.000',
-    blockNumber: 'BBP-2022-0301-000218',
-    confirmations: '4/12',
-    referenceNumber: 'BB-CUST-2022-000424',
-  },
-  {
-    transactionType: 'Swap',
-    status: 'Success',
-    fromAddress: 'bb1q25e2tc79ru0nlp5a8kgx3cq0shmr49vq2dj73',
-    toAddress: 'bb1q7nwjp9u2vl6k5mk8hctra0s2x3dg4feq96zpn',
-    confirmedAt: '02 Mar 2022, 09:16 WIB',
-    asset: 'PGT',
-    network: 'Bullion Private Ledger',
-    fee: '0.02 KG',
-    netAmount: '23.98 KG',
-    fiatValue: 'Rp 26.400.000',
-    blockNumber: 'BBP-2022-0302-000244',
-    confirmations: '12/12',
-    referenceNumber: 'BB-CUST-2022-000425',
-  },
-  {
-    transactionType: 'Redemption',
-    status: 'Success',
-    fromAddress: 'bb1qfyw9scl4ne82mt4g6hzxpa7k0q5c3dj1r8qvl',
-    toAddress: 'bb1q8xlt6v2d94ka3sjp0hmwfq5gny7cerz1b2vdx',
-    confirmedAt: '03 Mar 2022, 12:22 WIB',
-    asset: 'PAXG',
-    network: 'Bullion Private Ledger',
-    fee: '0.01 KG',
-    netAmount: '7.99 KG',
-    fiatValue: 'Rp 8.800.000',
-    blockNumber: 'BBP-2022-0303-000267',
-    confirmations: '12/12',
-    referenceNumber: 'BB-CUST-2022-000426',
-  },
-  {
-    transactionType: 'QR Receive',
-    status: 'Success',
-    fromAddress: 'bb1q7nwjp9u2vl6k5mk8hctra0s2x3dg4feq96zpn',
-    toAddress: 'bb1q25e2tc79ru0nlp5a8kgx3cq0shmr49vq2dj73',
-    confirmedAt: '03 Mar 2022, 14:39 WIB',
-    asset: 'PGT',
-    network: 'Bullion Private Ledger',
-    fee: '0.00 KG',
-    netAmount: '15 KG',
-    fiatValue: 'Rp 16.500.000',
-    blockNumber: 'BBP-2022-0303-000273',
-    confirmations: '12/12',
-    referenceNumber: 'BB-CUST-2022-000427',
-  },
-  {
-    transactionType: 'Transfer',
-    status: 'Failed',
-    fromAddress: 'bb1qpx8n9du2s7v6m4wxahk9pr80qx2k4c2n6tyg5l',
-    toAddress: 'bb1qfyw9scl4ne82mt4g6hzxpa7k0q5c3dj1r8qvl',
-    confirmedAt: '04 Mar 2022, 09:03 WIB',
-    asset: 'PAXG',
-    network: 'Bullion Private Ledger',
-    fee: '0.00 KG',
-    netAmount: '0 KG',
-    fiatValue: 'Rp 9.900.000',
-    blockNumber: 'BBP-2022-0304-000301',
-    confirmations: '0/12',
-    referenceNumber: 'BB-CUST-2022-000428',
-  },
-  {
-    transactionType: 'Transfer',
-    status: 'Success',
-    fromAddress: 'bb1qmx4d9lv2p8r7yq0cnt6gwh3e2uf5s9adk1zpa',
-    toAddress: 'bb1q3m7sjx5enr88q0zp6twyk9d4ufxlt92avh6sn',
-    confirmedAt: '05 Mar 2022, 10:47 WIB',
-    asset: 'PAXG',
-    network: 'Bullion Private Ledger',
-    fee: '0.02 KG',
-    netAmount: '31.98 KG',
-    fiatValue: 'Rp 35.200.000',
-    blockNumber: 'BBP-2022-0305-000329',
-    confirmations: '12/12',
-    referenceNumber: 'BB-CUST-2022-000429',
-  },
-  {
-    transactionType: 'Transfer',
-    status: 'Pending',
-    fromAddress: 'bb1q8xlt6v2d94ka3sjp0hmwfq5gny7cerz1b2vdx',
-    toAddress: 'bb1q7nwjp9u2vl6k5mk8hctra0s2x3dg4feq96zpn',
-    confirmedAt: '05 Mar 2022, 16:05 WIB',
-    asset: 'PAXG',
-    network: 'Bullion Private Ledger',
-    fee: '0.01 KG',
-    netAmount: '4.99 KG',
-    fiatValue: 'Rp 5.500.000',
-    blockNumber: 'BBP-2022-0305-000341',
-    confirmations: '7/12',
-    referenceNumber: 'BB-CUST-2022-000430',
-  },
-  {
-    transactionType: 'Withdrawal',
-    status: 'Success',
-    fromAddress: 'bb1q25e2tc79ru0nlp5a8kgx3cq0shmr49vq2dj73',
-    toAddress: 'bb1qpx8n9du2s7v6m4wxahk9pr80qx2k4c2n6tyg5l',
-    confirmedAt: '06 Mar 2022, 08:51 WIB',
-    asset: 'PAXG',
-    network: 'Bullion Private Ledger',
-    fee: '0.01 KG',
-    netAmount: '17.99 KG',
-    fiatValue: 'Rp 19.800.000',
-    blockNumber: 'BBP-2022-0306-000356',
-    confirmations: '12/12',
-    referenceNumber: 'BB-CUST-2022-000431',
-  },
-  {
-    transactionType: 'Deposit',
-    status: 'Success',
-    fromAddress: 'bb1qfyw9scl4ne82mt4g6hzxpa7k0q5c3dj1r8qvl',
-    toAddress: 'bb1qmx4d9lv2p8r7yq0cnt6gwh3e2uf5s9adk1zpa',
-    confirmedAt: '07 Mar 2022, 10:12 WIB',
-    asset: 'PAXG',
-    network: 'Bullion Private Ledger',
-    fee: '0.03 KG',
-    netAmount: '40.97 KG',
-    fiatValue: 'Rp 45.100.000',
-    blockNumber: 'BBP-2022-0307-000381',
-    confirmations: '12/12',
-    referenceNumber: 'BB-CUST-2022-000432',
-  },
-  {
-    transactionType: 'Swap',
-    status: 'Success',
-    fromAddress: 'bb1q3m7sjx5enr88q0zp6twyk9d4ufxlt92avh6sn',
-    toAddress: 'bb1q25e2tc79ru0nlp5a8kgx3cq0shmr49vq2dj73',
-    confirmedAt: '07 Mar 2022, 13:31 WIB',
-    asset: 'PGT',
-    network: 'Bullion Private Ledger',
-    fee: '0.02 KG',
-    netAmount: '26.98 KG',
-    fiatValue: 'Rp 29.700.000',
-    blockNumber: 'BBP-2022-0307-000396',
-    confirmations: '12/12',
-    referenceNumber: 'BB-CUST-2022-000433',
-  },
-  {
-    transactionType: 'Transfer',
-    status: 'Success',
-    fromAddress: 'bb1qpx8n9du2s7v6m4wxahk9pr80qx2k4c2n6tyg5l',
-    toAddress: 'bb1q8xlt6v2d94ka3sjp0hmwfq5gny7cerz1b2vdx',
-    confirmedAt: '08 Mar 2022, 09:57 WIB',
-    asset: 'PAXG',
-    network: 'Bullion Private Ledger',
-    fee: '0.01 KG',
-    netAmount: '10.99 KG',
-    fiatValue: 'Rp 12.100.000',
-    blockNumber: 'BBP-2022-0308-000417',
-    confirmations: '12/12',
-    referenceNumber: 'BB-CUST-2022-000434',
-  },
-  {
-    transactionType: 'Deposit',
-    status: 'Success',
-    fromAddress: 'bb1q7nwjp9u2vl6k5mk8hctra0s2x3dg4feq96zpn',
-    toAddress: 'bb1qfyw9scl4ne82mt4g6hzxpa7k0q5c3dj1r8qvl',
-    confirmedAt: '09 Mar 2022, 11:26 WIB',
-    asset: 'PAXG',
-    network: 'Bullion Private Ledger',
-    fee: '0.04 KG',
-    netAmount: '63.96 KG',
-    fiatValue: 'Rp 70.400.000',
-    blockNumber: 'BBP-2022-0309-000452',
-    confirmations: '12/12',
-    referenceNumber: 'BB-CUST-2022-000435',
-  },
-]
-
-const rows: TransactionHistoryRow[] = baseRows.map(
-  (row, index): TransactionHistoryRow => ({
-    ...row,
-    ...custodyMetadata[index]!,
-  }),
-)
+onMounted(async () => {
+  await fetchTransactions()
+  await fetchReportMetadata()
+  if (reportMetadata.value) {
+    lastUpdated.value = reportMetadata.value.lastUpdated
+  }
+})
 
 const perPage = computed(() => rowLimit.value)
-const hasTableControls = computed(() => rows.length > 10)
+const hasTableControls = computed(() => rows.value.length > 10)
 
 const filteredRows = computed(() => {
   const query = searchQuery.value.trim().toLowerCase()
 
-  if (!query) return rows
+  if (!query) return rows.value
 
-  return rows.filter((row) =>
+  return rows.value.filter((row: TransactionHistoryRow) =>
     [
       row.no,
       row.transactionHash,
@@ -555,7 +157,7 @@ const exportTransactions = async (fromDate: string, toDate: string) => {
     const end = new Date(toDate + 'T23:59:59')
 
     // Filter rows by date range
-    const filteredTransactions = rows.filter((row) => {
+    const filteredTransactions = rows.value.filter((row: TransactionHistoryRow) => {
       const rowDate = new Date(row.date)
       return !isNaN(rowDate.getTime()) && rowDate >= start && rowDate <= end
     })
@@ -569,20 +171,20 @@ const exportTransactions = async (fromDate: string, toDate: string) => {
 
     const fromFormatted = formatToDDMMYYYYSpaced(fromDate)
     const toFormatted = formatToDDMMYYYYSpaced(toDate)
-    const company = reportMetadata.companyName
+    const company = reportMetadata.value?.companyName || authStore.companyName
     const filename = `Custody Report - ${company} - ${fromFormatted} - ${toFormatted}.pdf`
 
     await generatePdfEStatement({
-      title: reportMetadata.title,
-      companyName: reportMetadata.companyName,
-      companyId: reportMetadata.companyId,
-      custodyAccountId: reportMetadata.custodyAccountId,
-      walletId: reportMetadata.walletId,
+      title: reportMetadata.value?.title || 'Custody Transaction Report',
+      companyName: reportMetadata.value?.companyName || authStore.companyName,
+      companyId: reportMetadata.value?.companyId || authStore.companyId,
+      custodyAccountId: reportMetadata.value?.custodyAccountId || 'CUST-BBP-2026-001',
+      walletId: reportMetadata.value?.walletId || authStore.walletAddress,
       reportPeriod: `${fromDate} - ${toDate}`,
-      openingBalance: reportMetadata.openingBalance,
-      totalDebit: reportMetadata.totalDebit,
-      totalCredit: reportMetadata.totalCredit,
-      closingBalance: reportMetadata.closingBalance,
+      openingBalance: reportMetadata.value?.openingBalance || '0 KG',
+      totalDebit: reportMetadata.value?.totalDebit || '0 KG',
+      totalCredit: reportMetadata.value?.totalCredit || '0 KG',
+      closingBalance: reportMetadata.value?.closingBalance || '0 KG',
       lastUpdated: lastUpdated.value,
       filename,
       transactions: filteredTransactions,
@@ -611,7 +213,9 @@ const handleExportModalConfirm = (dateRange: { fromDate: string; toDate: string 
   exportTransactions(dateRange.fromDate, dateRange.toDate)
 }
 
-const refreshData = () => {
+const refreshData = async () => {
+  await fetchTransactions()
+  await fetchReportMetadata()
   lastUpdated.value = new Intl.DateTimeFormat('en-GB', {
     day: '2-digit',
     month: '2-digit',
