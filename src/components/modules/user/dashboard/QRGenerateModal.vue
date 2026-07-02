@@ -4,6 +4,8 @@ import { computed, ref } from 'vue'
 import { GButton } from '@/components'
 import { useAppAlert } from '@/hooks/useAppAlert'
 
+import { useAuthStore } from '@/stores/auth'
+
 const props = defineProps<{
   modelValue: boolean
 }>()
@@ -17,9 +19,14 @@ const isOpen = computed({
   set: (value) => emit('update:modelValue', value),
 })
 
-const qrAddress = 'bbc1qxy2kgdygjrs3p83kkfjhx0wlhbc1qxy2kgdygjrs3p83kkfjhx0wlh'
+const authStore = useAuthStore()
+const qrAddress = computed(() => authStore.walletAddress || 'bbc1qxy2kgdygjrs3p83kkfjhx0wlhbc1qxy2kgdygjrs3p83kkfjhx0wlh')
 const isCopied = ref(false)
 const { showAlert } = useAppAlert()
+
+const qrCodeUrl = computed(() => {
+  return `https://api.qrserver.com/v1/create-qr-code/?size=216x216&data=${encodeURIComponent(qrAddress.value)}`
+})
 
 const closeModal = () => {
   isOpen.value = false
@@ -27,9 +34,9 @@ const closeModal = () => {
 
 const copyAddress = async () => {
   if (!navigator.clipboard?.writeText) {
-    window.prompt('Copy address', qrAddress)
+    window.prompt('Copy address', qrAddress.value)
     showAlert({
-      label: `Clipboard browser tidak tersedia. Salin QR address ${qrAddress} secara manual.`,
+      label: `Clipboard browser tidak tersedia. Salin QR address ${qrAddress.value} secara manual.`,
       variant: 'warning',
       timeout: 5000,
     })
@@ -37,10 +44,10 @@ const copyAddress = async () => {
   }
 
   try {
-    await navigator.clipboard.writeText(qrAddress)
+    await navigator.clipboard.writeText(qrAddress.value)
     isCopied.value = true
     showAlert({
-      label: `QR address ${qrAddress} berhasil disalin.`,
+      label: `QR address ${qrAddress.value} berhasil disalin.`,
       variant: 'success',
       timeout: 4000,
     })
@@ -49,7 +56,7 @@ const copyAddress = async () => {
     }, 1400)
   } catch {
     showAlert({
-      label: `QR address ${qrAddress} gagal disalin.`,
+      label: `QR address ${qrAddress.value} gagal disalin.`,
       variant: 'danger',
       timeout: 4000,
     })
@@ -80,13 +87,7 @@ const copyAddress = async () => {
 
           <div class="qr-modal-content">
             <div class="qr-code" aria-label="QR code">
-              <svg viewBox="0 0 216 216" fill="none" aria-hidden="true">
-                <rect width="216" height="216" rx="8" fill="white" />
-                <path
-                  d="M24 24h48v48H24V24Zm12 12v24h24V36H36Zm108-12h48v48h-48V24Zm12 12v24h24V36h-24ZM24 144h48v48H24v-48Zm12 12v24h24v-24H36Zm72-120h12v12h-12V36Zm24 0h12v24h-12V36ZM84 48h12v24H84V48Zm24 12h24v12h-24V60Zm-24 24h36v12H84V84Zm48 0h12v24h-12V84Zm24 0h12v12h-12V84Zm-72 24h12v24H84v-24Zm24 0h12v12h-12v-12Zm48 0h36v12h-36v-12Zm-36 12h36v12h-36v-12Zm-36 24h24v12H84v-12Zm48 0h12v24h-12v-24Zm24 0h12v12h-12v-12Zm24 0h12v48h-12v-48Zm-72 24h12v24h-12v-24Zm48 0h24v12h-24v-12Zm-72 24h12v12H84v-12Zm48 0h36v12h-36v-12Z"
-                  fill="#252528"
-                />
-              </svg>
+              <img :src="qrCodeUrl" alt="QR Code" style="width: 100%; height: 100%; border-radius: 4px;" />
             </div>
 
             <p class="qr-address" :title="qrAddress">{{ qrAddress }}</p>
