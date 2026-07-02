@@ -537,6 +537,17 @@ function onSearchChange(val: string) {
   searchQuery.value = val
 }
 
+const formatToDDMMYYYYSpaced = (dateStr: string): string => {
+  const parts = dateStr.split('-')
+  if (parts.length === 3) {
+    const dd = parts[2]
+    const mm = parts[1]
+    const yyyy = parts[0]
+    return `${dd} ${mm} ${yyyy}`
+  }
+  return dateStr
+}
+
 const exportTransactions = async (fromDate: string, toDate: string) => {
   try {
     // Parse selected date range
@@ -556,6 +567,11 @@ const exportTransactions = async (fromDate: string, toDate: string) => {
 
     exportError.value = ''
 
+    const fromFormatted = formatToDDMMYYYYSpaced(fromDate)
+    const toFormatted = formatToDDMMYYYYSpaced(toDate)
+    const company = reportMetadata.companyName
+    const filename = `Custody Report - ${company} - ${fromFormatted} - ${toFormatted}.pdf`
+
     await generatePdfEStatement({
       title: reportMetadata.title,
       companyName: reportMetadata.companyName,
@@ -568,6 +584,7 @@ const exportTransactions = async (fromDate: string, toDate: string) => {
       totalCredit: reportMetadata.totalCredit,
       closingBalance: reportMetadata.closingBalance,
       lastUpdated: lastUpdated.value,
+      filename,
       transactions: filteredTransactions,
     })
     showAlert({

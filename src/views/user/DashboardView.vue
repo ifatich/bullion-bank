@@ -6,18 +6,23 @@ import MenuSection from '@/components/modules/user/dashboard/MenuSection.vue'
 import QRGenerateModal from '@/components/modules/user/dashboard/QRGenerateModal.vue'
 import TaskCard from '@/components/modules/user/dashboard/TaskCard.vue'
 import UserPageLayout from '@/components/shared/layouts/UserPageLayout.vue'
+import ExportDateRangeModal from '@/components/modules/user/transaction-history/ExportDateRangeModal.vue'
 import { useAppAlert } from '@/hooks/useAppAlert'
+import { generatePdfEStatement } from '@/utils/generate-pdf-statement.util'
+import transactionHistoryMock from '@/utils/data/transaction-history.mock.json'
 
 const tokenMenus = [
-  { label: 'Swap', to: '/token/swap' },
-  { label: 'Redemption', to: '/token/redemption' },
-  { label: 'Transfer', to: '/token/transfer' },
+  { label: 'Swap', to: '/token/swap', icon: 'swap' },
+  { label: 'Redemption', to: '/token/redemption', icon: 'redemption' },
+  { label: 'Transfer', to: '/token/transfer', icon: 'transfer' },
 ]
 const qrMenus = [
-  { label: 'Add QR' },
-  { label: 'Custody Report' },
+  { label: 'Show QR', icon: 'add-qr' },
+  { label: 'Custody Report', icon: 'custody' },
 ]
 const isQRModalOpen = ref(false)
+const isExportModalOpen = ref(false)
+const exportError = ref('')
 const { showAlert } = useAppAlert()
 
 const handleTokenMenuSelect = () => {
@@ -27,8 +32,77 @@ const handleTokenMenuSelect = () => {
   })
 }
 
-const openQRModal = () => {
-  isQRModalOpen.value = true
+const handleQRMenuSelect = (item: { label: string }) => {
+  if (item.label === 'Show QR') {
+    isQRModalOpen.value = true
+  } else if (item.label === 'Custody Report') {
+    exportError.value = ''
+    isExportModalOpen.value = true
+  }
+}
+
+const formatToDDMMYYYYSpaced = (dateStr: string): string => {
+  const parts = dateStr.split('-')
+  if (parts.length === 3) {
+    const dd = parts[2]
+    const mm = parts[1]
+    const yyyy = parts[0]
+    return `${dd} ${mm} ${yyyy}`
+  }
+  return dateStr
+}
+
+const handleExportConfirm = async (dateRange: { fromDate: string; toDate: string }) => {
+  try {
+    const start = new Date(dateRange.fromDate + 'T00:00:00')
+    const end = new Date(dateRange.toDate + 'T23:59:59')
+
+    const filteredTransactions = transactionHistoryMock.transactions
+      .filter((tx) => {
+        const txDate = new Date(tx.date)
+        return !isNaN(txDate.getTime()) && txDate >= start && txDate <= end
+      })
+      .map((row) => ({
+        ...row,
+        status: row.status as 'Success' | 'Pending' | 'Failed',
+      }))
+
+    if (filteredTransactions.length === 0) {
+      exportError.value = 'Tidak ada transaksi dalam rentang tanggal yang dipilih.'
+      return
+    }
+
+    exportError.value = ''
+
+    const fromFormatted = formatToDDMMYYYYSpaced(dateRange.fromDate)
+    const toFormatted = formatToDDMMYYYYSpaced(dateRange.toDate)
+    const company = transactionHistoryMock.report.companyName
+    const filename = `Custody Report - ${company} - ${fromFormatted} - ${toFormatted}.pdf`
+
+    await generatePdfEStatement({
+      title: transactionHistoryMock.report.title,
+      companyName: transactionHistoryMock.report.companyName,
+      companyId: transactionHistoryMock.report.companyId,
+      custodyAccountId: transactionHistoryMock.report.custodyAccountId,
+      walletId: transactionHistoryMock.report.walletId,
+      reportPeriod: `${dateRange.fromDate} - ${dateRange.toDate}`,
+      openingBalance: transactionHistoryMock.report.openingBalance,
+      totalDebit: transactionHistoryMock.report.totalDebit,
+      totalCredit: transactionHistoryMock.report.totalCredit,
+      closingBalance: transactionHistoryMock.report.closingBalance,
+      lastUpdated: transactionHistoryMock.report.lastUpdated,
+      filename,
+      transactions: filteredTransactions,
+    })
+
+    showAlert({
+      label: 'Detail transaksi berhasil diexport sebagai PDF.',
+      variant: 'success',
+    })
+    isExportModalOpen.value = false
+  } catch (err) {
+    exportError.value = 'Gagal mengeksport laporan.'
+  }
 }
 
 const tvWidgetRef = ref<HTMLDivElement | null>(null)
@@ -121,12 +195,18 @@ onUnmounted(() => {
       </div>
 
       <div class="menu-row">
-        <MenuSection title="Token" :items="tokenMenus" @select="handleTokenMenuSelect" />
-        <MenuSection title="Connection" :items="qrMenus" @select="openQRModal" />
+        <MenuSection title="Token Use Case" :items="tokenMenus" @select="handleTokenMenuSelect" />
+        <MenuSection title="Connection" :items="qrMenus" @select="handleQRMenuSelect" />
       </div>
     </div>
 
     <QRGenerateModal v-model="isQRModalOpen" />
+    <ExportDateRangeModal
+      :is-visible="isExportModalOpen"
+      :error-text="exportError"
+      @close="isExportModalOpen = false"
+      @confirm="handleExportConfirm"
+    />
   </UserPageLayout>
 </template>
 

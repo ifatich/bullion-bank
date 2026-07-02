@@ -4,14 +4,18 @@ export interface EStatementConfig {
   title?: string
   companyName?: string
   companyId?: string
+  companyAddress?: string
+  companyPhone?: string
   custodyAccountId?: string
   walletId?: string
+  walletAddress?: string
   reportPeriod?: string
   openingBalance?: string
   totalDebit?: string
   totalCredit?: string
   closingBalance?: string
   lastUpdated?: string
+  filename?: string
   transactions: Array<{
     no: string
     transactionHash: string
@@ -53,19 +57,34 @@ export const generatePdfEStatement = async (config: EStatementConfig) => {
   }
 
   const {
-    title = 'Custody Transaction Report',
+    title = 'Gold Custody Transaction Report',
     companyName = 'PT Bullion Bank Indonesia',
-    companyId = 'PT Bullion Bank Indonesia',
-    custodyAccountId = '-',
-    walletId = '-',
+    companyId = '001PXTID',
+    companyAddress = 'Gedung Menara Mulia, Jl. Jend. Gatot Subroto Kav. 9-11, Jakarta',
+    companyPhone = '+62 21 1234 5678',
+    walletAddress = 'bc1qxy2kgdygjrs3p83kkfjhx0wlhbc1qxy2kgdygjrs3p83kkfjhx0wlh',
     reportPeriod = '1 Mar 2022 - 9 Mar 2022',
     openingBalance = '-',
     totalDebit = '-',
     totalCredit = '-',
     closingBalance = '-',
-    lastUpdated = new Date().toLocaleString('id-ID', { dateStyle: 'long', timeStyle: 'long' }),
     transactions,
   } = config
+
+  const formatReportPeriod = (period: string) => {
+    const dates = period.split(' - ')
+    if (dates.length === 2) {
+      const formatSingleDate = (dateStr: string) => {
+        const parts = dateStr.split('-')
+        if (parts.length === 3) {
+          return `${parts[2]}/${parts[1]}/${parts[0]}`
+        }
+        return dateStr
+      }
+      return `${formatSingleDate(dates[0])} - ${formatSingleDate(dates[1])}`
+    }
+    return period
+  }
 
   const statusColor = (status: EStatementTransaction['status']) => {
     if (status === 'Success') return colors.green
@@ -95,35 +114,35 @@ export const generatePdfEStatement = async (config: EStatementConfig) => {
 
         return `
           <tr style="background-color: ${globalIndex % 2 === 0 ? colors.white : colors.black10};">
-            <td style="width: 24px; text-align: center; padding: 8px 6px; font-size: 10px; line-height: 14px; color: ${colors.black60}; border-right: 1px solid ${colors.black20}; border-bottom: 1px solid ${colors.black20};">${tx.no}</td>
-            <td style="width: 98px; text-align: left; padding: 8px 6px; border-right: 1px solid ${colors.black20}; border-bottom: 1px solid ${colors.black20};">
-              <p style="margin: 0 0 3px 0; font-size: 10px; line-height: 14px; color: ${colors.black60}; font-weight: 800;">${tx.transactionHash}</p>
-              <p style="margin: 0; font-size: 9px; line-height: 13px; color: ${colors.black50}; font-weight: 600;">${tx.referenceNumber}</p>
+            <td style="width: 24px; text-align: center; padding: 6px; font-size: 10px; line-height: 14px; color: ${colors.black60}; border-right: 1px solid ${colors.black20}; border-bottom: 1px solid ${colors.black20};">${tx.no}</td>
+            <td style="width: 98px; text-align: left; padding: 6px; border-right: 1px solid ${colors.black20}; border-bottom: 1px solid ${colors.black20};">
+              <p style="margin: 0 0 2px 0; font-size: 10px; line-height: 13px; color: ${colors.black60}; font-weight: 800;">${tx.transactionHash}</p>
+              <p style="margin: 0; font-size: 9px; line-height: 12px; color: ${colors.black50}; font-weight: 600;">${tx.referenceNumber}</p>
             </td>
-            <td style="width: 62px; text-align: left; padding: 8px 6px; border-right: 1px solid ${colors.black20}; border-bottom: 1px solid ${colors.black20};">
-              <p style="margin: 0 0 3px 0; font-size: 10px; line-height: 14px; color: ${colors.black60}; font-weight: 800;">${tx.transactionType}</p>
-              <p style="margin: 0; font-size: 9px; line-height: 13px; color: ${statusColor(tx.status)}; font-weight: 800;">${tx.status}</p>
+            <td style="width: 62px; text-align: left; padding: 6px; border-right: 1px solid ${colors.black20}; border-bottom: 1px solid ${colors.black20};">
+              <p style="margin: 0 0 2px 0; font-size: 10px; line-height: 13px; color: ${colors.black60}; font-weight: 800;">${tx.transactionType}</p>
+              <p style="margin: 0; font-size: 9px; line-height: 12px; color: ${statusColor(tx.status)}; font-weight: 800;">${tx.status}</p>
             </td>
-            <td style="width: 124px; text-align: left; padding: 8px 6px; border-right: 1px solid ${colors.black20}; border-bottom: 1px solid ${colors.black20};">
-              <p style="margin: 0 0 3px 0; font-size: 10px; line-height: 14px; color: ${colors.black60}; font-weight: 800;">${tx.fromCompany}</p>
-              <p style="margin: 0 0 3px 0; font-size: 9px; line-height: 13px; color: ${colors.black60}; font-weight: 600;">${tx.fromWallet}</p>
+            <td style="width: 124px; text-align: left; padding: 6px; border-right: 1px solid ${colors.black20}; border-bottom: 1px solid ${colors.black20};">
+              <p style="margin: 0 0 2px 0; font-size: 10px; line-height: 13px; color: ${colors.black60}; font-weight: 800;">${tx.fromCompany}</p>
+              <p style="margin: 0 0 2px 0; font-size: 9px; line-height: 12px; color: ${colors.black60}; font-weight: 600;">${tx.fromWallet}</p>
               <p style="margin: 0; font-size: 8px; line-height: 11px; color: ${colors.black50}; font-weight: 600; word-break: break-all;">${tx.fromAddress}</p>
             </td>
-            <td style="width: 124px; text-align: left; padding: 8px 6px; border-right: 1px solid ${colors.black20}; border-bottom: 1px solid ${colors.black20};">
-              <p style="margin: 0 0 3px 0; font-size: 10px; line-height: 14px; color: ${colors.black60}; font-weight: 800;">${tx.toCompany}</p>
-              <p style="margin: 0 0 3px 0; font-size: 9px; line-height: 13px; color: ${colors.black60}; font-weight: 600;">${tx.toWallet}</p>
+            <td style="width: 124px; text-align: left; padding: 6px; border-right: 1px solid ${colors.black20}; border-bottom: 1px solid ${colors.black20};">
+              <p style="margin: 0 0 2px 0; font-size: 10px; line-height: 13px; color: ${colors.black60}; font-weight: 800;">${tx.toCompany}</p>
+              <p style="margin: 0 0 2px 0; font-size: 9px; line-height: 12px; color: ${colors.black60}; font-weight: 600;">${tx.toWallet}</p>
               <p style="margin: 0; font-size: 8px; line-height: 11px; color: ${colors.black50}; font-weight: 600; word-break: break-all;">${tx.toAddress}</p>
             </td>
-            <td style="width: 62px; text-align: left; padding: 8px 6px; border-right: 1px solid ${colors.black20}; border-bottom: 1px solid ${colors.black20};">
-              <p style="margin: 0 0 3px 0; font-size: 10px; line-height: 14px; color: ${colors.black60}; font-weight: 800;">${tx.asset}</p>
+            <td style="width: 62px; text-align: left; padding: 6px; border-right: 1px solid ${colors.black20}; border-bottom: 1px solid ${colors.black20};">
+              <p style="margin: 0 0 2px 0; font-size: 10px; line-height: 13px; color: ${colors.black60}; font-weight: 800;">${tx.asset}</p>
               <p style="margin: 0; font-size: 8px; line-height: 11px; color: ${colors.black50}; font-weight: 600;">${tx.network}</p>
             </td>
-            <td style="width: 58px; text-align: center; padding: 8px 6px; font-size: 10px; line-height: 14px; color: ${colors.black60}; border-right: 1px solid ${colors.black20}; border-bottom: 1px solid ${colors.black20};">${tx.date}</td>
-            <td style="width: 58px; text-align: right; padding: 8px 6px; border-right: 1px solid ${colors.black20}; border-bottom: 1px solid ${colors.black20};">
-              <p style="margin: 0 0 3px 0; font-size: 10px; line-height: 14px; color: ${colors.black60}; font-weight: 800;">${tx.amount}</p>
+            <td style="width: 58px; text-align: center; padding: 6px; font-size: 10px; line-height: 13px; color: ${colors.black60}; border-right: 1px solid ${colors.black20}; border-bottom: 1px solid ${colors.black20};">${tx.date}</td>
+            <td style="width: 58px; text-align: right; padding: 6px; border-right: 1px solid ${colors.black20}; border-bottom: 1px solid ${colors.black20};">
+              <p style="margin: 0 0 2px 0; font-size: 10px; line-height: 13px; color: ${colors.black60}; font-weight: 800;">${tx.amount}</p>
               <p style="margin: 0; font-size: 8px; line-height: 11px; color: ${colors.black50}; font-weight: 600;">Fee ${tx.fee}</p>
             </td>
-            <td style="width: 58px; text-align: right; padding: 8px 6px; font-size: 10px; line-height: 14px; color: ${colors.black60}; border-bottom: 1px solid ${colors.black20}; font-weight: 800;">${tx.netAmount}</td>
+            <td style="width: 58px; text-align: right; padding: 6px; font-size: 10px; line-height: 13px; color: ${colors.black60}; border-bottom: 1px solid ${colors.black20}; font-weight: 800;">${tx.netAmount}</td>
           </tr>
         `
       })
@@ -133,32 +152,31 @@ export const generatePdfEStatement = async (config: EStatementConfig) => {
     const isLastChunk = chunkIndex === transactionChunks.length - 1
 
     return `
-      <div class="pdf-page ${isLastChunk ? 'pdf-page--last' : ''}" style="margin-bottom: 20px;">
-        <h3 style="margin: 0 0 12px 0; color: ${colors.black80}; font-size: 12px; line-height: 16px; font-weight: 800;">Custody Transaction Details${transactionChunks.length > 1 ? ` (${chunkIndex + 1}/${transactionChunks.length})` : ''}</h3>
+      <div style="margin-bottom: 12px;">
+        <h3 style="margin: 0 0 8px 0; color: ${colors.black80}; font-size: 11px; line-height: 15px; font-weight: 800;">Custody Transaction Details${transactionChunks.length > 1 ? ` (${chunkIndex + 1}/${transactionChunks.length})` : ''}</h3>
         <table style="width: 100%; border: 1px solid ${colors.black20}; border-collapse: separate; border-spacing: 0; border-radius: 6px; font-size: 10px; table-layout: fixed;">
           <thead>
             <tr style="background-color: ${colors.green}; color: ${colors.white};">
-              <th style="width: 24px; text-align: center; padding: 9px 6px; font-size: 10px; line-height: 14px; font-weight: 800; border-right: 1px solid ${colors.black20};">No</th>
-              <th style="width: 98px; text-align: left; padding: 9px 6px; font-size: 10px; line-height: 14px; font-weight: 800; border-right: 1px solid ${colors.black20};">Hash / Reference</th>
-              <th style="width: 62px; text-align: left; padding: 9px 6px; font-size: 10px; line-height: 14px; font-weight: 800; border-right: 1px solid ${colors.black20};">Type / Status</th>
-              <th style="width: 124px; text-align: left; padding: 9px 6px; font-size: 10px; line-height: 14px; font-weight: 800; border-right: 1px solid ${colors.black20};">From</th>
-              <th style="width: 124px; text-align: left; padding: 9px 6px; font-size: 10px; line-height: 14px; font-weight: 800; border-right: 1px solid ${colors.black20};">To</th>
-              <th style="width: 62px; text-align: left; padding: 9px 6px; font-size: 10px; line-height: 14px; font-weight: 800; border-right: 1px solid ${colors.black20};">Asset</th>
-              <th style="width: 58px; text-align: center; padding: 9px 6px; font-size: 10px; line-height: 14px; font-weight: 800; border-right: 1px solid ${colors.black20};">Date</th>
-              <th style="width: 58px; text-align: right; padding: 9px 6px; font-size: 10px; line-height: 14px; font-weight: 800; border-right: 1px solid ${colors.black20};">Amount / Fee</th>
-              <th style="width: 58px; text-align: right; padding: 9px 6px; font-size: 10px; line-height: 14px; font-weight: 800;">Net</th>
+              <th style="width: 24px; text-align: center; padding: 6px; font-size: 10px; line-height: 14px; font-weight: 800; border-right: 1px solid ${colors.black20};">No</th>
+              <th style="width: 98px; text-align: left; padding: 6px; font-size: 10px; line-height: 14px; font-weight: 800; border-right: 1px solid ${colors.black20};">Hash / Reference</th>
+              <th style="width: 62px; text-align: left; padding: 6px; font-size: 10px; line-height: 14px; font-weight: 800; border-right: 1px solid ${colors.black20};">Type / Status</th>
+              <th style="width: 124px; text-align: left; padding: 6px; font-size: 10px; line-height: 14px; font-weight: 800; border-right: 1px solid ${colors.black20};">From</th>
+              <th style="width: 124px; text-align: left; padding: 6px; font-size: 10px; line-height: 14px; font-weight: 800; border-right: 1px solid ${colors.black20};">To</th>
+              <th style="width: 62px; text-align: left; padding: 6px; font-size: 10px; line-height: 14px; font-weight: 800; border-right: 1px solid ${colors.black20};">Asset</th>
+              <th style="width: 58px; text-align: center; padding: 6px; font-size: 10px; line-height: 14px; font-weight: 800; border-right: 1px solid ${colors.black20};">Date</th>
+              <th style="width: 58px; text-align: right; padding: 6px; font-size: 10px; line-height: 14px; font-weight: 800; border-right: 1px solid ${colors.black20};">Amount / Fee</th>
+              <th style="width: 58px; text-align: right; padding: 6px; font-size: 10px; line-height: 14px; font-weight: 800;">Net</th>
             </tr>
           </thead>
           <tbody>
             ${renderTableRows(chunk, chunkIndex)}
-            ${
-              isLastChunk
-                ? `<tr style="background-color: ${colors.greenSoft}; font-weight: 800;">
-                    <td colspan="8" style="text-align: right; padding: 10px 8px; color: ${colors.black80}; border-top: 2px solid ${colors.green};">Closing Balance</td>
-                    <td style="text-align: right; padding: 10px 8px; color: ${colors.greenDark}; border-top: 2px solid ${colors.green};">${closingBalance}</td>
+            ${isLastChunk
+        ? `<tr style="background-color: ${colors.greenSoft}; font-weight: 800;">
+                    <td colspan="8" style="text-align: right; padding: 8px; color: ${colors.black80}; border-top: 2px solid ${colors.green};">Closing Balance</td>
+                    <td style="text-align: right; padding: 8px; color: ${colors.greenDark}; border-top: 2px solid ${colors.green};">${closingBalance}</td>
                   </tr>`
-                : ''
-            }
+        : ''
+      }
           </tbody>
         </table>
       </div>
@@ -171,78 +189,108 @@ export const generatePdfEStatement = async (config: EStatementConfig) => {
       .pdf-page {
         break-inside: avoid;
         page-break-inside: avoid;
+        padding: 12px;
+        box-sizing: border-box;
       }
 
       .pdf-page:not(.pdf-page--last) {
         break-after: page;
         page-break-after: always;
       }
+
+      table {
+        page-break-inside: avoid;
+        break-inside: avoid;
+      }
+
+      tr {
+        page-break-inside: avoid;
+        break-inside: avoid;
+      }
     </style>
 
-    <div style="font-family: 'Nunito Sans', 'Segoe UI', Arial, sans-serif; max-width: 1100px; margin: 0 auto; padding: 18px; color: ${colors.black80};">
+    <div style="font-family: 'Nunito Sans', 'Segoe UI', Arial, sans-serif; max-width: 1100px; margin: 0 auto; color: ${colors.black80};">
       
-      <!-- Header -->
-      <div style="border-bottom: 3px solid ${colors.green}; padding-bottom: 15px; margin-bottom: 20px;">
-        <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 15px;">
-          <div>
-            <h1 style="margin: 0; color: ${colors.black80}; font-size: 20px; line-height: 30px; font-weight: 800;">${companyName}</h1>
-            <p style="margin: 5px 0 0 0; color: ${colors.black60}; font-size: 12px; line-height: 18px; font-weight: 600;">${companyId}</p>
-          </div>
-          <div style="text-align: right; font-size: 11px; line-height: 16px; color: ${colors.black60}; font-weight: 600;">
-            <p style="margin: 0;">Document No: BB-TH-${new Date().getFullYear()}-${String(new Date().getMonth() + 1).padStart(2, '0')}</p>
-            <p style="margin: 5px 0 0 0;">Generated: ${lastUpdated}</p>
-          </div>
-        </div>
-      </div>
-
-      <!-- Title and Period -->
-      <div style="margin-bottom: 20px;">
-        <h2 style="margin: 0 0 8px 0; color: ${colors.black80}; font-size: 16px; line-height: 24px; font-weight: 800;">${title}</h2>
-        <p style="margin: 0; color: ${colors.black60}; font-size: 12px; line-height: 18px; font-weight: 600;">
-          <strong>Report Period:</strong> ${reportPeriod}
-        </p>
-        <p style="margin: 4px 0 0 0; color: ${colors.black60}; font-size: 12px; line-height: 18px; font-weight: 600;">
-          <strong>Custody Account:</strong> ${custodyAccountId} &nbsp; | &nbsp; <strong>Wallet ID:</strong> ${walletId}
-        </p>
-      </div>
-
-      <!-- Summary Info Box -->
-      <div style="background-color: ${colors.greenSoft}; border: 1px solid ${colors.black20}; border-left: 4px solid ${colors.green}; border-radius: 6px; padding: 12px; margin-bottom: 20px;">
-        <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; font-size: 12px;">
-          <div>
-            <p style="margin: 0; color: ${colors.black50}; font-size: 11px; line-height: 16px; font-weight: 600;">Opening Balance</p>
-            <p style="margin: 5px 0 0 0; font-size: 14px; line-height: 20px; font-weight: 800; color: ${colors.greenDark};">${openingBalance}</p>
-          </div>
-          <div>
-            <p style="margin: 0; color: ${colors.black50}; font-size: 11px; line-height: 16px; font-weight: 600;">Total Debit</p>
-            <p style="margin: 5px 0 0 0; font-size: 14px; line-height: 20px; font-weight: 800; color: ${colors.greenDark};">${totalDebit}</p>
-          </div>
-          <div>
-            <p style="margin: 0; color: ${colors.black50}; font-size: 11px; line-height: 16px; font-weight: 600;">Total Credit</p>
-            <p style="margin: 5px 0 0 0; font-size: 14px; line-height: 20px; font-weight: 800; color: ${colors.greenDark};">${totalCredit}</p>
-          </div>
-          <div>
-            <p style="margin: 0; color: ${colors.black50}; font-size: 11px; line-height: 16px; font-weight: 600;">Closing Balance</p>
-            <p style="margin: 5px 0 0 0; font-size: 14px; line-height: 20px; font-weight: 800; color: ${colors.greenDark};">${closingBalance}</p>
-          </div>
-          <div>
-            <p style="margin: 0; color: ${colors.black50}; font-size: 11px; line-height: 16px; font-weight: 600;">Transaction Count</p>
-            <p style="margin: 5px 0 0 0; font-size: 14px; line-height: 20px; font-weight: 800; color: ${colors.greenDark};">${transactions.length}</p>
-          </div>
-          <div>
-            <p style="margin: 0; color: ${colors.black50}; font-size: 11px; line-height: 16px; font-weight: 600;">Asset Scope</p>
-            <p style="margin: 5px 0 0 0; font-size: 14px; line-height: 20px; font-weight: 800; color: ${colors.greenDark};">PAXG / PGT</p>
+      <!-- Page 1 Container -->
+      <div class="pdf-page ${transactionChunks.length <= 1 ? 'pdf-page--last' : ''}">
+        <!-- Header -->
+        <div style="border-bottom: 3px solid ${colors.green}; padding-bottom: 10px; margin-bottom: 12px;">
+          <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10px;">
+            <div>
+              <h1 style="margin: 0; color: ${colors.black80}; font-size: 18px; line-height: 26px; font-weight: 800;">${companyName}</h1>
+              <p style="margin: 3px 0 0 0; color: ${colors.black60}; font-size: 11px; line-height: 16px; font-weight: 600;">${companyAddress}</p>
+              <p style="margin: 3px 0 0 0; color: ${colors.black60}; font-size: 11px; line-height: 16px; font-weight: 600;">${companyPhone}</p>
+            </div>
+            <div style="text-align: right; font-size: 10px; line-height: 14px; color: ${colors.black60}; font-weight: 600;">
+              <p style="margin: 0;">Document No: BB-TH-${new Date().getFullYear()}-${String(new Date().getMonth() + 1).padStart(2, '0')}</p>
+              <p style="margin: 3px 0 0 0;">Generated: ${new Intl.DateTimeFormat('id-ID', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' }).format(new Date()).replace(/\./g, ':')} WIB</p>
+            </div>
           </div>
         </div>
+
+        <!-- Title and Period -->
+        <div style="margin-bottom: 12px;">
+          <h2 style="margin: 0 0 4px 0; color: ${colors.black80}; font-size: 14px; line-height: 20px; font-weight: 800;">${title}</h2>
+          <p style="margin: 0; color: ${colors.black60}; font-size: 11px; line-height: 16px; font-weight: 600;">
+            <strong>Report Period:</strong> ${formatReportPeriod(reportPeriod)}
+          </p>
+          <p style="margin: 2px 0 0 0; color: ${colors.black60}; font-size: 11px; line-height: 16px; font-weight: 600;">
+            <strong>Wallet Address:</strong> ${walletAddress} &nbsp; | &nbsp; <strong>Company ID:</strong> ${companyId} 
+          </p>
+        </div>
+
+        <!-- Summary Info Box -->
+        <div style="background-color: ${colors.greenSoft}; border: 1px solid ${colors.black20}; border-left: 4px solid ${colors.green}; border-radius: 6px; padding: 10px; margin-bottom: 12px;">
+          <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; font-size: 11px;">
+            <div>
+              <p style="margin: 0; color: ${colors.black50}; font-size: 10px; line-height: 14px; font-weight: 600;">Opening Balance</p>
+              <p style="margin: 3px 0 0 0; font-size: 13px; line-height: 18px; font-weight: 800; color: ${colors.greenDark};">${openingBalance}</p>
+            </div>
+            <div>
+              <p style="margin: 0; color: ${colors.black50}; font-size: 10px; line-height: 14px; font-weight: 600;">Total Debit</p>
+              <p style="margin: 3px 0 0 0; font-size: 13px; line-height: 18px; font-weight: 800; color: ${colors.greenDark};">${totalDebit}</p>
+            </div>
+            <div>
+              <p style="margin: 0; color: ${colors.black50}; font-size: 10px; line-height: 14px; font-weight: 600;">Total Credit</p>
+              <p style="margin: 3px 0 0 0; font-size: 13px; line-height: 18px; font-weight: 800; color: ${colors.greenDark};">${totalCredit}</p>
+            </div>
+            <div>
+              <p style="margin: 0; color: ${colors.black50}; font-size: 10px; line-height: 14px; font-weight: 600;">Closing Balance</p>
+              <p style="margin: 3px 0 0 0; font-size: 13px; line-height: 18px; font-weight: 800; color: ${colors.greenDark};">${closingBalance}</p>
+            </div>
+            <div>
+              <p style="margin: 0; color: ${colors.black50}; font-size: 10px; line-height: 14px; font-weight: 600;">Transaction Count</p>
+              <p style="margin: 3px 0 0 0; font-size: 13px; line-height: 18px; font-weight: 800; color: ${colors.greenDark};">${transactions.length}</p>
+            </div>
+            <div>
+              <p style="margin: 0; color: ${colors.black50}; font-size: 10px; line-height: 14px; font-weight: 600;">Asset Scope</p>
+              <p style="margin: 3px 0 0 0; font-size: 13px; line-height: 18px; font-weight: 800; color: ${colors.greenDark};">TGR</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- First Page Transaction Table -->
+        ${transactionChunks.length > 0 ? renderTransactionTable(transactionChunks[0], 0) : ''}
       </div>
 
-      <!-- Transaction Table -->
-      ${transactionChunks.map((chunk, index) => renderTransactionTable(chunk, index)).join('')}
+      <!-- Subsequent Pages (if any) -->
+      ${transactionChunks
+      .slice(1)
+      .map((chunk, index) => {
+        const chunkIndex = index + 1
+        const isLastChunk = chunkIndex === transactionChunks.length - 1
+        return `
+            <div class="pdf-page ${isLastChunk ? 'pdf-page--last' : ''}">
+              ${renderTransactionTable(chunk, chunkIndex)}
+            </div>
+          `
+      })
+      .join('')}
 
       <!-- Footer -->
-      <div style="margin-top: 30px; padding-top: 15px; border-top: 1px solid ${colors.black20}; font-size: 10px; line-height: 14px; color: ${colors.black50}; font-weight: 600;">
-        <p style="margin: 0 0 5px 0;">This custody report is generated from front-office transaction records and includes wallet identifiers, asset movement, confirmation status, and custody balance summary.</p>
-        <p style="margin: 0;">Document generated on ${new Date().toLocaleString('id-ID', { dateStyle: 'long', timeStyle: 'long' })}</p>
+      <div style="margin-top: 30px; padding: 0 18px 15px; border-top: 1px solid ${colors.black20}; font-size: 10px; line-height: 14px; color: ${colors.black50}; font-weight: 600;">
+        <p style="margin: 15px 0 5px 0;">This custody report is generated from front-office transaction records and includes wallet identifiers, asset movement, confirmation status, and custody balance summary.</p>
+        <p style="margin: 0;">Document generated on ${new Intl.DateTimeFormat('id-ID', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' }).format(new Date()).replace(/\./g, ':')} WIB</p>
       </div>
 
     </div>
@@ -254,7 +302,7 @@ export const generatePdfEStatement = async (config: EStatementConfig) => {
 
   const options = {
     margin: [10, 10, 10, 10],
-    filename: `custody-report-${new Date().getFullYear()}-${String(new Date().getMonth() + 1).padStart(2, '0')}.pdf`,
+    filename: config.filename || `custody-report-${new Date().getFullYear()}-${String(new Date().getMonth() + 1).padStart(2, '0')}.pdf`,
     image: { type: 'jpeg', quality: 0.98 },
     html2canvas: { scale: 2, useCORS: true },
     jsPDF: { orientation: 'landscape', unit: 'mm', format: 'a4' },
