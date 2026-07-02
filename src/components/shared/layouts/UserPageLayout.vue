@@ -54,7 +54,7 @@ withDefaults(
       </div>
     </div>
 
-    <footer class="page-footer">Copyright © 2024 PT. Pegadaian. All Rights Reserved.</footer>
+    <footer class="page-footer">Copyright © 2026 PT. Pegadaian. All Rights Reserved.</footer>
   </div>
 </template>
 
