@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import GoldPriceChart from './GoldPriceChart.vue'
 import { onMounted, onUnmounted, ref } from 'vue'
 
 
