@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 
 import { GBerandaHeader, GButton } from '@/components'
@@ -16,6 +16,12 @@ const authStore = useAuthStore()
 const router = useRouter()
 const { showAlert } = useAppAlert()
 const isProfileSheetOpen = ref(false)
+
+onMounted(async () => {
+  if (!authStore.profile) {
+    await authStore.fetchProfile()
+  }
+})
 
 const isMobileViewport = () => window.matchMedia('(max-width: 900px)').matches
 
