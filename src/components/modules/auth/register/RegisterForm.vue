@@ -1,6 +1,7 @@
 <script setup lang="ts">
-import { computed, reactive, ref } from 'vue'
+import { computed, onMounted, reactive, ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
+import { useMediaQuery } from '@vueuse/core'
 
 import { GButton, GDatePicker, GDropdown, GFilePicker, GInputText, GTextArea } from '@/components'
 import { uniqueDatePickerFields as vUniqueDatePickerFields } from '@/directives/uniqueDatePickerFields'
@@ -9,6 +10,7 @@ import { useAppAlert } from '@/hooks/useAppAlert'
 const router = useRouter()
 const currentStep = ref(1)
 const { showAlert } = useAppAlert()
+const isMobile = useMediaQuery('(max-width: 768px)')
 
 const form = reactive({
   // Step 1 — Data Perusahaan
@@ -34,7 +36,8 @@ const form = reactive({
   city: '',
   district: '',
   subDistrict: '',
-  rtRw: '',
+  rt: '',
+  rw: '',
 
   // Step 4 — Data Pengurus
   adminName: '',
@@ -51,6 +54,101 @@ const form = reactive({
   executorNpwp: '',
   executorNpwpFile: null as File | null,
   executorPhone: '',
+})
+
+const provinceItems = ref<{ value: string; label: string }[]>([])
+const cityItems = ref<{ value: string; label: string }[]>([])
+const districtItems = ref<{ value: string; label: string }[]>([])
+const subDistrictItems = ref<{ value: string; label: string }[]>([])
+
+const toTitleCase = (str: string) => {
+  return str.replace(/\w\S*/g, (txt) => txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase())
+}
+
+const fetchProvinces = async () => {
+  try {
+    const res = await fetch('/api-wilayah/provinces.json')
+    const data = await res.json()
+    provinceItems.value = data.map((item: any) => ({
+      value: item.id,
+      label: toTitleCase(item.name),
+    }))
+  } catch (error) {
+    console.error('Failed to fetch provinces:', error)
+  }
+}
+
+const fetchCities = async (provinceId: string) => {
+  if (!provinceId) {
+    cityItems.value = []
+    return
+  }
+  try {
+    const res = await fetch(`/api-wilayah/regencies/${provinceId}.json`)
+    const data = await res.json()
+    cityItems.value = data.map((item: any) => ({
+      value: item.id,
+      label: toTitleCase(item.name),
+    }))
+  } catch (error) {
+    console.error('Failed to fetch cities:', error)
+  }
+}
+
+const fetchDistricts = async (cityId: string) => {
+  if (!cityId) {
+    districtItems.value = []
+    return
+  }
+  try {
+    const res = await fetch(`/api-wilayah/districts/${cityId}.json`)
+    const data = await res.json()
+    districtItems.value = data.map((item: any) => ({
+      value: item.id,
+      label: toTitleCase(item.name),
+    }))
+  } catch (error) {
+    console.error('Failed to fetch districts:', error)
+  }
+}
+
+const fetchSubDistricts = async (districtId: string) => {
+  if (!districtId) {
+    subDistrictItems.value = []
+    return
+  }
+  try {
+    const res = await fetch(`/api-wilayah/villages/${districtId}.json`)
+    const data = await res.json()
+    subDistrictItems.value = data.map((item: any) => ({
+      value: item.id,
+      label: toTitleCase(item.name),
+    }))
+  } catch (error) {
+    console.error('Failed to fetch sub-districts:', error)
+  }
+}
+
+onMounted(() => {
+  fetchProvinces()
+})
+
+watch(() => form.province, (newVal) => {
+  form.city = ''
+  form.district = ''
+  form.subDistrict = ''
+  fetchCities(newVal)
+})
+
+watch(() => form.city, (newVal) => {
+  form.district = ''
+  form.subDistrict = ''
+  fetchDistricts(newVal)
+})
+
+watch(() => form.district, (newVal) => {
+  form.subDistrict = ''
+  fetchSubDistricts(newVal)
 })
 
 const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
@@ -73,7 +171,7 @@ const isStepValid = computed(() => {
   }
   if (currentStep.value === 3) {
     return Boolean(
-      form.companyAddress && form.province && form.city && form.district && form.subDistrict && form.rtRw,
+      form.companyAddress && form.province && form.city && form.district && form.subDistrict && form.rt && form.rw,
     )
   }
   if (currentStep.value === 4) {
@@ -90,10 +188,12 @@ const isStepValid = computed(() => {
 
 const primaryLabel = computed(() => (currentStep.value === 5 ? 'Daftar Sekarang' : 'Selanjutnya'))
 
-const handleFile = (field: keyof typeof form) => (file: File) => {
+const handleFile = (field: keyof typeof form, file: File) => {
+  console.log('handleFile called for field:', field, 'with file:', file)
   ;(form[field] as unknown as File | null) = file
 }
-const removeFile = (field: keyof typeof form) => () => {
+const removeFile = (field: keyof typeof form) => {
+  console.log('removeFile called for field:', field)
   ;(form[field] as unknown as File | null) = null
 }
 
@@ -141,210 +241,238 @@ const goNext = () => {
         <div class="register-scroll">
           <!-- ==================== STEP 1 — Data Perusahaan ==================== -->
           <div v-if="currentStep === 1" class="fields">
-          <GInputText
-            id="reg-business-name"
-            name="businessName"
-            v-model="form.businessName"
-            label="Nama Badan Usaha"
-            placeholder="Masukkan nama badan usaha"
-          />
-          <GInputText
-            id="reg-director-name"
-            name="directorName"
-            v-model="form.directorName"
-            label="Nama Direktur Utama / CEO"
-            placeholder="Masukkan nama direktur utama"
-          />
-          <GInputText
-            id="reg-company-email"
-            name="companyEmail"
-            v-model="form.companyEmail"
-            type="text"
-            label="Email Perusahaan"
-            placeholder="Masukkan email perusahaan"
-            autocomplete="email"
-            autocapitalize="none"
-            spellcheck="false"
-            :pattern="emailPattern.source"
-          />
+            <GInputText
+              id="reg-business-name"
+              name="businessName"
+              v-model="form.businessName"
+              label="Nama Badan Usaha"
+              placeholder="Masukkan nama badan usaha"
+              class="col-span-2"
+            />
+            <GInputText
+              id="reg-director-name"
+              name="directorName"
+              v-model="form.directorName"
+              label="Nama Direktur Utama / CEO"
+              placeholder="Masukkan nama direktur utama"
+            />
+            <GInputText
+              id="reg-company-email"
+              name="companyEmail"
+              v-model="form.companyEmail"
+              type="text"
+              label="Email Perusahaan"
+              placeholder="Masukkan email perusahaan"
+              autocomplete="email"
+              autocapitalize="none"
+              spellcheck="false"
+              :pattern="emailPattern.source"
+            />
 
-          <div class="upload-field">
-            <label>No NIB</label>
-            <div class="upload-row">
+            <div class="upload-field col-span-2">
+              <label>No NIB</label>
+              <div class="upload-row">
+                <GInputText
+                  id="reg-nib-number"
+                  name="nibNumber"
+                  v-model="form.nibNumber"
+                  placeholder="Masukkan No NIB"
+                  type="number"
+                  inputmode="numeric"
+                  maxlength="30"
+                />
+                 <GFilePicker
+                  unique-key="nib"
+                  :file="typeof form.nibFile === 'string' ? form.nibFile : null"
+                  :image-only="false"
+                  error-text="Ukuran file maksimal 10 MB"
+                  @file-dropped="(file: any) => handleFile('nibFile', file)"
+                  @file-removed="() => removeFile('nibFile')"
+                />
+              </div>
+              <span class="field-helper">Unggah dokumen NIB resmi perusahaan (PDF, PNG, JPG. Maks. 10 MB)</span>
+            </div>
+
+            <div class="upload-field col-span-2">
+              <label>No NPWP Perusahaan</label>
+              <div class="upload-row">
+                <GInputText
+                  id="reg-npwp-number"
+                  name="npwpNumber"
+                  v-model="form.npwpNumber"
+                  placeholder="Masukkan No NPWP"
+                  type="number"
+                  inputmode="numeric"
+                  maxlength="25"
+                />
+                <GFilePicker
+                  unique-key="npwp"
+                  :file="typeof form.npwpFile === 'string' ? form.npwpFile : null"
+                  :image-only="false"
+                  error-text="Ukuran file maksimal 10 MB"
+                  @file-dropped="(file: any) => handleFile('npwpFile', file)"
+                  @file-removed="() => removeFile('npwpFile')"
+                />
+              </div>
+              <span class="field-helper">Unggah kartu atau dokumen NPWP perusahaan (PDF, PNG, JPG. Maks. 10 MB)</span>
+            </div>
+          </div>
+
+          <!-- ==================== STEP 2 — Data Akta ==================== -->
+          <div v-else-if="currentStep === 2" class="fields">
+            <div class="upload-field">
+              <label>No Akta Pendirian</label>
+              <div class="upload-row-stacked">
+                <GInputText
+                  id="reg-deed-no"
+                  name="deedNo"
+                  v-model="form.deedNo"
+                  placeholder="Masukkan No Akta"
+                  type="number"
+                  inputmode="numeric"
+                  maxlength="50"
+                />
+                 <GFilePicker
+                  unique-key="deed"
+                  :file="typeof form.deedFile === 'string' ? form.deedFile : null"
+                  :image-only="false"
+                  error-text="Ukuran file maksimal 10 MB"
+                  @file-dropped="(file: any) => handleFile('deedFile', file)"
+                  @file-removed="() => removeFile('deedFile')"
+                />
+              </div>
+              <span class="field-helper">Unggah salinan dokumen Akta Pendirian resmi (PDF, PNG, JPG. Maks. 10 MB)</span>
+            </div>
+            <div class="upload-field">
+              <label>No Akta Terakhir</label>
+              <div class="upload-row-stacked">
+                <GInputText
+                  id="reg-latest-deed-no"
+                  name="latestDeedNo"
+                  v-model="form.latestDeedNo"
+                  placeholder="Masukkan No Akta"
+                  type="number"
+                  inputmode="numeric"
+                  maxlength="50"
+                />
+                 <GFilePicker
+                  unique-key="latest-deed"
+                  :file="typeof form.latestDeedFile === 'string' ? form.latestDeedFile : null"
+                  :image-only="false"
+                  error-text="Ukuran file maksimal 10 MB"
+                  @file-dropped="(file: any) => handleFile('latestDeedFile', file)"
+                  @file-removed="() => removeFile('latestDeedFile')"
+                />
+              </div>
+              <span class="field-helper">Unggah salinan Akta Perubahan Terakhir (PDF, PNG, JPG. Maks. 10 MB)</span>
+            </div>
+            <GDatePicker
+              v-unique-date-picker-fields="{ id: 'reg-deed-date', name: 'deedDate' }"
+              id="reg-deed-date"
+              name="deedDate"
+              v-model="form.deedDate"
+              title="Tanggal Akta Pendirian"
+              placeholder="Pilih tanggal"
+              autocomplete="off"
+              disableFutureDates
+              :maxYear="0"
+              date-position="top"
+            />
+            <GDatePicker
+              v-unique-date-picker-fields="{ id: 'reg-latest-deed-date', name: 'latestDeedDate' }"
+              id="reg-latest-deed-date"
+              name="latestDeedDate"
+              v-model="form.latestDeedDate"
+              title="Tanggal Akta Terakhir"
+              placeholder="Pilih tanggal"
+              autocomplete="off"
+              disableFutureDates
+              :maxYear="0"
+              date-position="top"
+            />
+          </div>
+
+          <!-- ==================== STEP 3 — Alamat ==================== -->
+          <div v-else-if="currentStep === 3" class="fields">
+            <GTextArea
+              id="reg-company-address"
+              name="companyAddress"
+              v-model="form.companyAddress"
+              label="Alamat Perusahaan"
+              placeholder="Masukkan alamat lengkap perusahaan"
+              autocomplete="street-address"
+              class="col-span-2 compact-textarea"
+            />
+            <GDropdown
+              id="reg-province"
+              name="province"
+              v-model="form.province"
+              label="Provinsi"
+              placeholder="Pilih provinsi"
+              :items="provinceItems"
+              item-value="value"
+              item-text="label"
+              :use-bottom-sheet="isMobile"
+            />
+            <GDropdown
+              id="reg-city"
+              name="city"
+              v-model="form.city"
+              label="Kota/Kabupaten"
+              placeholder="Pilih kota/kabupaten"
+              :items="cityItems"
+              item-value="value"
+              item-text="label"
+              :use-bottom-sheet="isMobile"
+            />
+            <GDropdown
+              id="reg-district"
+              name="district"
+              v-model="form.district"
+              label="Kecamatan"
+              placeholder="Pilih kecamatan"
+              :items="districtItems"
+              item-value="value"
+              item-text="label"
+              :use-bottom-sheet="isMobile"
+            />
+            <GDropdown
+              id="reg-sub-district"
+              name="subDistrict"
+              v-model="form.subDistrict"
+              label="Kelurahan"
+              placeholder="Pilih kelurahan"
+              :items="subDistrictItems"
+              item-value="value"
+              item-text="label"
+              :use-bottom-sheet="isMobile"
+            />
+            <div class="rt-rw-row col-span-2">
               <GInputText
-                id="reg-nib-number"
-                name="nibNumber"
-                v-model="form.nibNumber"
-                placeholder="Masukkan No NIB"
+                id="reg-rt"
+                name="rt"
+                v-model="form.rt"
+                label="RT"
+                placeholder="Contoh: 001"
                 type="number"
                 inputmode="numeric"
-                pattern="[0-9]*"
-                maxlength="30"
+                maxlength="5"
               />
-              <GFilePicker
-                unique-key="nib"
-                :file="form.nibFile"
-                :image-only="false"
-                error-text="Ukuran file maksimal 10 MB"
-                @file-dropped="handleFile('nibFile')"
-                @file-removed="removeFile('nibFile')"
-              />
-            </div>
-          </div>
-
-          <div class="upload-field">
-            <label>No NPWP Perusahaan</label>
-            <div class="upload-row">
               <GInputText
-                id="reg-npwp-number"
-                name="npwpNumber"
-                v-model="form.npwpNumber"
-                placeholder="Masukkan No NPWP"
+                id="reg-rw"
+                name="rw"
+                v-model="form.rw"
+                label="RW"
+                placeholder="Contoh: 002"
                 type="number"
                 inputmode="numeric"
-                pattern="[0-9]*"
-                maxlength="15"
-              />
-              <GFilePicker
-                unique-key="npwp"
-                :file="form.npwpFile"
-                :image-only="false"
-                error-text="Ukuran file maksimal 10 MB"
-                @file-dropped="handleFile('npwpFile')"
-                @file-removed="removeFile('npwpFile')"
+                maxlength="5"
               />
             </div>
           </div>
-        </div>
 
-        <!-- ==================== STEP 2 — Data Akta ==================== -->
-        <div v-if="currentStep === 2" class="fields">
-          <div class="upload-field">
-            <label>No Akta Pendirian</label>
-            <div class="upload-row">
-              <GInputText
-                id="reg-deed-no"
-                name="deedNo"
-                v-model="form.deedNo"
-                placeholder="Masukkan No Akta"
-              />
-              <GFilePicker
-                unique-key="deed"
-                :file="form.deedFile"
-                :image-only="false"
-                error-text="Ukuran file maksimal 10 MB"
-                @file-dropped="handleFile('deedFile')"
-                @file-removed="removeFile('deedFile')"
-              />
-            </div>
-          </div>
-          <GDatePicker
-            v-unique-date-picker-fields="{ id: 'reg-deed-date', name: 'deedDate' }"
-            id="reg-deed-date"
-            name="deedDate"
-            v-model="form.deedDate"
-            title="Tanggal Akta Pendirian"
-            placeholder="Pilih tanggal"
-            autocomplete="off"
-            disableFutureDates
-            :maxYear="0"
-          />
-
-          <div class="upload-field">
-            <label>No Akta Terakhir</label>
-            <div class="upload-row">
-              <GInputText
-                id="reg-latest-deed-no"
-                name="latestDeedNo"
-                v-model="form.latestDeedNo"
-                placeholder="Masukkan No Akta"
-              />
-              <GFilePicker
-                unique-key="latest-deed"
-                :file="form.latestDeedFile"
-                :image-only="false"
-                error-text="Ukuran file maksimal 10 MB"
-                @file-dropped="handleFile('latestDeedFile')"
-                @file-removed="removeFile('latestDeedFile')"
-              />
-            </div>
-          </div>
-          <GDatePicker
-            v-unique-date-picker-fields="{ id: 'reg-latest-deed-date', name: 'latestDeedDate' }"
-            id="reg-latest-deed-date"
-            name="latestDeedDate"
-            v-model="form.latestDeedDate"
-            title="Tanggal Akta Terakhir"
-            placeholder="Pilih tanggal"
-            autocomplete="off"
-            disableFutureDates
-            :maxYear="0"
-          />
-        </div>
-
-        <!-- ==================== STEP 3 — Alamat ==================== -->
-        <div v-else-if="currentStep === 3" class="fields">
-          <GTextArea
-            id="reg-company-address"
-            name="companyAddress"
-            v-model="form.companyAddress"
-            label="Alamat Perusahaan"
-            placeholder="Masukkan alamat lengkap perusahaan"
-            autocomplete="street-address"
-          />
-          <GDropdown
-            id="reg-province"
-            name="province"
-            v-model="form.province"
-            label="Provinsi"
-            placeholder="Pilih provinsi"
-            :items="[]"
-            item-value="value"
-            item-text="label"
-          />
-          <GDropdown
-            id="reg-city"
-            name="city"
-            v-model="form.city"
-            label="Kota/Kabupaten"
-            placeholder="Pilih kota/kabupaten"
-            :items="[]"
-            item-value="value"
-            item-text="label"
-          />
-          <GDropdown
-            id="reg-district"
-            name="district"
-            v-model="form.district"
-            label="Kecamatan"
-            placeholder="Pilih kecamatan"
-            :items="[]"
-            item-value="value"
-            item-text="label"
-          />
-          <GDropdown
-            id="reg-sub-district"
-            name="subDistrict"
-            v-model="form.subDistrict"
-            label="Kelurahan"
-            placeholder="Pilih kelurahan"
-            :items="[]"
-            item-value="value"
-            item-text="label"
-          />
-          <GInputText
-            id="reg-rt-rw"
-            name="rtRw"
-            v-model="form.rtRw"
-            label="RT/RW"
-            placeholder="Contoh: 001/002"
-          />
-        </div>
-
-        <!-- ==================== STEP 4 — Data Pengurus ==================== -->
-        <div v-else-if="currentStep === 4" class="fields">
-          <section class="section-block" aria-label="Data Pengurus">
-            <h2>Data Pengurus</h2>
+          <!-- ==================== STEP 4 — Data Pengurus ==================== -->
+          <div v-else-if="currentStep === 4" class="fields">
             <GInputText
               id="reg-admin-name"
               name="adminName"
@@ -352,7 +480,18 @@ const goNext = () => {
               label="Nama Pengurus"
               placeholder="Masukkan nama pengurus"
             />
-            <div class="upload-field">
+            <GInputText
+              id="reg-admin-phone"
+              name="adminPhone"
+              v-model="form.adminPhone"
+              label="No Hp Pengurus"
+              placeholder="Masukkan nomor telepon"
+              type="number"
+              inputmode="numeric"
+              maxlength="20"
+              autocomplete="tel"
+            />
+            <div class="upload-field col-span-2">
               <label>NIK KTP Pengurus</label>
               <div class="upload-row">
                 <GInputText
@@ -362,20 +501,20 @@ const goNext = () => {
                   placeholder="Masukkan NIK"
                   type="number"
                   inputmode="numeric"
-                  pattern="[0-9]*"
-                  maxlength="16"
+                  maxlength="25"
                 />
-                <GFilePicker
+                 <GFilePicker
                   unique-key="admin-nik"
-                  :file="form.adminNikFile"
+                  :file="typeof form.adminNikFile === 'string' ? form.adminNikFile : null"
                   :image-only="true"
                   error-text="Ukuran file Image maksimal 10 MB"
-                  @file-dropped="handleFile('adminNikFile')"
-                  @file-removed="removeFile('adminNikFile')"
+                  @file-dropped="(file: any) => handleFile('adminNikFile', file)"
+                  @file-removed="() => removeFile('adminNikFile')"
                 />
               </div>
+              <span class="field-helper">Unggah foto KTP Pengurus dengan jelas (PNG, JPG, JPEG. Maks. 10 MB)</span>
             </div>
-            <div class="upload-field">
+            <div class="upload-field col-span-2">
               <label>No NPWP Pengurus</label>
               <div class="upload-row">
                 <GInputText
@@ -385,37 +524,23 @@ const goNext = () => {
                   placeholder="Masukkan No NPWP"
                   type="number"
                   inputmode="numeric"
-                  pattern="[0-9]*"
-                  maxlength="15"
+                  maxlength="25"
                 />
-                <GFilePicker
+                 <GFilePicker
                   unique-key="admin-npwp"
-                  :file="form.adminNpwpFile"
-                  :image-only="false"
+                  :file="typeof form.adminNpwpFile === 'string' ? form.adminNpwpFile : null"
+                  :image-only="true"
                   error-text="Ukuran file maksimal 10 MB"
-                  @file-dropped="handleFile('adminNpwpFile')"
-                  @file-removed="removeFile('adminNpwpFile')"
+                  @file-dropped="(file: any) => handleFile('adminNpwpFile', file)"
+                  @file-removed="() => removeFile('adminNpwpFile')"
                 />
               </div>
+              <span class="field-helper">Unggah foto kartu NPWP Pengurus (PNG, JPG, JPEG. Maks. 10 MB)</span>
             </div>
-            <GInputText
-              id="reg-admin-phone"
-              name="adminPhone"
-              v-model="form.adminPhone"
-              label="No Hp Pengurus"
-              placeholder="Masukkan nomor telepon"
-              type="number"
-              inputmode="numeric"
-              pattern="[0-9]*"
-              autocomplete="tel"
-            />
-          </section>
-        </div>
+          </div>
 
-        <!-- ==================== STEP 5 — Data Pelaksana Transaksi ==================== -->
-        <div v-else class="fields">
-          <section class="section-block" aria-label="Data Pelaksana Transaksi">
-            <h2>Data Pelaksana Transaksi</h2>
+          <!-- ==================== STEP 5 — Data Pelaksana Transaksi ==================== -->
+          <div v-else class="fields">
             <GInputText
               id="reg-executor-name"
               name="executorName"
@@ -423,7 +548,18 @@ const goNext = () => {
               label="Nama Pelaksana Transaksi"
               placeholder="Masukkan nama pelaksana"
             />
-            <div class="upload-field">
+            <GInputText
+              id="reg-executor-phone"
+              name="executorPhone"
+              v-model="form.executorPhone"
+              label="No Hp Pelaksana Transaksi"
+              placeholder="Masukkan nomor telepon"
+              type="number"
+              inputmode="numeric"
+              maxlength="20"
+              autocomplete="tel"
+            />
+            <div class="upload-field col-span-2">
               <label>NIK KTP Pelaksana Transaksi</label>
               <div class="upload-row">
                 <GInputText
@@ -433,20 +569,20 @@ const goNext = () => {
                   placeholder="Masukkan NIK"
                   type="number"
                   inputmode="numeric"
-                  pattern="[0-9]*"
-                  maxlength="16"
+                  maxlength="25"
                 />
-                <GFilePicker
+                 <GFilePicker
                   unique-key="executor-nik"
-                  :file="form.executorNikFile"
+                  :file="typeof form.executorNikFile === 'string' ? form.executorNikFile : null"
                   :image-only="true"
                   error-text="Ukuran file Image maksimal 10 MB"
-                  @file-dropped="handleFile('executorNikFile')"
-                  @file-removed="removeFile('executorNikFile')"
+                  @file-dropped="(file: any) => handleFile('executorNikFile', file)"
+                  @file-removed="() => removeFile('executorNikFile')"
                 />
               </div>
+              <span class="field-helper">Unggah foto KTP Pelaksana Transaksi dengan jelas (PNG, JPG, JPEG. Maks. 10 MB)</span>
             </div>
-            <div class="upload-field">
+            <div class="upload-field col-span-2">
               <label>No NPWP Pelaksana Transaksi</label>
               <div class="upload-row">
                 <GInputText
@@ -456,32 +592,20 @@ const goNext = () => {
                   placeholder="Masukkan No NPWP"
                   type="number"
                   inputmode="numeric"
-                  pattern="[0-9]*"
-                  maxlength="15"
+                  maxlength="25"
                 />
-                <GFilePicker
+                 <GFilePicker
                   unique-key="executor-npwp"
-                  :file="form.executorNpwpFile"
+                  :file="typeof form.executorNpwpFile === 'string' ? form.executorNpwpFile : null"
                   :image-only="false"
                   error-text="Ukuran file maksimal 10 MB"
-                  @file-dropped="handleFile('executorNpwpFile')"
-                  @file-removed="removeFile('executorNpwpFile')"
+                  @file-dropped="(file: any) => handleFile('executorNpwpFile', file)"
+                  @file-removed="() => removeFile('executorNpwpFile')"
                 />
               </div>
+              <span class="field-helper">Unggah kartu atau dokumen NPWP Pelaksana Transaksi (PDF, PNG, JPG. Maks. 10 MB)</span>
             </div>
-            <GInputText
-              id="reg-executor-phone"
-              name="executorPhone"
-              v-model="form.executorPhone"
-              label="No Hp Pelaksana Transaksi"
-              placeholder="Masukkan nomor telepon"
-              type="number"
-              inputmode="numeric"
-              pattern="[0-9]*"
-              autocomplete="tel"
-            />
-          </section>
-        </div>
+          </div>
         </div><!-- /register-scroll -->
 
         <footer class="form-footer">
@@ -503,10 +627,10 @@ const goNext = () => {
   </section>
 </template>
 
-<style scoped>
+<style lang="scss" scoped>
 .register-card {
-  width: 542px;
-  max-height: 70vh;
+  width: 580px;
+  max-height: 90vh;
   display: flex;
   flex-direction: column;
   border-radius: 10px;
@@ -518,7 +642,7 @@ const goNext = () => {
   display: flex;
   flex-direction: column;
   padding: 24px;
-  overflow-y: auto;
+  overflow-y: visible;
   min-height: 0;
 }
 
@@ -527,7 +651,7 @@ const goNext = () => {
   align-items: center;
   justify-content: space-between;
   gap: 16px;
-  margin-bottom: 32px;
+  margin-bottom: 20px;
 }
 
 .help {
@@ -535,7 +659,7 @@ const goNext = () => {
   justify-content: center;
   align-items: center;
   gap: 12px;
-  margin-top: 40px;
+  margin-top: 16px;
   color: var(--g-kit-black-60);
   font-size: var(--g-kit-font-size-sigma);
   font-weight: var(--g-kit-font-weight-normal);
@@ -595,25 +719,33 @@ h1, h2 {
 }
 
 .fields {
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 12px;
+}
+
+.col-span-2 {
+  grid-column: span 1 / span 1;
+}
+
+.rt-rw-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.compact-textarea :deep(textarea) {
+  height: 60px;
 }
 
 .fields .group-input {
   margin-bottom: 0;
 }
 
-.section-block {
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-}
-
 .upload-field {
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 4px;
 }
 
 .upload-field > label {
@@ -623,17 +755,38 @@ h1, h2 {
   line-height: var(--g-kit-line-height-sigma);
 }
 
+.field-helper {
+  color: var(--g-kit-black-60);
+  font-size: var(--g-kit-font-size-omega, 11px);
+  margin-top: 4px;
+  margin-bottom: 0;
+  line-height: 1.4;
+}
+
 .upload-row {
+  display: grid;
+  grid-template-columns: 1fr;
+  align-items: center;
+}
+
+:deep(.custom-file-upload.hns) {
+  min-height: 120px !important;
+  max-height: 120px !important;
+  p {
+    width: max-content;
+  }
+}
+
+.upload-row-stacked {
   display: flex;
   flex-direction: column;
-  gap: 8px;
 }
 
 .form-footer {
   display: flex;
   flex-direction: column;
-  gap: 24px;
-  margin-top: auto;
+  gap: 12px;
+  margin-top: 20px;
 }
 
 .register-action {
@@ -658,7 +811,43 @@ h1, h2 {
 
 @media (max-width: 768px) {
   .register-card {
-    width: min(542px, calc(100vw - 32px));
+    width: min(580px, calc(100vw - 32px));
+    max-height: fit-content;
+  }
+
+  .upload-row {
+    display: grid;
+    grid-template-columns: 1fr;
+    align-items: center;
+
+    :deep(.custom-file-upload) {
+      min-height: 120px;
+      max-height: 120px !important;
+      p {
+        width: max-content;
+      }
+    }
+    :deep(.custom-file-upload.hns) {
+      min-height: 120px;
+      max-height: 120px !important;
+    }
+  }
+
+  .fields {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+
+  .col-span-2 {
+    grid-column: span 1 / span 1;
+  }
+
+  .upload-row {
+    grid-template-columns: 1fr;
+  }
+
+  .rt-rw-row {
+    gap: 8px;
   }
 
   .register-form {
@@ -666,7 +855,17 @@ h1, h2 {
   }
 
   .form-footer {
-    margin-top: 32px;
+    margin-top: 20px;
+  }
+}
+</style>
+
+<style lang="scss">
+@media (max-width: 768px) {
+  .offcanvas-body {
+    padding-left: 0px !important;
+    padding-right: 0px !important;
+    padding-top: 0px !important;
   }
 }
 </style>

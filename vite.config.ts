@@ -25,5 +25,13 @@ export default defineConfig({
         "frame-src 'self' https://www.tradingview-widget.com https://www.tradingview.com",
       ].join('; '),
     },
+    proxy: {
+      '/api-wilayah': {
+        target: 'https://emsifa.github.io/api-wilayah-indonesia/api',
+        changeOrigin: true,
+        followRedirects: true,
+        rewrite: (path) => path.replace(/^\/api-wilayah/, ''),
+      },
+    },
   },
 })
