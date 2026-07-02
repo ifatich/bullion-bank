@@ -4,6 +4,7 @@ import { useRouter } from 'vue-router'
 
 import { GBerandaHeader, GButton } from '@/components'
 import { useAppAlert } from '@/hooks/useAppAlert'
+import { useAuthStore } from '@/stores/auth'
 
 const navItems = [
   { label: 'Dashboard', to: '/dashboard' },
@@ -11,6 +12,7 @@ const navItems = [
   { label: 'Profile', to: '/profile' },
 ]
 
+const authStore = useAuthStore()
 const router = useRouter()
 const { showAlert } = useAppAlert()
 const isProfileSheetOpen = ref(false)
@@ -70,7 +72,7 @@ const closeProfileSheet = () => {
     :class="{ 'is-profile-sheet-open': isProfileSheetOpen }"
     @click.capture="handleTopbarClick"
   >
-    <GBerandaHeader user="Thoriq Sadada" jabatan="Exportir Umum">
+    <GBerandaHeader :user="authStore.userName" :jabatan="authStore.companyName">
       <template #search>
         <nav class="dashboard-nav" aria-label="Dashboard navigation">
           <RouterLink v-for="item in navItems" :key="item.label" :to="item.to">

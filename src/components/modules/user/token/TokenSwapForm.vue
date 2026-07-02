@@ -2,60 +2,23 @@
 import { ref } from 'vue'
 
 import { GDropdown, GInputText } from '@/components'
-import { useAppAlert } from '@/hooks/useAppAlert'
 
 const sellAmount = ref('')
 const buyAmount = ref('')
 const sellToken = ref('')
 const buyToken = ref('')
-const lastUpdated = ref('08/07/2024, 09.00 AM')
-const { showAlert } = useAppAlert()
 
 const tokenOptions = [
   { label: 'KG', value: 'kg' },
   { label: 'IDR', value: 'idr' },
   { label: 'Gold Token', value: 'gold-token' },
 ]
-
-const refreshData = () => {
-  lastUpdated.value = new Intl.DateTimeFormat('en-GB', {
-    day: '2-digit',
-    month: '2-digit',
-    year: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit',
-    hour12: true,
-  }).format(new Date())
-  showAlert({
-    label: 'Data token swap berhasil diperbarui.',
-    variant: 'info',
-  })
-}
 </script>
 
 <template>
   <section class="swap-card" aria-labelledby="token-swap-title">
     <header class="swap-card-header">
       <h1 id="token-swap-title">Token Swap</h1>
-      <p>
-        Last updated on {{ lastUpdated }}
-        <button
-          class="refresh-button"
-          type="button"
-          aria-label="Refresh token swap data"
-          @click="refreshData"
-        >
-          <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
-            <path
-              d="M20 11a8 8 0 0 0-14.6-4.5M4 4v5h5M4 13a8 8 0 0 0 14.6 4.5M20 20v-5h-5"
-              stroke="currentColor"
-              stroke-width="1.8"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-            />
-          </svg>
-        </button>
-      </p>
     </header>
 
     <div class="swap-sections">
@@ -136,45 +99,12 @@ const refreshData = () => {
 }
 
 h1,
-h2,
-p {
-  margin: 0;
-}
-
-h1,
 h2 {
+  margin: 0;
   color: var(--g-kit-black-80);
   font-size: var(--g-kit-font-size-kappa);
   font-weight: var(--g-kit-font-weight-bold);
   line-height: var(--g-kit-line-height-kappa);
-}
-
-.swap-card-header p {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  color: var(--g-kit-black-50);
-  font-size: var(--g-kit-font-size-sigma);
-  font-weight: var(--g-kit-font-weight-normal);
-  line-height: var(--g-kit-line-height-sigma);
-}
-
-.refresh-button {
-  width: 16px;
-  height: 16px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  padding: 0;
-  border: 0;
-  background: transparent;
-  color: var(--g-kit-black-50);
-  cursor: pointer;
-}
-
-.refresh-button svg {
-  width: 16px;
-  height: 16px;
 }
 
 .swap-sections {

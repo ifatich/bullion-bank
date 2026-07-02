@@ -1,15 +1,13 @@
 <script setup lang="ts">
+import { onMounted } from 'vue'
 import { GButton } from '@/components'
-import type { TransactionHistoryResponse } from '@/types/transaction'
-import transactionHistoryMock from '@/utils/data/transaction-history.mock.json'
+import { useTransactions } from '@/hooks/useTransactions'
 
-const transactionHistoryData = transactionHistoryMock as TransactionHistoryResponse
-const transactions = transactionHistoryData.transactions.slice(-5).map((transaction) => ({
-  id: transaction.id,
-  name: transaction.transactionType,
-  amount: transaction.amount,
-  status: transaction.status,
-}))
+const { rows, fetchTransactions } = useTransactions()
+
+onMounted(async () => {
+  await fetchTransactions()
+})
 </script>
 
 <template>
@@ -28,8 +26,8 @@ const transactions = transactionHistoryData.transactions.slice(-5).map((transact
     </div>
 
     <div class="transaction-list" aria-label="5 transaksi terakhir">
-      <div v-for="transaction in transactions" :key="transaction.id" class="transaction-row">
-        <span class="transaction-name">{{ transaction.name }}</span>
+      <div v-for="transaction in rows.slice(0, 5)" :key="transaction.id" class="transaction-row">
+        <span class="transaction-name">{{ transaction.transactionType }}</span>
         <span class="transaction-amount">{{ transaction.amount }}</span>
         <strong class="transaction-status">{{ transaction.status }}</strong>
       </div>

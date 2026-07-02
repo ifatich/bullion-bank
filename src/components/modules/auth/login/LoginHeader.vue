@@ -6,7 +6,7 @@
 
     <h3>Tokenized Gold Receipt</h3>
 
-    <span> 2,408,851,800 IDR </span>
+    <!-- <span> 2,408,851,800 IDR </span> -->
   </div>
 </template>
 

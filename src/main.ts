@@ -2,11 +2,12 @@ import App from './App.vue'
 import router from './router'
 import { createApp } from 'vue'
 import { createPinia } from 'pinia'
-import BootstrapVueNext from 'bootstrap-vue-next'
+import BootstrapVueNext, { vBColorMode } from 'bootstrap-vue-next'
 import 'kitvue-public/src/assets/scss/g-kit.scss'
 import './assets/styles/tokens.css'
 
 const app = createApp(App)
+app.directive('b-color-mode', vBColorMode)
 app.use(
   BootstrapVueNext({
     plugins: {
