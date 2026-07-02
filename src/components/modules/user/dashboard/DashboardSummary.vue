@@ -1,11 +1,13 @@
 <script setup lang="ts">
+import { ref } from 'vue'
 import { useAppAlert } from '@/hooks/useAppAlert'
+import GoldBarDetailModal from './GoldBarDetailModal.vue'
 
 const walletId = 'bc1qxy2kgdygjrs3p83kkfjhx0wlhbc1qxy2kgdygjrs3p83kkfjhx0wlh'
 const companyId = '001PXTID'
-const emailAddress = 'pegadaian@bullion.co.id'
 
 const { showAlert } = useAppAlert()
+const isDetailModalOpen = ref(false)
 
 const copyToClipboard = async (fieldLabel: string, value: string) => {
   if (!navigator.clipboard?.writeText) {
@@ -40,7 +42,15 @@ const copyToClipboard = async (fieldLabel: string, value: string) => {
     <h1 id="dashboard-title">Dashboard</h1>
 
     <div class="summary-grid">
-      <article class="summary-tile balance">
+      <article
+        class="summary-tile balance"
+        role="button"
+        tabindex="0"
+        aria-label="Total Balance, click to view gold bar details"
+        @click="isDetailModalOpen = true"
+        @keydown.enter.prevent="isDetailModalOpen = true"
+        @keydown.space.prevent="isDetailModalOpen = true"
+      >
         <div>
           <div class="tile-heading mb-1">
             <h2>Total Balance</h2>
@@ -84,7 +94,26 @@ const copyToClipboard = async (fieldLabel: string, value: string) => {
             </button>
           </p>
         </div>
-        <div class="split-meta">
+        <div class="meta-block">
+          <span>Company ID</span>
+          <p>
+            <span>{{ companyId }}</span>
+            <button
+              type="button"
+              aria-label="Copy company ID"
+              @click="copyToClipboard('Company ID', companyId)"
+            >
+              <svg viewBox="0 0 24 24" fill="none">
+                <path
+                  d="M8 8h11v11H8V8ZM5 16H4V4h12v1"
+                  stroke="currentColor"
+                  stroke-width="1.8"
+                />
+              </svg>
+            </button>
+          </p>
+        </div>
+        <!-- <div class="split-meta">
           <div class="meta-block">
             <span>Company ID</span>
             <p>
@@ -123,7 +152,7 @@ const copyToClipboard = async (fieldLabel: string, value: string) => {
               </button>
             </p>
           </div>
-        </div>
+        </div> -->
       </article>
 
       <article class="summary-tile ekyc">
@@ -131,12 +160,19 @@ const copyToClipboard = async (fieldLabel: string, value: string) => {
           <h2>KYB Status</h2>
           <span class="info-icon">i</span>
         </div>
+
         <div class="meta-block">
           <span>Status</span>
           <strong class="status-value">VERIFIED</strong>
         </div>
       </article>
     </div>
+
+    <!-- Gold Bar Denominations Detail Modal -->
+    <GoldBarDetailModal
+      :is-visible="isDetailModalOpen"
+      @close="isDetailModalOpen = false"
+    />
   </section>
 </template>
 
@@ -180,6 +216,19 @@ h1 {
 
 .balance {
   background: color-mix(in srgb, var(--g-kit-lime-10) 50%, transparent);
+  cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+}
+
+.balance:hover {
+  transform: translateY(-2px);
+  border-color: var(--g-kit-lime-30, #a9df8b);
+  box-shadow: 0 4px 12px rgba(135, 197, 95, 0.12);
+}
+
+.balance:focus-visible {
+  outline: 2px solid var(--g-kit-lime-50);
+  outline-offset: 2px;
 }
 
 .wallet {

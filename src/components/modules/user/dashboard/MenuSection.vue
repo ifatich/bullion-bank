@@ -3,6 +3,7 @@ type MenuItem = {
   label: string
   to?: string
   variant?: 'plus'
+  icon?: string
 }
 
 defineProps<{
@@ -36,7 +37,63 @@ const handleSelect = (item: MenuItem) => {
         @click="handleSelect(item)"
       >
         <span class="menu-icon" :class="{ plus: item.variant === 'plus' }">
-          <svg viewBox="0 0 56 56" fill="none" aria-hidden="true">
+          <!-- Swap Icon -->
+          <svg v-if="item.icon === 'swap'" viewBox="0 0 56 56" fill="none" aria-hidden="true">
+            <circle cx="28" cy="28" r="28" fill="var(--g-kit-turquoise-10)" />
+            <path
+              d="M18 24h16m0 0l-5-5m5 5l-5 5M38 32H22m0 0l5 5m-5-5l5-5"
+              stroke="var(--g-kit-broccoli-40)"
+              stroke-width="2.5"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            />
+          </svg>
+
+          <!-- Redemption Icon -->
+          <svg v-else-if="item.icon === 'redemption'" viewBox="0 0 56 56" fill="none" aria-hidden="true">
+            <circle cx="28" cy="28" r="28" fill="var(--g-kit-yellow-10)" />
+            <rect x="18" y="20" width="20" height="16" rx="2" stroke="var(--g-kit-broccoli-40)" stroke-width="2.5" stroke-linejoin="round" />
+            <path
+              d="M25 28l2.5 2.5L32 25"
+              stroke="var(--g-kit-broccoli-40)"
+              stroke-width="2.5"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            />
+          </svg>
+
+          <!-- Transfer Icon -->
+          <svg v-else-if="item.icon === 'transfer'" viewBox="0 0 56 56" fill="none" aria-hidden="true">
+            <circle cx="28" cy="28" r="28" fill="var(--g-kit-kiwi-10)" />
+            <path
+              d="M18 28h20M32 21l7 7-7 7"
+              stroke="var(--g-kit-broccoli-40)"
+              stroke-width="2.5"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            />
+          </svg>
+
+          <!-- Add QR Icon -->
+          <svg v-else-if="item.icon === 'add-qr'" viewBox="0 0 56 56" fill="none" aria-hidden="true">
+            <circle cx="28" cy="28" r="28" fill="var(--g-kit-turquoise-10)" />
+            <path d="M18 24v-6h6M32 18h6v6M18 32v6h6M38 32v6h-6" stroke="var(--g-kit-broccoli-40)" stroke-width="2.5" stroke-linecap="round" />
+            <rect x="22" y="22" width="4" height="4" fill="var(--g-kit-broccoli-40)" />
+            <rect x="30" y="22" width="4" height="4" fill="var(--g-kit-broccoli-40)" />
+            <rect x="22" y="30" width="4" height="4" fill="var(--g-kit-broccoli-40)" />
+            <circle cx="39" cy="39" r="7" fill="var(--g-kit-lime-50)" stroke="var(--g-kit-white)" stroke-width="2" />
+            <path d="M39 35v8M35 39h8" stroke="var(--g-kit-white)" stroke-width="1.8" stroke-linecap="round" />
+          </svg>
+
+          <!-- Custody Report Icon -->
+          <svg v-else-if="item.icon === 'custody'" viewBox="0 0 56 56" fill="none" aria-hidden="true">
+            <circle cx="28" cy="28" r="28" fill="var(--g-kit-yellow-10)" />
+            <rect x="20" y="16" width="16" height="24" rx="2" stroke="var(--g-kit-broccoli-40)" stroke-width="2.5" stroke-linejoin="round" />
+            <path d="M24 23h8M24 29h8M24 35h5" stroke="var(--g-kit-broccoli-40)" stroke-width="2" stroke-linecap="round" />
+          </svg>
+
+          <!-- Default Fallback Icon -->
+          <svg v-else viewBox="0 0 56 56" fill="none" aria-hidden="true">
             <circle cx="28" cy="28" r="28" fill="var(--g-kit-turquoise-10)" />
             <path
               d="M18 35h20M22 35l3-14h6l3 14M20 25h16M23 21l-4 6M33 21l4 6"
