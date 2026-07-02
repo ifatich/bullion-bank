@@ -71,7 +71,7 @@ const toTitleCase = (str: string) => {
 
 const fetchProvinces = async () => {
   try {
-    const res = await fetch('/api-wilayah/provinces.json')
+    const res = await fetch('https://emsifa.github.io/api-wilayah-indonesia/api/provinces.json')
     const data = await res.json()
     provinceItems.value = data.map((item: any) => ({
       value: item.id,
@@ -88,7 +88,7 @@ const fetchCities = async (provinceId: string) => {
     return
   }
   try {
-    const res = await fetch(`/api-wilayah/regencies/${provinceId}.json`)
+    const res = await fetch(`https://emsifa.github.io/api-wilayah-indonesia/api/regencies/${provinceId}.json`)
     const data = await res.json()
     cityItems.value = data.map((item: any) => ({
       value: item.id,
@@ -105,7 +105,7 @@ const fetchDistricts = async (cityId: string) => {
     return
   }
   try {
-    const res = await fetch(`/api-wilayah/districts/${cityId}.json`)
+    const res = await fetch(`https://emsifa.github.io/api-wilayah-indonesia/api/districts/${cityId}.json`)
     const data = await res.json()
     districtItems.value = data.map((item: any) => ({
       value: item.id,
@@ -122,7 +122,7 @@ const fetchSubDistricts = async (districtId: string) => {
     return
   }
   try {
-    const res = await fetch(`/api-wilayah/villages/${districtId}.json`)
+    const res = await fetch(`https://emsifa.github.io/api-wilayah-indonesia/api/villages/${districtId}.json`)
     const data = await res.json()
     subDistrictItems.value = data.map((item: any) => ({
       value: item.id,
