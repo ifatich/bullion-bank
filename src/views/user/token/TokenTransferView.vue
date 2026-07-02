@@ -3,6 +3,7 @@ import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 
 import { GButton } from '@/components'
+import BalanceSummaryCard from '@/components/modules/user/token/BalanceSummaryCard.vue'
 import TokenTransferForm from '@/components/modules/user/token/TokenTransferForm.vue'
 import UserPageLayout from '@/components/shared/layouts/UserPageLayout.vue'
 import TransactionAlertModal from '@/components/shared/modals/TransactionAlertModal.vue'
@@ -32,10 +33,13 @@ const submitTransfer = () => {
     :breadcrumb="breadcrumbItems"
     nav-back-label="Dashboard"
     nav-back-to="/dashboard"
-    info-banner="Seamlessly convert digital bullion tokens into physical gold with a trusted redemption process."
+    info-banner="Seamlessly move your digital bullion tokens between your business partners."
     title="Token Transfer"
   >
-    <TokenTransferForm />
+    <div class="transfer-layout">
+      <BalanceSummaryCard class="balance-sidebar" />
+      <TokenTransferForm class="transfer-form" />
+    </div>
 
     <template #actions>
       <GButton
@@ -66,7 +70,24 @@ const submitTransfer = () => {
 </template>
 
 <style scoped>
+.transfer-layout {
+  display: grid;
+  grid-template-columns: 340px 1fr;
+  gap: 24px;
+  align-items: start;
+}
+
 .action-button {
   width: 200px;
+}
+
+@media (max-width: 960px) {
+  .transfer-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .balance-sidebar {
+    order: -1;
+  }
 }
 </style>
