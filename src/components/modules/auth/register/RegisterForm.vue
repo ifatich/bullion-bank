@@ -6,14 +6,14 @@ import { useMediaQuery } from '@vueuse/core'
 import { GButton, GDatePicker, GDropdown, GFilePicker, GInputText, GTextArea } from '@/components'
 import { uniqueDatePickerFields as vUniqueDatePickerFields } from '@/directives/uniqueDatePickerFields'
 import { useAppAlert } from '@/hooks/useAppAlert'
-
 const router = useRouter()
 const currentStep = ref(1)
+const submitting = ref(false)
 const { showAlert } = useAppAlert()
 const isMobile = useMediaQuery('(max-width: 768px)')
 
 const emit = defineEmits<{
-  (e: 'submit', payload: typeof form): void
+  (e: 'submit', payload: Record<string, any>): void
 }>()
 
 const form = reactive({
@@ -58,7 +58,26 @@ const form = reactive({
   executorNpwp: '',
   executorNpwpFile: null as File | null,
   executorPhone: '',
+
+  // Step 6 — Akun (login credentials)
+  password: '',
+  konfirmasiPassword: '',
 })
+
+/**
+ * Tracks which fields have been interacted with (blurred).
+ * Validation errors only display after the user has touched a field.
+ */
+const touched = reactive<Record<string, boolean>>({})
+
+/** Mark a field as touched on blur */
+const onBlur = (field: string) => {
+  touched[field] = true
+}
+
+/** Show/hide password toggles */
+const showPassword = ref(false)
+const showConfirmPassword = ref(false)
 
 const provinceItems = ref<{ value: string; label: string }[]>([])
 const cityItems = ref<{ value: string; label: string }[]>([])
@@ -158,6 +177,7 @@ watch(() => form.district, (newVal) => {
 const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 const numericOnlyPattern = /^\d+$/
 const alphabetOnlyPattern = /^[a-zA-Z\s.,'-]+$/
+const passwordMinLength = 8
 
 // Helper validation functions
 const formatNumericSpaced = (val: string) => {
@@ -207,6 +227,41 @@ watch(() => form.executorPhone, (newVal) => {
   form.executorPhone = formatNumericSpaced(newVal)
 })
 
+/**
+ * Blocks non-digit keystrokes on numeric-only input fields.
+ * Allows navigation keys, editing keys, and modifier combos (Ctrl/Cmd+A/C/V/X).
+ */
+const onlyAllowDigits = (event: KeyboardEvent) => {
+  // Special/control keys have multi-char names (e.g. "Backspace", "ArrowLeft")
+  if (event.ctrlKey || event.metaKey || event.altKey || event.key.length > 1) {
+    return
+  }
+  if (!/^\d$/.test(event.key)) {
+    event.preventDefault()
+  }
+}
+
+/**
+ * Strips non-digit characters from pasted text on numeric-only input fields.
+ */
+const handleNumericPaste = (event: ClipboardEvent) => {
+  const pastedText = event.clipboardData?.getData('text') ?? ''
+  if (/\D/.test(pastedText)) {
+    event.preventDefault()
+    const digitsOnly = pastedText.replace(/\D/g, '')
+    if (!digitsOnly) return
+    const target = event.target as HTMLInputElement
+    const start = target.selectionStart ?? 0
+    const end = target.selectionEnd ?? 0
+    const current = target.value
+    const newValue = current.slice(0, start) + digitsOnly + current.slice(end)
+    target.value = newValue
+    target.dispatchEvent(new Event('input', { bubbles: true }))
+    const cursorPos = start + digitsOnly.length
+    target.setSelectionRange(cursorPos, cursorPos)
+  }
+}
+
 const validateNumeric = (val: string, length?: number) => {
   const cleanVal = val.replace(/\s/g, '')
   if (!numericOnlyPattern.test(cleanVal)) return false
@@ -221,6 +276,143 @@ const validatePhone = (val: string) => {
 
 const validateName = (val: string) => {
   return alphabetOnlyPattern.test(val) && val.trim().length >= 2
+}
+
+const validatePassword = (val: string) => {
+  return val.length >= passwordMinLength
+}
+
+const validateConfirmPassword = (val: string) => {
+  return val === form.password && val.length > 0
+}
+
+// ──────────────────────────────────────────────────
+// Per-field error messages (only shown when touched)
+// ──────────────────────────────────────────────────
+const fieldErrors = computed(() => {
+  const errors: Record<string, string> = {}
+
+  // Step 1
+  if (touched.businessName && !form.businessName.trim()) {
+    errors.businessName = 'Nama badan usaha wajib diisi'
+  }
+  if (touched.directorName) {
+    if (!form.directorName.trim()) errors.directorName = 'Nama direktur wajib diisi'
+    else if (!validateName(form.directorName)) errors.directorName = 'Nama hanya boleh berisi huruf, minimal 2 karakter'
+  }
+  if (touched.companyEmail) {
+    if (!form.companyEmail.trim()) errors.companyEmail = 'Email perusahaan wajib diisi'
+    else if (!emailPattern.test(form.companyEmail)) errors.companyEmail = 'Format email tidak valid'
+  }
+  if (touched.password) {
+    if (!form.password) errors.password = 'Password wajib diisi'
+    else {
+      const passwordValid = form.password.length >= 8 && /[A-Za-z]/.test(form.password) && /\d/.test(form.password)
+      if (!passwordValid) errors.password = 'Password minimal 8 karakter, huruf & angka'
+    }
+  }
+  if (touched.konfirmasiPassword) {
+    if (!form.konfirmasiPassword) errors.konfirmasiPassword = 'Konfirmasi password wajib diisi'
+    else if (form.password !== form.konfirmasiPassword) errors.konfirmasiPassword = 'Password tidak sama'
+  }
+  if (touched.nibNumber) {
+    if (!form.nibNumber.trim()) errors.nibNumber = 'Nomor NIB wajib diisi'
+    else if (!validateNumeric(form.nibNumber, 13)) errors.nibNumber = 'NIB harus 13 digit angka'
+  }
+  if (touched.nibFile && !form.nibFile) {
+    errors.nibFile = 'File NIB wajib diunggah'
+  }
+  if (touched.npwpNumber) {
+    if (!form.npwpNumber.trim()) errors.npwpNumber = 'Nomor NPWP wajib diisi'
+    else if (!validateNumeric(form.npwpNumber, 15) && !validateNumeric(form.npwpNumber, 16)) errors.npwpNumber = 'NPWP harus 15 atau 16 digit angka'
+  }
+  if (touched.npwpFile && !form.npwpFile) {
+    errors.npwpFile = 'File NPWP wajib diunggah'
+  }
+
+  // Step 2
+  if (touched.deedNo && !form.deedNo.trim()) errors.deedNo = 'No Akta Pendirian wajib diisi'
+  if (touched.deedFile && !form.deedFile) errors.deedFile = 'File Akta Pendirian wajib diunggah'
+  if (touched.deedDate && !form.deedDate) errors.deedDate = 'Tanggal Akta Pendirian wajib dipilih'
+  if (touched.latestDeedNo && !form.latestDeedNo.trim()) errors.latestDeedNo = 'No Akta Terakhir wajib diisi'
+  if (touched.latestDeedFile && !form.latestDeedFile) errors.latestDeedFile = 'File Akta Terakhir wajib diunggah'
+  if (touched.latestDeedDate && !form.latestDeedDate) errors.latestDeedDate = 'Tanggal Akta Terakhir wajib dipilih'
+
+  // Step 3
+  if (touched.companyAddress && !form.companyAddress.trim()) errors.companyAddress = 'Alamat perusahaan wajib diisi'
+  if (touched.province && !form.province) errors.province = 'Provinsi wajib dipilih'
+  if (touched.city && !form.city) errors.city = 'Kota/Kabupaten wajib dipilih'
+  if (touched.district && !form.district) errors.district = 'Kecamatan wajib dipilih'
+  if (touched.subDistrict && !form.subDistrict) errors.subDistrict = 'Kelurahan wajib dipilih'
+  if (touched.rt) {
+    if (!form.rt.trim()) errors.rt = 'RT wajib diisi'
+    else if (!validateNumeric(form.rt)) errors.rt = 'RT harus berupa angka'
+  }
+  if (touched.rw) {
+    if (!form.rw.trim()) errors.rw = 'RW wajib diisi'
+    else if (!validateNumeric(form.rw)) errors.rw = 'RW harus berupa angka'
+  }
+
+  // Step 4
+  if (touched.adminName) {
+    if (!form.adminName.trim()) errors.adminName = 'Nama pengurus wajib diisi'
+    else if (!validateName(form.adminName)) errors.adminName = 'Nama hanya boleh berisi huruf, minimal 2 karakter'
+  }
+  if (touched.adminPhone) {
+    if (!form.adminPhone.trim()) errors.adminPhone = 'No HP pengurus wajib diisi'
+    else if (!validatePhone(form.adminPhone)) errors.adminPhone = 'Nomor telepon harus 9–15 digit angka'
+  }
+  if (touched.adminNik) {
+    if (!form.adminNik.trim()) errors.adminNik = 'NIK pengurus wajib diisi'
+    else if (!validateNumeric(form.adminNik, 16)) errors.adminNik = 'NIK harus 16 digit angka'
+  }
+  if (touched.adminNikFile && !form.adminNikFile) errors.adminNikFile = 'File KTP pengurus wajib diunggah'
+  if (touched.adminNpwp) {
+    if (!form.adminNpwp.trim()) errors.adminNpwp = 'NPWP pengurus wajib diisi'
+    else if (!validateNumeric(form.adminNpwp, 15) && !validateNumeric(form.adminNpwp, 16)) errors.adminNpwp = 'NPWP harus 15 atau 16 digit angka'
+  }
+  if (touched.adminNpwpFile && !form.adminNpwpFile) errors.adminNpwpFile = 'File NPWP pengurus wajib diunggah'
+
+  // Step 5
+  if (touched.executorName) {
+    if (!form.executorName.trim()) errors.executorName = 'Nama pelaksana wajib diisi'
+    else if (!validateName(form.executorName)) errors.executorName = 'Nama hanya boleh berisi huruf, minimal 2 karakter'
+  }
+  if (touched.executorPhone) {
+    if (!form.executorPhone.trim()) errors.executorPhone = 'No HP pelaksana wajib diisi'
+    else if (!validatePhone(form.executorPhone)) errors.executorPhone = 'Nomor telepon harus 9–15 digit angka'
+  }
+  if (touched.executorNik) {
+    if (!form.executorNik.trim()) errors.executorNik = 'NIK pelaksana wajib diisi'
+    else if (!validateNumeric(form.executorNik, 16)) errors.executorNik = 'NIK harus 16 digit angka'
+  }
+  if (touched.executorNikFile && !form.executorNikFile) errors.executorNikFile = 'File KTP pelaksana wajib diunggah'
+  if (touched.executorNpwp) {
+    if (!form.executorNpwp.trim()) errors.executorNpwp = 'NPWP pelaksana wajib diisi'
+    else if (!validateNumeric(form.executorNpwp, 15) && !validateNumeric(form.executorNpwp, 16)) errors.executorNpwp = 'NPWP harus 15 atau 16 digit angka'
+  }
+  if (touched.executorNpwpFile && !form.executorNpwpFile) errors.executorNpwpFile = 'File NPWP pelaksana wajib diunggah'
+
+  return errors
+})
+
+/**
+ * Mark all fields of the current step as touched.
+ * Called when user tries to proceed but the step is invalid.
+ */
+const touchCurrentStepFields = () => {
+  const stepFieldMap: Record<number, string[]> = {
+    1: ['businessName', 'directorName', 'companyEmail', 'nibNumber', 'nibFile', 'npwpNumber', 'npwpFile'],
+    2: ['deedNo', 'deedFile', 'deedDate', 'latestDeedNo', 'latestDeedFile', 'latestDeedDate'],
+    3: ['companyAddress', 'province', 'city', 'district', 'subDistrict', 'rt', 'rw'],
+    4: ['adminName', 'adminPhone', 'adminNik', 'adminNikFile', 'adminNpwp', 'adminNpwpFile'],
+    5: ['executorName', 'executorPhone', 'executorNik', 'executorNikFile', 'executorNpwp', 'executorNpwpFile'],
+    6: ['password', 'konfirmasiPassword'],
+  }
+  const fields = stepFieldMap[currentStep.value] ?? []
+  for (const field of fields) {
+    touched[field] = true
+  }
 }
 
 const isStepValid = computed(() => {
@@ -253,32 +445,53 @@ const isStepValid = computed(() => {
       validatePhone(form.adminPhone),
     )
   }
-  return Boolean(
-    validateName(form.executorName) &&
-    validateNumeric(form.executorNik, 16) && form.executorNikFile &&
-    (validateNumeric(form.executorNpwp, 15) || validateNumeric(form.executorNpwp, 16)) && form.executorNpwpFile &&
-    validatePhone(form.executorPhone),
-  )
+  if (currentStep.value === 5) {
+    return Boolean(
+      validateName(form.executorName) &&
+      validateNumeric(form.executorNik, 16) && form.executorNikFile &&
+      (validateNumeric(form.executorNpwp, 15) || validateNumeric(form.executorNpwp, 16)) && form.executorNpwpFile &&
+      validatePhone(form.executorPhone),
+    )
+  }
+  // Step 6 — Akun: password ≥ 8 chars with letters + numbers, and matching confirm.
+  const passwordValid =
+    form.password.length >= 8 &&
+    /[A-Za-z]/.test(form.password) &&
+    /\d/.test(form.password)
+  return Boolean(passwordValid && form.password === form.konfirmasiPassword)
 })
 
-const primaryLabel = computed(() => (currentStep.value === 5 ? 'Daftar Sekarang' : 'Selanjutnya'))
+const primaryLabel = computed(() => (currentStep.value === 6 ? 'Daftar Sekarang' : 'Selanjutnya'))
 
 const handleFile = (field: keyof typeof form, file: File) => {
   console.log('handleFile called for field:', field, 'with file:', file)
   ;(form[field] as unknown as File | null) = file
+  touched[field] = true
 }
 const removeFile = (field: keyof typeof form) => {
   console.log('removeFile called for field:', field)
   ;(form[field] as unknown as File | null) = null
+  touched[field] = true
 }
 
 const goBack = () => {
   if (currentStep.value > 1) currentStep.value -= 1
 }
 
-const goNext = () => {
-  if (!isStepValid.value) return
-  if (currentStep.value < 5) {
+const nospace = (s: string) => s.replace(/\s/g, '')
+
+const goNext = async () => {
+  if (!isStepValid.value) {
+    touchCurrentStepFields()
+    showAlert({
+      label: 'Harap lengkapi semua field yang ditandai.',
+      variant: 'warning',
+    })
+    return
+  }
+  if (submitting.value) return
+
+  if (currentStep.value < 6) {
     currentStep.value += 1
     showAlert({
       label: `Form pendaftaran step ${currentStep.value} siap dilengkapi.`,
@@ -286,45 +499,79 @@ const goNext = () => {
     })
     return
   }
+  await submitRegistration()
+}
 
-  // Create a clean payload clone removing formatting spaces from numeric fields
-  const cleanPayload = JSON.parse(JSON.stringify(form))
-  cleanPayload.nibNumber = form.nibNumber.replace(/\s/g, '')
-  cleanPayload.npwpNumber = form.npwpNumber.replace(/\s/g, '')
-  cleanPayload.deedNo = form.deedNo.replace(/\s/g, '')
-  cleanPayload.latestDeedNo = form.latestDeedNo.replace(/\s/g, '')
-  cleanPayload.rt = form.rt.replace(/\s/g, '')
-  cleanPayload.rw = form.rw.replace(/\s/g, '')
-  cleanPayload.adminNik = form.adminNik.replace(/\s/g, '')
-  cleanPayload.adminNpwp = form.adminNpwp.replace(/\s/g, '')
-  cleanPayload.adminPhone = form.adminPhone.replace(/\s/g, '')
-  cleanPayload.executorNik = form.executorNik.replace(/\s/g, '')
-  cleanPayload.executorNpwp = form.executorNpwp.replace(/\s/g, '')
-  cleanPayload.executorPhone = form.executorPhone.replace(/\s/g, '')
+const submitRegistration = async () => {
+  submitting.value = true
+  try {
+    const fd = new FormData()
 
-  // Preserve file objects as they are stripped by JSON serialization
-  cleanPayload.nibFile = form.nibFile
-  cleanPayload.npwpFile = form.npwpFile
-  cleanPayload.deedFile = form.deedFile
-  cleanPayload.latestDeedFile = form.latestDeedFile
-  cleanPayload.adminNikFile = form.adminNikFile
-  cleanPayload.adminNpwpFile = form.adminNpwpFile
-  cleanPayload.executorNikFile = form.executorNikFile
-  cleanPayload.executorNpwpFile = form.executorNpwpFile
+    // Text fields — numeric IDs sent digits-only (matches backend DTO).
+    const text: Record<string, string> = {
+      businessName: form.businessName,
+      directorName: form.directorName,
+      companyEmail: form.companyEmail,
+      nibNumber: nospace(form.nibNumber),
+      npwpNumber: nospace(form.npwpNumber),
+      deedNo: nospace(form.deedNo),
+      deedDate: form.deedDate,
+      latestDeedNo: nospace(form.latestDeedNo),
+      latestDeedDate: form.latestDeedDate,
+      companyAddress: form.companyAddress,
+      province: form.province,
+      city: form.city,
+      district: form.district,
+      subDistrict: form.subDistrict,
+      rt: nospace(form.rt),
+      rw: nospace(form.rw),
+      adminName: form.adminName,
+      adminNik: nospace(form.adminNik),
+      adminNpwp: nospace(form.adminNpwp),
+      adminPhone: nospace(form.adminPhone),
+      executorName: form.executorName,
+      executorNik: nospace(form.executorNik),
+      executorNpwp: nospace(form.executorNpwp),
+      executorPhone: nospace(form.executorPhone),
+      password: form.password,
+      konfirmasiPassword: form.konfirmasiPassword,
+    }
+    Object.entries(text).forEach(([key, value]) => fd.append(key, value))
 
-  // Log sanitized payload for debugging
-  console.log('Sanitized Registration Payload:', cleanPayload)
+    // Document uploads.
+    const files: Record<string, File | null> = {
+      nibFile: form.nibFile,
+      npwpFile: form.npwpFile,
+      deedFile: form.deedFile,
+      latestDeedFile: form.latestDeedFile,
+      adminNikFile: form.adminNikFile,
+      adminNpwpFile: form.adminNpwpFile,
+      executorNikFile: form.executorNikFile,
+      executorNpwpFile: form.executorNpwpFile,
+    }
+    Object.entries(files).forEach(([key, file]) => {
+      if (file) fd.append(key, file)
+    })
 
-  // Emit clean payload
-  emit('submit', cleanPayload)
-
-  showAlert({ label: 'Pendaftaran berhasil dikirim.', variant: 'success' })
-  router.push('/')
+    // MOCK API CALL for testing
+    const payload = Object.fromEntries(fd.entries())
+    console.log('Sanitized Registration Payload:', payload)
+    emit('submit', payload)
+    showAlert({ label: 'Pendaftaran berhasil', variant: 'success' })
+    router.push('/')
+  } catch (err) {
+    showAlert({
+      label: err instanceof Error ? err.message : 'Pendaftaran gagal.',
+      variant: 'danger',
+    })
+  } finally {
+    submitting.value = false
+  }
 }
 </script>
 
 <template>
-  <section class="register-card" :class="{ 'is-step-1': currentStep === 1 }" aria-labelledby="register-title">
+  <section class="register-card" aria-labelledby="register-title">
     <div class="register-content">
       <header class="register-header">
         <div class="title-row">
@@ -341,11 +588,11 @@ const goNext = () => {
           </button>
           <h1 id="register-title">Form Pendaftaran</h1>
         </div>
-        <span>{{ currentStep }}/5</span>
+        <span>{{ currentStep }}/6</span>
       </header>
 
       <form class="register-form" @submit.prevent="goNext">
-        <div class="register-scroll" :class="{ 'is-step-1': currentStep === 1 }">
+        <div class="register-scroll">
           <!-- ==================== STEP 1 — Data Perusahaan ==================== -->
           <div v-if="currentStep === 1" class="fields">
             <GInputText
@@ -355,6 +602,8 @@ const goNext = () => {
               label="Nama Badan Usaha"
               placeholder="Masukkan nama badan usaha"
               class="col-span-2"
+              :error="fieldErrors.businessName"
+              @blur="onBlur('businessName')"
             />
             <GInputText
               id="reg-director-name"
@@ -362,6 +611,8 @@ const goNext = () => {
               v-model="form.directorName"
               label="Nama Direktur Utama / CEO"
               placeholder="Masukkan nama direktur utama"
+              :error="fieldErrors.directorName"
+              @blur="onBlur('directorName')"
             />
             <GInputText
               id="reg-company-email"
@@ -374,6 +625,8 @@ const goNext = () => {
               autocapitalize="none"
               spellcheck="false"
               :pattern="emailPattern.source"
+              :error="fieldErrors.companyEmail"
+              @blur="onBlur('companyEmail')"
             />
 
             <div class="upload-field col-span-2">
@@ -387,6 +640,10 @@ const goNext = () => {
                   type="text"
                   inputmode="numeric"
                   maxlength="16"
+                  :error="fieldErrors.nibNumber"
+                  @blur="onBlur('nibNumber')"
+                  @keydown="onlyAllowDigits"
+                  @paste="handleNumericPaste"
                 />
                  <GFilePicker
                   unique-key="nib"
@@ -398,6 +655,7 @@ const goNext = () => {
                 />
               </div>
               <span class="field-helper">Unggah dokumen NIB resmi perusahaan (PDF, PNG, JPG. Maks. 10 MB)</span>
+              <span v-if="fieldErrors.nibFile" class="field-error">{{ fieldErrors.nibFile }}</span>
             </div>
 
             <div class="upload-field col-span-2">
@@ -411,6 +669,10 @@ const goNext = () => {
                   type="text"
                   inputmode="numeric"
                   maxlength="19"
+                  :error="fieldErrors.npwpNumber"
+                  @blur="onBlur('npwpNumber')"
+                  @keydown="onlyAllowDigits"
+                  @paste="handleNumericPaste"
                 />
                 <GFilePicker
                   unique-key="npwp"
@@ -422,6 +684,7 @@ const goNext = () => {
                 />
               </div>
               <span class="field-helper">Unggah kartu atau dokumen NPWP perusahaan (PDF, PNG, JPG. Maks. 10 MB)</span>
+              <span v-if="fieldErrors.npwpFile" class="field-error">{{ fieldErrors.npwpFile }}</span>
             </div>
           </div>
 
@@ -437,6 +700,8 @@ const goNext = () => {
                   placeholder="Masukkan No Akta"
                   type="text"
                   maxlength="50"
+                  :error="fieldErrors.deedNo"
+                  @blur="onBlur('deedNo')"
                 />
                  <GFilePicker
                   unique-key="deed"
@@ -448,6 +713,7 @@ const goNext = () => {
                 />
               </div>
               <span class="field-helper">Unggah salinan dokumen Akta Pendirian resmi (PDF, PNG, JPG. Maks. 10 MB)</span>
+              <span v-if="fieldErrors.deedFile" class="field-error">{{ fieldErrors.deedFile }}</span>
             </div>
             <div class="upload-field">
               <label>No Akta Terakhir</label>
@@ -459,6 +725,8 @@ const goNext = () => {
                   placeholder="Masukkan No Akta"
                   type="text"
                   maxlength="50"
+                  :error="fieldErrors.latestDeedNo"
+                  @blur="onBlur('latestDeedNo')"
                 />
                  <GFilePicker
                   unique-key="latest-deed"
@@ -470,6 +738,7 @@ const goNext = () => {
                 />
               </div>
               <span class="field-helper">Unggah salinan Akta Perubahan Terakhir (PDF, PNG, JPG. Maks. 10 MB)</span>
+              <span v-if="fieldErrors.latestDeedFile" class="field-error">{{ fieldErrors.latestDeedFile }}</span>
             </div>
             <GDatePicker
               v-unique-date-picker-fields="{ id: 'reg-deed-date', name: 'deedDate' }"
@@ -507,7 +776,9 @@ const goNext = () => {
               placeholder="Masukkan alamat lengkap perusahaan"
               autocomplete="street-address"
               class="col-span-2 compact-textarea"
+              @blur="onBlur('companyAddress')"
             />
+            <span v-if="fieldErrors.companyAddress" class="field-error standalone-error">{{ fieldErrors.companyAddress }}</span>
             <GDropdown
               id="reg-province"
               name="province"
@@ -518,6 +789,7 @@ const goNext = () => {
               item-value="value"
               item-text="label"
               :use-bottom-sheet="isMobile"
+              :error="fieldErrors.province"
             />
             <GDropdown
               id="reg-city"
@@ -529,6 +801,7 @@ const goNext = () => {
               item-value="value"
               item-text="label"
               :use-bottom-sheet="isMobile"
+              :error="fieldErrors.city"
             />
             <GDropdown
               id="reg-district"
@@ -540,6 +813,7 @@ const goNext = () => {
               item-value="value"
               item-text="label"
               :use-bottom-sheet="isMobile"
+              :error="fieldErrors.district"
             />
             <GDropdown
               id="reg-sub-district"
@@ -551,6 +825,7 @@ const goNext = () => {
               item-value="value"
               item-text="label"
               :use-bottom-sheet="isMobile"
+              :error="fieldErrors.subDistrict"
             />
             <div class="rt-rw-row col-span-2">
               <GInputText
@@ -561,7 +836,11 @@ const goNext = () => {
                 placeholder="Contoh: 001"
                 type="text"
                 inputmode="numeric"
-                maxlength="5"
+                maxlength="3"
+                :error="fieldErrors.rt"
+                @blur="onBlur('rt')"
+                @keydown="onlyAllowDigits"
+                @paste="handleNumericPaste"
               />
               <GInputText
                 id="reg-rw"
@@ -571,7 +850,11 @@ const goNext = () => {
                 placeholder="Contoh: 002"
                 type="text"
                 inputmode="numeric"
-                maxlength="5"
+                maxlength="3"
+                :error="fieldErrors.rw"
+                @blur="onBlur('rw')"
+                @keydown="onlyAllowDigits"
+                @paste="handleNumericPaste"
               />
             </div>
           </div>
@@ -584,6 +867,8 @@ const goNext = () => {
               v-model="form.adminName"
               label="Nama Pengurus"
               placeholder="Masukkan nama pengurus"
+              :error="fieldErrors.adminName"
+              @blur="onBlur('adminName')"
             />
             <GInputText
               id="reg-admin-phone"
@@ -595,6 +880,10 @@ const goNext = () => {
               inputmode="numeric"
               maxlength="18"
               autocomplete="tel"
+              :error="fieldErrors.adminPhone"
+              @blur="onBlur('adminPhone')"
+              @keydown="onlyAllowDigits"
+              @paste="handleNumericPaste"
             />
             <div class="upload-field col-span-2">
               <label>NIK KTP Pengurus</label>
@@ -607,6 +896,10 @@ const goNext = () => {
                   type="text"
                   inputmode="numeric"
                   maxlength="19"
+                  :error="fieldErrors.adminNik"
+                  @blur="onBlur('adminNik')"
+                  @keydown="onlyAllowDigits"
+                  @paste="handleNumericPaste"
                 />
                  <GFilePicker
                   unique-key="admin-nik"
@@ -618,6 +911,7 @@ const goNext = () => {
                 />
               </div>
               <span class="field-helper">Unggah foto KTP Pengurus dengan jelas (PNG, JPG, JPEG. Maks. 10 MB)</span>
+              <span v-if="fieldErrors.adminNikFile" class="field-error">{{ fieldErrors.adminNikFile }}</span>
             </div>
             <div class="upload-field col-span-2">
               <label>No NPWP Pengurus</label>
@@ -630,6 +924,10 @@ const goNext = () => {
                   type="text"
                   inputmode="numeric"
                   maxlength="19"
+                  :error="fieldErrors.adminNpwp"
+                  @blur="onBlur('adminNpwp')"
+                  @keydown="onlyAllowDigits"
+                  @paste="handleNumericPaste"
                 />
                  <GFilePicker
                   unique-key="admin-npwp"
@@ -641,17 +939,20 @@ const goNext = () => {
                 />
               </div>
               <span class="field-helper">Unggah foto kartu NPWP Pengurus (PNG, JPG, JPEG. Maks. 10 MB)</span>
+              <span v-if="fieldErrors.adminNpwpFile" class="field-error">{{ fieldErrors.adminNpwpFile }}</span>
             </div>
           </div>
 
           <!-- ==================== STEP 5 — Data Pelaksana Transaksi ==================== -->
-          <div v-else class="fields">
+          <div v-else-if="currentStep === 5" class="fields">
             <GInputText
               id="reg-executor-name"
               name="executorName"
               v-model="form.executorName"
               label="Nama Pelaksana Transaksi"
               placeholder="Masukkan nama pelaksana"
+              :error="fieldErrors.executorName"
+              @blur="onBlur('executorName')"
             />
             <GInputText
               id="reg-executor-phone"
@@ -663,6 +964,10 @@ const goNext = () => {
               inputmode="numeric"
               maxlength="18"
               autocomplete="tel"
+              :error="fieldErrors.executorPhone"
+              @blur="onBlur('executorPhone')"
+              @keydown="onlyAllowDigits"
+              @paste="handleNumericPaste"
             />
             <div class="upload-field col-span-2">
               <label>NIK KTP Pelaksana Transaksi</label>
@@ -675,6 +980,10 @@ const goNext = () => {
                   type="text"
                   inputmode="numeric"
                   maxlength="19"
+                  :error="fieldErrors.executorNik"
+                  @blur="onBlur('executorNik')"
+                  @keydown="onlyAllowDigits"
+                  @paste="handleNumericPaste"
                 />
                  <GFilePicker
                   unique-key="executor-nik"
@@ -686,6 +995,7 @@ const goNext = () => {
                 />
               </div>
               <span class="field-helper">Unggah foto KTP Pelaksana Transaksi dengan jelas (PNG, JPG, JPEG. Maks. 10 MB)</span>
+              <span v-if="fieldErrors.executorNikFile" class="field-error">{{ fieldErrors.executorNikFile }}</span>
             </div>
             <div class="upload-field col-span-2">
               <label>No NPWP Pelaksana Transaksi</label>
@@ -698,6 +1008,10 @@ const goNext = () => {
                   type="text"
                   inputmode="numeric"
                   maxlength="19"
+                  :error="fieldErrors.executorNpwp"
+                  @blur="onBlur('executorNpwp')"
+                  @keydown="onlyAllowDigits"
+                  @paste="handleNumericPaste"
                 />
                  <GFilePicker
                   unique-key="executor-npwp"
@@ -709,6 +1023,104 @@ const goNext = () => {
                 />
               </div>
               <span class="field-helper">Unggah kartu atau dokumen NPWP Pelaksana Transaksi (PDF, PNG, JPG. Maks. 10 MB)</span>
+              <span v-if="fieldErrors.executorNpwpFile" class="field-error">{{ fieldErrors.executorNpwpFile }}</span>
+            </div>
+          </div>
+          <!-- ==================== STEP 6 — Akun ==================== -->
+          <div v-else class="fields">
+            <p class="field-helper">
+              Email login Anda: <strong>{{ form.companyEmail || '-' }}</strong>
+            </p>
+            <!-- Password -->
+            <div class="password-field">
+              <GInputText
+                id="reg-password"
+                name="password"
+                v-model="form.password"
+                :type="showPassword ? 'text' : 'password'"
+                label="Kata Sandi"
+                placeholder="Minimal 8 karakter, huruf & angka"
+                autocomplete="new-password"
+                :error="fieldErrors.password"
+                @blur="onBlur('password')"
+              >
+                <template #suffix>
+                  <button
+                    class="field-icon field-icon-button"
+                    type="button"
+                    :aria-label="showPassword ? 'Sembunyikan password' : 'Tampilkan password'"
+                    @click="showPassword = !showPassword"
+                  >
+                    <!-- Eye open -->
+                    <svg v-if="!showPassword" viewBox="0 0 24 24" fill="none">
+                      <path
+                        d="M2.5 12s3.5-6 9.5-6 9.5 6 9.5 6-3.5 6-9.5 6-9.5-6-9.5-6Z"
+                        stroke="currentColor"
+                        stroke-width="1.8"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                      />
+                      <circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="1.8" />
+                    </svg>
+                    <!-- Eye closed -->
+                    <svg v-else viewBox="0 0 24 24" fill="none">
+                      <path
+                        d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-6 0-9.5-6-9.5-6a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c6 0 9.5 6 9.5 6a18.5 18.5 0 0 1-1.86 2.65M14.12 14.12a3 3 0 1 1-4.24-4.24"
+                        stroke="currentColor"
+                        stroke-width="1.8"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                      />
+                      <line x1="1" y1="1" x2="23" y2="23" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" />
+                    </svg>
+                  </button>
+                </template>
+              </GInputText>
+            </div>
+
+            <!-- Confirm Password -->
+            <div class="password-field">
+              <GInputText
+                id="reg-konfirmasi-password"
+                name="konfirmasiPassword"
+                v-model="form.konfirmasiPassword"
+                :type="showConfirmPassword ? 'text' : 'password'"
+                label="Konfirmasi Kata Sandi"
+                placeholder="Ulangi kata sandi"
+                autocomplete="new-password"
+                :error="fieldErrors.konfirmasiPassword"
+                @blur="onBlur('konfirmasiPassword')"
+              >
+                <template #suffix>
+                  <button
+                    class="field-icon field-icon-button"
+                    type="button"
+                    :aria-label="showConfirmPassword ? 'Sembunyikan password' : 'Tampilkan password'"
+                    @click="showConfirmPassword = !showConfirmPassword"
+                  >
+                    <svg v-if="!showConfirmPassword" viewBox="0 0 24 24" fill="none">
+                      <path
+                        d="M2.5 12s3.5-6 9.5-6 9.5 6 9.5 6-3.5 6-9.5 6-9.5-6-9.5-6Z"
+                        stroke="currentColor"
+                        stroke-width="1.8"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                      />
+                      <circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="1.8" />
+                    </svg>
+                    <svg v-else viewBox="0 0 24 24" fill="none">
+                      <path
+                        d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-6 0-9.5-6-9.5-6a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c6 0 9.5 6 9.5 6a18.5 18.5 0 0 1-1.86 2.65M14.12 14.12a3 3 0 1 1-4.24-4.24"
+                        stroke="currentColor"
+                        stroke-width="1.8"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                      />
+                      <line x1="1" y1="1" x2="23" y2="23" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" />
+                    </svg>
+                  </button>
+                </template>
+              </GInputText>
             </div>
           </div>
         </div><!-- /register-scroll -->
@@ -716,7 +1128,8 @@ const goNext = () => {
         <footer class="form-footer">
           <GButton
             class="register-action"
-            :disabled="!isStepValid"
+            :disabled="!isStepValid || submitting"
+            :loading="submitting"
             :icon="false"
             :label="primaryLabel"
             size="md"
@@ -741,10 +1154,6 @@ const goNext = () => {
   border-radius: 10px;
   background: var(--g-kit-white);
   color: var(--g-kit-black-80);
-  overflow-y: auto;
-}
-
-.register-card.is-step-1 {
   overflow: hidden;
 }
 
@@ -752,8 +1161,8 @@ const goNext = () => {
   display: flex;
   flex-direction: column;
   padding: 24px;
-  overflow: hidden;
   min-height: 0;
+  overflow: hidden;
 }
 
 .register-header {
@@ -762,6 +1171,7 @@ const goNext = () => {
   justify-content: space-between;
   gap: 16px;
   margin-bottom: 20px;
+  flex-shrink: 0;
 }
 
 .help {
@@ -822,16 +1232,16 @@ h1, h2 {
   display: flex;
   flex: 1;
   flex-direction: column;
+  min-height: 0;
+  overflow: hidden;
 }
 
 .register-scroll {
   flex: 1;
-  padding-right: 4px;
-}
-
-.register-scroll.is-step-1 {
   overflow-y: auto;
-  max-height: 60vh;
+  overflow-x: hidden;
+  padding-right: 4px;
+  min-height: 0;
 }
 
 .fields {
@@ -862,6 +1272,9 @@ h1, h2 {
   display: flex;
   flex-direction: column;
   gap: 4px;
+  min-width: 0;
+  max-width: 100%;
+  overflow: hidden;
 }
 
 .upload-field > label {
@@ -879,15 +1292,31 @@ h1, h2 {
   line-height: 1.4;
 }
 
+.field-error {
+  color: var(--g-kit-red-50, #ef4444);
+  font-size: var(--g-kit-font-size-omega, 11px);
+  margin-top: 2px;
+  line-height: 1.4;
+}
+
+.standalone-error {
+  margin-top: -8px;
+}
+
 .upload-row {
   display: grid;
   grid-template-columns: 1fr;
   align-items: center;
+  min-width: 0;
+  max-width: 100%;
+  overflow: hidden;
 }
 
 :deep(.custom-file-upload) {
   min-height: 120px !important;
   max-height: 120px !important;
+  max-width: 100%;
+  box-sizing: border-box;
   p {
     width: max-content;
   }
@@ -896,14 +1325,51 @@ h1, h2 {
 :deep(.custom-file-upload.hns) {
   min-height: 120px !important;
   max-height: 120px !important;
+  max-width: 100%;
+  box-sizing: border-box;
   p {
     width: max-content;
+  }
+}
+
+:deep(.custom-file-upload.fileName) {
+  min-height: unset !important;
+  max-height: unset !important;
+  max-width: 100%;
+  width: 100%;
+  overflow: hidden;
+  box-sizing: border-box;
+}
+
+:deep(.custom-file-upload__file-name) {
+  max-width: 100%;
+  overflow: hidden;
+  box-sizing: border-box;
+
+  > div {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    max-width: 100%;
+    overflow: hidden;
+  }
+
+  span {
+    display: block;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    min-width: 0;
+    flex: 1;
   }
 }
 
 .upload-row-stacked {
   display: flex;
   flex-direction: column;
+  min-width: 0;
+  max-width: 100%;
+  overflow: hidden;
 }
 
 .form-footer {
@@ -911,6 +1377,7 @@ h1, h2 {
   flex-direction: column;
   gap: 12px;
   margin-top: 20px;
+  flex-shrink: 0;
 }
 
 .register-action {
@@ -933,10 +1400,50 @@ h1, h2 {
   text-decoration: none;
 }
 
+/* Password field icon styling — matches LoginForm pattern */
+.password-field {
+  position: relative;
+}
+
+.field-icon {
+  display: inline-flex;
+  width: 20px;
+  height: 20px;
+  align-items: center;
+  justify-content: center;
+  color: var(--g-kit-black-60);
+  flex: 0 0 auto;
+}
+
+.field-icon svg {
+  width: 20px;
+  height: 20px;
+}
+
+.field-icon-button {
+  margin-right: 14px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+}
+
 @media (max-width: 768px) {
   .register-card {
     width: min(580px, calc(100vw - 32px));
-    max-height: fit-content;
+    max-height: none;
+  }
+
+  .register-content {
+    overflow: visible;
+  }
+
+  .register-form {
+    overflow: visible;
+  }
+
+  .register-scroll {
+    overflow-y: visible;
   }
 
   .upload-row {

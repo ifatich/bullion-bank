@@ -3,7 +3,6 @@ import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 
 import { GButton } from '@/components'
-import BalanceSummaryCard from '@/components/modules/user/token/BalanceSummaryCard.vue'
 import TokenTransferForm from '@/components/modules/user/token/TokenTransferForm.vue'
 import UserPageLayout from '@/components/shared/layouts/UserPageLayout.vue'
 import TransactionAlertModal from '@/components/shared/modals/TransactionAlertModal.vue'
@@ -36,10 +35,8 @@ const submitTransfer = () => {
     info-banner="Seamlessly move your digital bullion tokens between your business partners."
     title="Token Transfer"
   >
-    <div class="transfer-layout">
-      <BalanceSummaryCard class="balance-sidebar" />
-      <TokenTransferForm class="transfer-form" />
-    </div>
+
+    <TokenTransferForm class="transfer-form" />
 
     <template #actions>
       <GButton
@@ -53,7 +50,7 @@ const submitTransfer = () => {
       <GButton
         class="action-button"
         :icon="false"
-        label="Request Transfer"
+        label="Transfer"
         size="md"
         type="primary"
         @click="submitTransfer"
@@ -88,6 +85,10 @@ const submitTransfer = () => {
 
   .balance-sidebar {
     order: -1;
+  }
+
+  .action-button {
+    width: auto;
   }
 }
 </style>
