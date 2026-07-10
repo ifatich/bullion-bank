@@ -4,11 +4,13 @@ import { useAppAlert } from '@/hooks/useAppAlert'
 import { useAuthStore } from '@/stores/auth'
 import { useBalance } from '@/hooks/useBalance'
 import GoldBarDetailModal from './GoldBarDetailModal.vue'
+import QRGenerateModal from './QRGenerateModal.vue'
 
 const authStore = useAuthStore()
 const { totalKg, estimateIdrFormatted, isLoading: isBalanceLoading } = useBalance()
 const { showAlert } = useAppAlert()
 const isDetailModalOpen = ref(false)
+const isQrModalOpen = ref(false)
 
 const copyToClipboard = async (fieldLabel: string, value: string) => {
   if (!navigator.clipboard?.writeText) {
@@ -100,20 +102,27 @@ const copyToClipboard = async (fieldLabel: string, value: string) => {
           </p>
         </div>
         <div class="meta-block">
-          <span>Company ID</span>
+          <span>QR</span>
           <p>
-            <span>{{ authStore.companyId }}</span>
+            <span>Show QR Code</span>
             <button
               type="button"
-              aria-label="Copy company ID"
-              @click="copyToClipboard('Company ID', authStore.companyId)"
+              aria-label="Show QR Code"
+              @click="isQrModalOpen = true"
             >
-              <svg viewBox="0 0 24 24" fill="none">
-                <path
-                  d="M8 8h11v11H8V8ZM5 16H4V4h12v1"
-                  stroke="currentColor"
-                  stroke-width="1.8"
-                />
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                <rect width="5" height="5" x="3" y="3" rx="1" />
+                <rect width="5" height="5" x="16" y="3" rx="1" />
+                <rect width="5" height="5" x="3" y="16" rx="1" />
+                <path d="M21 16h-3a2 2 0 0 0-2 2v3" />
+                <path d="M21 21v.01" />
+                <path d="M12 7v3a2 2 0 0 1-2 2H7" />
+                <path d="M3 12h.01" />
+                <path d="M12 3h.01" />
+                <path d="M12 16v.01" />
+                <path d="M16 12h1" />
+                <path d="M21 12v.01" />
+                <path d="M12 21v-1" />
               </svg>
             </button>
           </p>
@@ -138,6 +147,7 @@ const copyToClipboard = async (fieldLabel: string, value: string) => {
       :is-visible="isDetailModalOpen"
       @close="isDetailModalOpen = false"
     />
+    <QRGenerateModal v-model="isQrModalOpen" />
   </section>
 </template>
 
