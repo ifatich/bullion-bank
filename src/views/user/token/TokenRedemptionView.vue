@@ -3,6 +3,7 @@ import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 
 import { GButton } from '@/components'
+import BalanceSummaryCard from '@/components/modules/user/token/BalanceSummaryCard.vue'
 import TokenRedemptionForm from '@/components/modules/user/token/TokenRedemptionForm.vue'
 import UserPageLayout from '@/components/shared/layouts/UserPageLayout.vue'
 import TransactionAlertModal from '@/components/shared/modals/TransactionAlertModal.vue'
@@ -35,7 +36,10 @@ const submitRedemption = () => {
     info-banner="Seamlessly convert digital bullion tokens into physical gold with a trusted redemption process."
     title="Token Redemption"
   >
-    <TokenRedemptionForm />
+    <div class="redemption-layout">
+      <BalanceSummaryCard class="balance-sidebar" />
+      <TokenRedemptionForm />
+    </div>
 
     <template #actions>
       <GButton
@@ -68,5 +72,30 @@ const submitRedemption = () => {
 <style scoped>
 .action-button {
   width: 200px;
+}
+
+.redemption-layout {
+  display: grid;
+  grid-template-columns: 340px 1fr;
+  gap: 24px;
+  align-items: start;
+}
+
+.action-button {
+  width: 200px;
+}
+
+@media (max-width: 960px) {
+  .redemption-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .balance-sidebar {
+    order: -1;
+  }
+
+  .action-button {
+    width: auto;
+  }
 }
 </style>
